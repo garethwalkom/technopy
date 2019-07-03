@@ -39,6 +39,10 @@ LabSoft():
     Load():                     Load a measurement from a .ttcs file.
 
 Camera():
+    Lenses():                   Gets list of all lenses of selected camera.
+    Lens():                     Gets ID of selected lens.
+    FocusFactors():             Gets list of all focus factors of current lens.
+    FocusFactor():              Gets ID of selected focus factor.
     Open():                     Set new camera calibration data.
     GetConvertingUnits():       Get converting information.
     SetConvertingUnits():       Set new converting values.
@@ -116,13 +120,15 @@ To-do:|
     * Add option to save/load from other formats... e.g., .png, .pcf, etc.
     * Give option to adjust exposure time on Capture()
     * Fix messy code in some places
-    * Call 'focusfactors' in lenses{} from folder, rather than dict
+    * Call .self within classes instead of global if not needed elsewhere.
+    * Change names to more logical names
+    * Update __main__ example code so it works
 """
 from win32com.client import Dispatch
 import os
 from glob import glob
 import datetime, time
-import operator
+import configparser
 import numpy as np
 import luxpy as lx
 from matplotlib import pyplot as plt
@@ -224,82 +230,11 @@ statisticType = {
         'symbolNegativeColor': 39,      # 39 	Symbol objects in color images (negative contrast)
         'contrastGrey': 40}             # 40 	Contrasts objects in grey images
 
-lens = {
-        'x6_5mm': {
-                'name': glob(CalibrationDataRoot + '/' + cameraName + '/*/')[0].split('\\')[1]},
-        'x12mm': {
-                'name': glob(CalibrationDataRoot + '/' + cameraName + '/*/')[1].split('\\')[1],
-                'focusFactors': {
-                        'TT12Scale0_3': 0,
-                        'TT12Scale0_5': 1,
-                        'TT12Scale1': 2,
-                        'TT12Scale3': 3,
-                        'TT12ScaleInfinite': 4}},
-        'x25mm': {
-                'name': glob(CalibrationDataRoot + '/' + cameraName + '/*/')[2].split('\\')[1],
-                'focusFactors': {
-                        'TT25Scale00': 0,
-                        'TT25Scale01': 1,
-                        'TT25Scale02': 2,
-                        'TT25Scale03': 3,
-                        'TT25Scale04': 4,
-                        'TT25Scale05': 5,
-                        'TT25Scale06': 6,
-                        'TT25Scale07': 7,
-                        'TT25Scale08': 8,
-                        'TT25Scale09': 9,
-                        'TT25Scale10': 10,
-                        'TT25Scale11': 11,
-                        'TT25Scale12': 12,
-                        'TT25Scale13': 13,
-                        'TT25Scale14': 14,
-                        'TT25Scale15': 15,
-                        'TT25Scale16': 16,
-                        'TT25Scale17': 17,
-                        'TT25Scale18': 18,
-                        'TT25Scale19': 19,
-                        'TT25Scale20': 20}},
-        'x50mm': {
-                'name': glob(CalibrationDataRoot + '/' + cameraName + '/*/')[3].split('\\')[1],
-                'focusFactors': {
-                        'TT50Scale00': 0,
-                        'TT50Scale01': 1,
-                        'TT50Scale02': 2,
-                        'TT50Scale03': 3,
-                        'TT50Scale04': 4,
-                        'TT50Scale05': 5,
-                        'TT50Scale06': 6,
-                        'TT50Scale07': 7,
-                        'TT50Scale08': 8,
-                        'TT50Scale09': 9,
-                        'TT50Scale10': 10,
-                        'TT50Scale11': 11,
-                        'TT50Scale12': 12,
-                        'TT50Scale13': 13,
-                        'TT50Scale14': 14,
-                        'TT50Scale15': 15,
-                        'TT50Scale16': 16,
-                        'TT50Scale17': 17,
-                        'TT50Scale18': 18,
-                        'TT50Scale19': 19,
-                        'TT50Scale20': 20,
-                        'TT50Scale21': 21,
-                        'TT50Scale22': 22,
-                        'TT50Scale23': 23,
-                        'TT50Scale24': 24,
-                        'TT50Scale25': 25,
-                        'TT50Scale26': 26,
-                        'TT50Scale27': 27,
-                        'TT50Scale28': 28,
-                        'TT50Scale29': 29,
-                        'TT50Scale30': 30}}}
-
 # Define the Lens and focus factor in use.
-Lens = lens['x12mm']['name']
-FocusFactor = lens['x12mm']['focusFactors']['TT12ScaleInfinite']
+lens = '12'
+scale = 'infinite'
 
 # Define Save Parameters
-
 MeasRoot = 'E:/Measurements/' + str(datetime.date.today()) + '/'
 MeasName = datetime.datetime.now().strftime('%H:%M:%S')
 extension = '.png'
@@ -401,7 +336,80 @@ class LabSoft():
         
 class Camera():
     
-    def Open(lmk, CalibrationDataRoot):
+    def Lenses(CalibrationDataRoot = CalibrationDataRoot, cameraName = cameraName):
+        """
+        Gets list of all lenses of selected camera.|
+        -------------------------------------------
+        """
+    
+        global lenses
+        
+        lenses = []
+        
+        for lens in (glob(CalibrationDataRoot + '/' + cameraName + '/*/')):
+            lenses.append(lens.split('\\')[1])
+        
+        return lenses
+    
+    def Lens(lenses, current_lens = '12'):
+        """
+        Gets ID of selected lens.|
+        -------------------------
+        """
+        
+        global lens_ID
+        
+        lens = []
+        
+        for l in range(len(lenses)):
+            lens.append(lenses[l].split('f')[1])
+            
+        if current_lens in lens:
+            lens_ID = (lens.index(current_lens))
+            
+        return lens_ID
+    
+    def FocusFactors():
+        """
+        Gets list of all focus factors of current lens.|
+        -----------------------------------------------
+        """
+        
+        lenses = Camera.Lenses()
+        
+        lens_ID = Camera.Lens(lenses)        
+        lens = lenses[lens_ID]
+        
+        FocusFactors = []
+                        
+        config = configparser.ConfigParser()
+        config.read(CalibrationDataRoot + '/' + cameraName + '/' + lens + '/' + 'FocusFactor.ini')
+        FocusFactors_Size = config.get('GreyFactor', 'Size')
+        FocusFactors_Size = int(FocusFactors_Size)
+        for FocusFactor in range(FocusFactors_Size):
+            FocusFactor = str(FocusFactor + 1)
+            FocusFactors.append(config.get('GreyFactor/' + FocusFactor, 'Name'))
+            
+        return FocusFactors, FocusFactors_Size
+    
+    def FocusFactor(FocusFactors, scale = 'infinite'):
+        """
+        Gets ID of selected focus factor.|
+        ---------------------------------
+        """
+        
+        FocusFactor = []
+        
+        for f in range(len(FocusFactors)):
+            FocusFactor.append(FocusFactors[f].split(' ')[2])
+            
+        if scale in FocusFactor:
+            FocusFactor_ID = (FocusFactor.index(scale))
+            
+        return FocusFactor_ID
+        
+    
+    def Open(lmk, lenses, lens_ID):
         """
         Set new camera calibration data.|
         --------------------------------
@@ -416,7 +424,8 @@ class Camera():
                     is finished.
         """
         print ('Connecting to Camera...')
-        ErrorCode = lmk.iSetNewCamera(CalibrationDataRoot + '/' + cameraName + '/' + Lens)
+        lensName = lenses[lens_ID]
+        ErrorCode = lmk.iSetNewCamera(CalibrationDataRoot + '/' + cameraName + '/' + lensName)
         ActiveX.ErrorCode(ErrorCode) # Check for error
             
     def GetConvertingUnits(lmk):
@@ -481,7 +490,7 @@ class Camera():
         
         return FocusFactors, FocusFactor
     
-    def SetFocusFactor(lmk, FocusFactor = FocusFactor):
+    def SetFocusFactor(lmk, FocusFactor = scale):
         """
         Set a focus factor.|
         -------------------
@@ -494,7 +503,9 @@ class Camera():
                 | Index of focus factor
         """
         print ('Setting Focus Factor to:', FocusFactor, '...')
-        ErrorCode = lmk.iSetFocusFactor(FocusFactor)
+        FocusFactors, FocusFactors_Size = Camera.FocusFactors()
+        FocusFactor_ID = Camera.FocusFactor(FocusFactors, FocusFactor)
+        ErrorCode = lmk.iSetFocusFactor(FocusFactor_ID)
         ActiveX.ErrorCode(ErrorCode) # Check for error
         
     def GetModulationFrequency(lmk):
@@ -1988,7 +1999,10 @@ class Characterize():
         # Open LMK LabSoft4 Standard Color ActiveX [REQUIRED]
         LabSoft.Open(lmk)
         # Connect to Camera [REQUIRED] 
-        Camera.Open(lmk, CalibrationDataRoot)
+        lenses = Camera.Lenses()
+        lens_ID = Camera.Lens(lenses)
+        Camera.Open(lmk, lenses, lens_ID)
+        Camera.SetFocusFactor(lmk)
     
         ### Adjust Camera
         # Set Modulation Frequency
