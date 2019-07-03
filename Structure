@@ -1,0 +1,87 @@
+Structure:|
+----------
+
+Key:
+# = not working properly
+
+ActiveX():
+    Connect():                  Connect to LMK ActiveX Server.
+    ErrorCode():                Prints error code if error occurs.
+
+LabSoft():
+    Open():                     Opens the LMK4 application.
+    Close():                    Closes the LMK4 application.
+    Save():                     Save the measurement as a .ttcs file.
+    Load():                     Load a measurement from a .ttcs file.
+
+Camera():
+    Lenses():                   Gets list of all lenses of selected camera.
+    Lens():                     Gets ID of selected lens.
+    FocusFactors():             Gets list of all focus factors of current lens.
+    FocusFactor():              Gets ID of selected focus factor.
+    Open():                     Set new camera calibration data.
+    GetConvertingUnits():       Get converting information.
+    SetConvertingUnits():       Set new converting values.
+    GetFocusFactors():          List of available focus factors.
+    SetFocusFactor():           Set a focus factor.
+    GetModulationFrequency():   Get the modulation frequency.
+    SetModulationFrequency():   Set the frequency of modulated light.
+    GetScatteredLight():        Is scattered light correction switched on?
+    SetScatteredLight():        Use of scattered light correction.
+    GetIntegrationTime():       Determine current exposure time and other time parameters.
+    SetIntegrationTime():       Set new exposure time.
+    GetMaxCameraTime():         Determine the maximum possible exposure time.
+    SetMaxCameraTime():         Set the maximum possible exposure time.
+    GetAutoScan():              Get use of autoscan algorithm.
+    SetAutoScan():              Set use of autoscan algorithm.
+    GetFilterWheel():           Determine filter state.
+    GetGreyFilterList():        List of available grey filters.
+    SetGreyFilterList():        Set grey filters.
+    SetGreyFilter():            Selection of a grey filter.
+    ColorAutoScanTime():        Determine good exposure times for every color filter.
+    GetColorCorrectionList():   List of available color correction factors.
+    SetColorCorrection():       Selection of a color correction factor.
+    GetSmear():                 Get the parameter for smear correction.
+    SetSmear():                 Set the parameter for smear correction.
+    GetAutomatic():             Get the state of Automatic-Flag for exposure times.
+    SetAutomatic():             Set Automatic-Flag for all exposure times.
+    
+Coordinates():
+    GetValueUnit():             Get the values and units of the axis.
+    SetValueUnit():             Set the values and units of the axis.
+    
+Capture():
+    SinglePic():                SinglePic capture algorithm.
+    MultiPic():                 MultiPic capture algorithm.
+    HighDynPic():               HighDyn capturing for luminance image.
+    ColorHighDyn():             HighDyn capturing for color image.
+    GetLastInfo():              Determine information about the preceeding capture.
+    
+Image():
+    GetSize():                  Get image size and parameter.
+    Save():                     Save image.
+    Load():                     Load Image.
+    
+Region():
+    Create():                   Create a region.
+    CreateRectImageSize():      Create a rectangular region the size of the whole image.
+    CreateGrid():               Create a grid region within whole image with defined amount of squares.
+    GetID():                    Get index of region given region name.
+    Select():                   Selects or deselects a region.
+    Delete():                   Delete a region.
+    
+Evaluation():
+    CreateStatistic():          Create a new statistic.
+    GetStandardStatistic():     Determine parameter of the standard statistic.
+    GetImageMeanXYZ():          Create region size of image and get mean XYZ.
+#    GetGridMeanXYZ():           Create regions as a grid in image and get mean XYZ.
+#    GetColorHistogramValues():  Get the values of the histogram in a color image.
+    GetPixelColor():            Get a pixel value of a color image.
+    Convert_CIE_RGB():          Conversion of a color value from CIE-RGB to another color space.
+    XYZ_To_xy():                Convert XYZ to x, y.
+    XYZ_To_u_v_():              Convert XYZ to u', v'.
+    Show_xy():                  Plot x, y color coordinates using Luxpy.
+    Show_u_v_():                Plot u', v' color coordinates using Luxpy.
+    
+Characterize():
+    VR_HMD():                   Characterize a Virtual Reality Head-Mounted-Display.
