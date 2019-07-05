@@ -7,11 +7,19 @@ To-do:|
 ------
     * Compare on one figure (multiple figures are opening)
     * Add measurements from Perez
+    * Add all previous measurements
+    * Get measurements from file
+    * Get RGB values from calibration file
+    * Get RGBs from file and use as key/name/seperate array
+    * Analyze calibration data into graphs
+    * Analyze calibration data into statistics
+    * Write look-up tables
+    * Fix messy functions
 
 """
 import numpy as np
 
-import MeasAnalyze as anal
+import Analyze as anal
 
 ## Define Gamuts
 # Each array should be ordered depending on what data you want to use (e.g.: x, y, u_ (u'), v_, (v'))
@@ -19,6 +27,22 @@ import MeasAnalyze as anal
 # the line of the gamut and then closed back to the starting point
 # (e.g.: R, G, B, R or R, Y, G, C, B, M, R)
 # Split each column into seperate variables, so they can be called individually later
+
+Psych_RGB = np.array([0, 15, 25, 50, 100, 150, 200, 245, 250, 255])
+
+Psych_XYZ = np.array([[0.00708, 0.00328, 0.00788], # 0, 0, 0
+                      [4.414, 4.531, 5.462], # 15, 15, 15
+                      [7.424, 7.639, 9.196], # 25, 25, 25
+                      [14.55, 14.93, 17.97], # 50, 50, 50
+                      [30.47, 31.13, 37.66], # 100, 100, 100
+                      [46.7, 47.75, 57.98], # 150, 150, 150
+                      [62.09, 62.56, 76.16], # 200, 200, 200
+                      [76.06, 76.38, 92.45], # 245, 245, 245
+                      [78.12, 78.36, 94.76], # 250, 250, 250
+                      [78.95, 79.15, 95.74] # 255, 255, 255
+                      ])
+
+OpenVR_RGB = np.array([0, 15, 30, 45, 51, 60, 102, 128, 153, 178, 204, 245, 255])
 
 ## Outputs from Measurements
 class Output():
@@ -34,6 +58,15 @@ class Output():
         else:
             anal.Analyze.xy(x, y, gamut=True)
             Area = Analyze.Area(x, y)
+        
+        return Area
+    
+    def OpenVR():
+        u_, v_ = np.array([[0.48957, 0.20859, 0.09020, 0.11675, 0.17706, 0.32982, 0.48957],
+                           [0.52589, 0.56361, 0.57946, 0.44267, 0.13181, 0.32601, 0.52589]])
+    
+        anal.Analyze.uv(u_, v_, gamut = True)
+        Area = Analyze.Area(u_, v_)
         
         return Area
     
