@@ -122,7 +122,11 @@ To-do:|
     * Fix messy code in some places
     * Call .self within classes instead of global if not needed elsewhere.
     * Change names to more logical names
-    * Update __main__ example code so it works
+    * Update __main__ example code so it works 
+    * Change doctstrings to inlude 'Raises:' for ErrorCodes (https://docs.scipy.org/doc/numpy/reference/generated/numpy.interp.html)
+    * Change docstring layout similar to Numpy (https://github.com/numpy/numpy/blob/v1.16.1/numpy/lib/function_base.py#L1282-L1412)
+    * Space text with \n better
+    * Look to see if time taken is needed in some functions
 """
 from win32com.client import Dispatch
 import os
@@ -333,6 +337,80 @@ class LabSoft():
         print ('Loading Measurement', FileName, 'from .ttcs...')
         ErrorCode = lmk.iLoadProtokoll(FileName)
         ActiveX.ErrorCode(ErrorCode) # Check for error
+        
+class Select():
+    
+    def Lenses(CalibrationDataRoot = CalibrationDataRoot, cameraName = cameraName):
+        """
+        Gets list of all lenses of selected camera.|
+        -------------------------------------------
+        """
+    
+        global lenses
+        
+        lenses = []
+        
+        for lens in (glob(CalibrationDataRoot + '/' + cameraName + '/*/')):
+            lenses.append(lens.split('\\')[1])
+        
+        return lenses
+    
+    def Lens(lenses, current_lens = '12'):
+        """
+        Gets ID of selected lens.|
+        -------------------------
+        """
+        
+        global lens_ID
+        
+        lens = []
+        
+        for l in range(len(lenses)):
+            lens.append(lenses[l].split('f')[1])
+            
+        if current_lens in lens:
+            lens_ID = (lens.index(current_lens))
+            
+        return lens_ID
+    
+    def FocusFactors():
+        """
+        Gets list of all focus factors of current lens.|
+        -----------------------------------------------
+        """
+        
+        lenses = Camera.Lenses()
+        
+        lens_ID = Camera.Lens(lenses)        
+        lens = lenses[lens_ID]
+        
+        FocusFactors = []
+                        
+        config = configparser.ConfigParser()
+        config.read(CalibrationDataRoot + '/' + cameraName + '/' + lens + '/' + 'FocusFactor.ini')
+        FocusFactors_Size = config.get('GreyFactor', 'Size')
+        FocusFactors_Size = int(FocusFactors_Size)
+        for FocusFactor in range(FocusFactors_Size):
+            FocusFactor = str(FocusFactor + 1)
+            FocusFactors.append(config.get('GreyFactor/' + FocusFactor, 'Name'))
+            
+        return FocusFactors, FocusFactors_Size
+    
+    def FocusFactor(FocusFactors, scale = 'infinite'):
+        """
+        Gets ID of selected focus factor.|
+        ---------------------------------
+        """
+        
+        FocusFactor = []
+        
+        for f in range(len(FocusFactors)):
+            FocusFactor.append(FocusFactors[f].split(' ')[2])
+            
+        if scale in FocusFactor:
+            FocusFactor_ID = (FocusFactor.index(scale))
+            
+        return FocusFactor_ID
         
 class Camera():
     
