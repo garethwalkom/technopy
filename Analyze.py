@@ -245,7 +245,8 @@ class Analyze:
         lx.SPD(spd).plot(color = color, linestyle = linestyle,
               ylabel = 'Spectral radiance (W/nm.m².sr)')
         """
-        Plot Spectral Power Distribution (SPD) using Luxpy.
+        Plot Spectral Power Distribution (SPD) using Luxpy.|
+        ---------------------------------------------------
         
         Args:
             :spd:
@@ -264,7 +265,8 @@ class Analyze:
     def xy(x, y, gamut=None, label='x, y', facecolors='none', color='k',
            linestyle='--', title='x, y', grid=True, **kwargs):
         """
-        Plot x, y color coordinates using Luxpy.
+        Plot x, y color coordinates using Luxpy.|
+        ----------------------------------------
         
         Args:
             :x:
@@ -319,7 +321,8 @@ class Analyze:
     def uv(u_, v_, gamut=None, label='u_, v_', facecolors='none', color='k',
            linestyle='--', title='u_, v_', grid=True, **kwargs):
         """
-        Plot u', v' color coordinates using Luxpy.
+        Plot u', v' color coordinates using Luxpy.|
+        ------------------------------------------
         
         Args:
             :u_:
