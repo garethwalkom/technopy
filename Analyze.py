@@ -14,6 +14,21 @@ import luxpy as lx
 from luxpy.toolboxes import spectro as sp
 import errno
 
+import TechnoPy as tp
+
+class CSV():
+    
+    def Open(Root, File_Name):
+        
+        CSV = pd.read_csv(Root + File_Name + '.csv')
+        
+        return CSV    
+        
+    def Save(df, Root, File_Name):
+        
+        df.to_csv(Root + File_Name + '.csv')
+        
+
 class CheckExists:
 
     def File(CSV_Root, MeasDate, header):
@@ -74,6 +89,34 @@ class Split:
         
         return MeasName, R_In, G_In, B_In
     
+    def RGB_Char(Output, header = ['X', 'Y', 'Z']):
+        
+        RGBs = np.array([0, 15, 30, 45, 51, 60, 102, 128, 153, 178, 204, 230, 245, 255,
+                         15, 30, 45, 51, 60, 102, 128, 153, 178, 204, 230, 245, 255,
+                         15, 30, 45, 51, 60, 102, 128, 153, 178, 204, 230, 245, 255,
+                         15, 30, 45, 51, 60, 102, 128, 153, 178, 204, 230, 245, 255,
+                         32, 64, 96, 128, 159, 191, 223,
+                         32, 64, 96, 128, 159, 191, 223, 255,
+                         32, 64, 96, 128, 159, 191, 223, 255,
+                         32, 64, 96, 128, 159, 191, 223, 255])
+        
+        if header is None:
+            Output_df = pd.DataFrame(Output, index = RGBs)
+        else:
+            Output_df = pd.DataFrame(Output, index = RGBs, columns = header)
+        
+        black = Output_df.iloc[0]
+        grays = Output_df.iloc[1:14]
+        grays_extra = Output_df.iloc[53:60]
+        reds = Output_df.iloc[14:27]
+        greens = Output_df.iloc[27:40]
+        blues = Output_df.iloc[40:53]
+        magentas = Output_df.iloc[60:68]
+        cyans = Output_df.iloc[68:76]
+        yellows = Output_df.iloc[76:84]
+        
+        return RGBs, black, grays, grays_extra, reds, greens, blues, magentas, cyans, yellows
+    
 class Measure:
     def SPD(device = 'jeti', Tint = 0, wait = 0.1):
         # Initializes spectrometer 'jeti' or 'oceanoptics'
@@ -89,6 +132,18 @@ class Measure:
             spds = np.vstack((spds[0][0,:],[x[1,:] for x in spds]))
             
         return spds
+    
+    def XYZ():
+        
+        XYZs = []
+        
+        Output_Color = tp.Characterize.VR_HMD()
+        XYZs.append(Output_Color)
+        
+        if XYZs != []:
+            XYZs = np.vstack((XYZs))
+            
+        return XYZs
 
 class Read:
     
@@ -239,11 +294,9 @@ class Calculate:
         
         return Ydlep
     
-class Analyze:
+class Show:
     
-    def SPD(spd, color='k', linestyle='--'):
-        lx.SPD(spd).plot(color = color, linestyle = linestyle,
-              ylabel = 'Spectral radiance (W/nm.m².sr)')
+    def SPD(spd, linestyle='--'):
         """
         Plot Spectral Power Distribution (SPD) using Luxpy.|
         ---------------------------------------------------
@@ -261,6 +314,16 @@ class Analyze:
         Returns:
             
         """
+        lx.SPD(spd).plot(linestyle = linestyle,
+              ylabel = 'Spectral radiance (W/nm.m².sr)')
+        
+    def XYZ(XYZ, linestyle='--'):
+        
+        fig, ax = plt.subplots()
+        ax.set_xlabel('RGB', fontsize=20)
+        ax.set_ylabel('Value', fontsize=20)
+        lineObjects = plt.plot(XYZ, linestyle = linestyle)
+        plt.legend(iter(lineObjects), ('X', 'Y', 'Z'))
         
     def xy(x, y, gamut=None, label='x, y', facecolors='none', color='k',
            linestyle='--', title='x, y', grid=True, **kwargs):
@@ -373,80 +436,87 @@ class Analyze:
         ax_uv.set_xlim([-0.1, 0.7])
         ax_uv.set_ylim([-0.1, 0.7])
         ax_uv.legend()
+        
+class Compare():
+    
+    def XYZ(XYZ, linestyle='--'):
+        
+        lineObjects = plt.plot(XYZ, linestyle = linestyle)
+        plt.legend(iter(lineObjects), ('X', 'Y', 'Z'))
 
-if __name__ == '__main__':
-    # Initiate timer for whole morphing
-    start = time.time()
-    print ('Started script to export LMK measurements from a folder...')
-    print ('Setting up parameters...')
-    startSetup = time.time()
-    
-    ### Define root to files
-    ## Define aspects of measurements to add to file.
-    MeasDevice = 'LMK'
-    MeasDate = '20190413'
-    MeasTarget = 'Test'
-    CSV_Root = MeasDate + '.csv'
-    readTxts = glob.glob(MeasDevice + '/' + MeasDate + '/' + MeasTarget + '/*.txt')
-    
-    ### Define header of output file
-    header = ['Meas_Date', 'Meas_Target', 'R_In', 'G_In', 'B_In', 'X_Mean', 'X_SD', 
-              'Y_Mean', 'Y_SD', 'Z_Mean', 'Z_SD', 'x', 'y', 'u_', 'v_', 'CIE-L*',
-              'CIE-a*', 'CIE-b*', 'R_Out', 'G_Out', 'B_Out']
-    
-    print ('Parameter setup took: {0:.3f} seconds\n'.format(time.time() - startSetup))
-    
-    writer, file, checkCSV = CheckExists.File(CSV_Root, MeasDate, header)
-    
-    ### Add measurements to file
-    with file:
-        for readTxt in readTxts: # For each measurement in root folder
-            try:
-                ### Split file name
-                MeasName, R_In, G_In, B_In = Split.Meas(readTxt)
-    
-                ### Check if measurement exists
-                print ('Checking measurement exists...')
-                measExists = CheckExists.Meas(checkCSV, MeasDate, MeasTarget, header)
-                if not measExists.empty: # If measurement exists in CSV file
-                    print ('Measurement:', MeasName, 'exists in file')
-                    print ('Next measurement:\n')
-                    break # Break out of loop to next measurement
-                else: # If measurement does not exist in CSV file
-                    print ('Measurement:', MeasName, 'does not exist')
-                    startAddMeas = time.time()
-                    print ('Adding measurement:', MeasName)
-                
-                ### Read measurement
-                with open('{}'.format(readTxt), 'r') as f:
-                    pass
-                
-                xyz = Read.LMK(readTxt)
-                
-                startCalcs = time.time()
-                print ('Starting Calculations...')
-                xyz_mean, X_Mean, X_SD, Y_Mean, Y_SD, Z_Mean, Z_SD  = Calculate.XYZ(xyz)
-                x, y = Calculate.Yxy(xyz)
-                u_, v_ = Calculate.Yuv(xyz)
-                CIE_L_, CIE_a_, CIE_b_ = Calculate.Lab(xyz)
-                R_Out, G_Out, B_Out = Calculate.sRGB(xyz)   
-                print ('Calculations finished in: {0:.3f} seconds\n'.format(time.time() - startCalcs))
-                
-                ### Write row using dictionary with final outputs
-                writer.writerow({'Meas_Date': MeasDate, 'Meas_Target': MeasTarget, 
-                                 'R_In': R_In, 'G_In' : G_In, 'B_In': B_In, 'X_Mean' 
-                                 : X_Mean, 'X_SD': X_SD, 'Y_Mean': Y_Mean, 'Y_SD'
-                                 : Y_SD, 'Z_Mean': Z_Mean, 'Z_SD': Z_SD, 'x'
-                                 : x, 'y': y, 'u_': u_, 'v_': v_, 'CIE-L*'
-                                 : CIE_L_, 'CIE-a*': CIE_a_, 'CIE-b*': CIE_b_, 
-                                 'R_Out': R_Out, 'G_Out': G_Out, 'B_Out': B_Out})
-                print ('Measurement:', MeasName, 'added in: {0:.3f} seconds\n'.format(time.time() - startAddMeas))
-            
-            ### Stop loop if error
-            except IOError as exc:
-                if exc.errno != errno.EISDIR:
-                    raise
-    
-    ### Finishing print statement
-    print ('------------------------------')
-    print ('All measurements added to file in: {0:.3f} seconds\n'.format(time.time() - start))
+#if __name__ == '__main__':
+#    # Initiate timer for whole morphing
+#    start = time.time()
+#    print ('Started script to export LMK measurements from a folder...')
+#    print ('Setting up parameters...')
+#    startSetup = time.time()
+#    
+#    ### Define root to files
+#    ## Define aspects of measurements to add to file.
+#    MeasDevice = 'LMK'
+#    MeasDate = '20190413'
+#    MeasTarget = 'Test'
+#    CSV_Root = MeasDate + '.csv'
+#    readTxts = glob.glob(MeasDevice + '/' + MeasDate + '/' + MeasTarget + '/*.txt')
+#    
+#    ### Define header of output file
+#    header = ['Meas_Date', 'Meas_Target', 'R_In', 'G_In', 'B_In', 'X_Mean', 'X_SD', 
+#              'Y_Mean', 'Y_SD', 'Z_Mean', 'Z_SD', 'x', 'y', 'u_', 'v_', 'CIE-L*',
+#              'CIE-a*', 'CIE-b*', 'R_Out', 'G_Out', 'B_Out']
+#    
+#    print ('Parameter setup took: {0:.3f} seconds\n'.format(time.time() - startSetup))
+#    
+#    writer, file, checkCSV = CheckExists.File(CSV_Root, MeasDate, header)
+#    
+#    ### Add measurements to file
+#    with file:
+#        for readTxt in readTxts: # For each measurement in root folder
+#            try:
+#                ### Split file name
+#                MeasName, R_In, G_In, B_In = Split.Meas(readTxt)
+#    
+#                ### Check if measurement exists
+#                print ('Checking measurement exists...')
+#                measExists = CheckExists.Meas(checkCSV, MeasDate, MeasTarget, header)
+#                if not measExists.empty: # If measurement exists in CSV file
+#                    print ('Measurement:', MeasName, 'exists in file')
+#                    print ('Next measurement:\n')
+#                    break # Break out of loop to next measurement
+#                else: # If measurement does not exist in CSV file
+#                    print ('Measurement:', MeasName, 'does not exist')
+#                    startAddMeas = time.time()
+#                    print ('Adding measurement:', MeasName)
+#                
+#                ### Read measurement
+#                with open('{}'.format(readTxt), 'r') as f:
+#                    pass
+#                
+#                xyz = Read.LMK(readTxt)
+#                
+#                startCalcs = time.time()
+#                print ('Starting Calculations...')
+#                xyz_mean, X_Mean, X_SD, Y_Mean, Y_SD, Z_Mean, Z_SD  = Calculate.XYZ(xyz)
+#                x, y = Calculate.Yxy(xyz)
+#                u_, v_ = Calculate.Yuv(xyz)
+#                CIE_L_, CIE_a_, CIE_b_ = Calculate.Lab(xyz)
+#                R_Out, G_Out, B_Out = Calculate.sRGB(xyz)   
+#                print ('Calculations finished in: {0:.3f} seconds\n'.format(time.time() - startCalcs))
+#                
+#                ### Write row using dictionary with final outputs
+#                writer.writerow({'Meas_Date': MeasDate, 'Meas_Target': MeasTarget, 
+#                                 'R_In': R_In, 'G_In' : G_In, 'B_In': B_In, 'X_Mean' 
+#                                 : X_Mean, 'X_SD': X_SD, 'Y_Mean': Y_Mean, 'Y_SD'
+#                                 : Y_SD, 'Z_Mean': Z_Mean, 'Z_SD': Z_SD, 'x'
+#                                 : x, 'y': y, 'u_': u_, 'v_': v_, 'CIE-L*'
+#                                 : CIE_L_, 'CIE-a*': CIE_a_, 'CIE-b*': CIE_b_, 
+#                                 'R_Out': R_Out, 'G_Out': G_Out, 'B_Out': B_Out})
+#                print ('Measurement:', MeasName, 'added in: {0:.3f} seconds\n'.format(time.time() - startAddMeas))
+#            
+#            ### Stop loop if error
+#            except IOError as exc:
+#                if exc.errno != errno.EISDIR:
+#                    raise
+#    
+#    ### Finishing print statement
+#    print ('------------------------------')
+#    print ('All measurements added to file in: {0:.3f} seconds\n'.format(time.time() - start))

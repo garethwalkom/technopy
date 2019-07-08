@@ -18,6 +18,7 @@ To-do:|
 
 """
 import numpy as np
+import pandas as pd
 
 import Analyze as anal
 
@@ -41,6 +42,8 @@ Psych_XYZ = np.array([[0.00708, 0.00328, 0.00788], # 0, 0, 0
                       [78.12, 78.36, 94.76], # 250, 250, 250
                       [78.95, 79.15, 95.74] # 255, 255, 255
                       ])
+
+Psych_df = pd.DataFrame(Psych_XYZ, index = Psych_RGB, columns = ['X', 'Y', 'Z'])
 
 OpenVR_RGB = np.array([0, 15, 30, 45, 51, 60, 102, 128, 153, 178, 204, 245, 255])
 
