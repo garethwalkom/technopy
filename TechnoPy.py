@@ -141,10 +141,14 @@ To-do:|
     * Change doctstrings to inlude 'Raises:' for ErrorCodes (https://docs.scipy.org/doc/numpy/reference/generated/numpy.interp.html)
     * Change docstring layout similar to Numpy (https://github.com/numpy/numpy/blob/v1.16.1/numpy/lib/function_base.py#L1282-L1412)
     * Space text with \n better
+    * Create instructions/example code with Jupyter Notebook.
     * Move lens and focus factor functions for Camera() class to Select() class, and get the working
     * Error check statisticType{} for compatible images and regions
     * Test functions in table class
-    ^ Change time taken to include minutes as well as seconds
+    * Sort out absolute mess
+    * Give warning if focus factor needed, but no chosen
+    * Delete old functions that are no longer needed
+    * Add spectral responsitivities (in LMK book in box) for each lens
 """
 from win32com.client import Dispatch
 import os
@@ -152,6 +156,7 @@ from glob import glob
 import datetime, time
 import configparser
 import operator
+import smtplib
 import numpy as np
 import luxpy as lx
 from matplotlib import pyplot as plt
@@ -162,6 +167,34 @@ CalibrationDataRoot = 'F:/LMK/Calibration Data'
 
 # Name of the TechnoTeam LMK Camera
 cameraName = str(os.listdir(CalibrationDataRoot))[2:-2]
+
+Camera_Names = {'Old':'ttf8847',
+                'VR': 'tts20035'}
+
+Old_Lenses = {'6.5': 'o13196f6_5',
+              '12': 'o95653f12',
+              '25': 'oB225463f25',
+              '50': 'oC216813f50'}
+
+VR_Lenses = {'50mm': 'oM00442f50',
+             'Conoscopic': 'oTTC-163_D0224',
+             'NED_2mm': 'oTTNED-12_50_2mmEP', 
+             'NED_4mm': 'oTTNED-12_50_4mmEP'}
+
+#Camera_Lens = {'Old':{
+#        'Name':'ttf8847',
+#        'Lenses':{
+#                '6.5': 'o13196f6_5',
+#                '12': 'o95653f12',
+#                '25': 'oB225463f25',
+#                '50': 'oC216813f50'}},
+#    'VR':{
+#            'Name': 'tts20035',
+#            'Lenses':{
+#                    '50mm': 'oM00442f50',
+#                    'Conoscopic': 'oTTC-163_D0224',
+#                    'NED_2mm': 'oTTNED-12_50_2mmEP', 
+#                    'NED_4mm': 'oTTNED-12_50_4mmEP'}}}
 
 ## Access Color Spaces
 # Dictionary containing all available color spaces.
@@ -211,7 +244,7 @@ fileType = {
 ## Access Regions
 # Structure to access region lists
 regionType = {
-        'Rectangle': {   
+        'Rectangle': {
                 'identifier': 0,
                 'points': 2},
         'Line': {
@@ -291,13 +324,11 @@ class ActiveX():
             :lmk:
                 | lmk must now be referenced to access the LMK ActiveX Server.
         """
-        print ('Connecting to LMK ActiveX Server...')
         lmk = Dispatch('lmk4.LMKAxServer')
-        print ('Connected to LMK ActiveX Server\n')
         
         return lmk
     
-    def ErrorCode(ErrorCode):
+    def ErrorCode(lmk, ErrorCode):
         """
         Prints error code if error occurs.|
         ----------------------------------
@@ -309,6 +340,8 @@ class ActiveX():
         """
         if ErrorCode != 0:
             print ('Error code:', ErrorCode, '\n')
+            _, ErrorInformation = lmk.iGetErrorInformation()
+            print ('Error info:', ErrorInformation)
             
 class LabSoft():
     
@@ -322,9 +355,8 @@ class LabSoft():
             :lmk:
                 | Dispatch('lmk4.LMKAxServer')
         """
-        print ('Opening LMK LabSoft4 Standard Color ActiveX...')
         ErrorCode = lmk.iOpen()
-        ActiveX.ErrorCode(ErrorCode) # Check for error
+        ActiveX.ErrorCode(lmk, ErrorCode) # Check for error
         
     def Close(lmk, Question = 0):
         """
@@ -339,9 +371,8 @@ class LabSoft():
                         or cancel the closing of the program.
                 | 0 = No dialogue window
         """
-        print ('Closing LMK LabSoft4 Standard Color ActiveX...')
         ErrorCode = lmk.iClose(Question)
-        ActiveX.ErrorCode(ErrorCode) # Check for error
+        ActiveX.ErrorCode(lmk, ErrorCode) # Check for error
         
     def Save(lmk, FileName = MeasRoot + datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S') + fileType['ttcs']):
         """
@@ -354,11 +385,10 @@ class LabSoft():
                 | Change to adjust root to save measurement
                 | Datetime is the exact datetime of the measurement, not datetime when saved.
         """
-        print ('Saving Measurement as .ttcs...')
         if not os.path.exists(MeasRoot):
             os.makedirs(MeasRoot)
         ErrorCode = lmk.iSaveProtokoll(FileName)
-        ActiveX.ErrorCode(ErrorCode) # Check for error
+        ActiveX.ErrorCode(lmk, ErrorCode) # Check for error
         
     def Load(lmk, FileName = 'Meas.ttcs'):
         """
@@ -370,13 +400,22 @@ class LabSoft():
             :FileName: QString, optional (default: 'Meas.ttcs')
                 | Change to adjust root to load measurement
         """
-        print ('Loading Measurement', FileName, 'from .ttcs...')
         ErrorCode = lmk.iLoadProtokoll(FileName)
-        ActiveX.ErrorCode(ErrorCode) # Check for error
+        ActiveX.ErrorCode(lmk, ErrorCode) # Check for error
         
 class Select():
     
-    def Lenses(CalibrationDataRoot = CalibrationDataRoot, cameraName = cameraName):
+    def Camera(CalibrationDataRoot = CalibrationDataRoot):
+        
+        cameras = []
+        
+        for camera in os.listdir(CalibrationDataRoot):
+            
+            cameras.append(camera)
+            
+        return cameras
+    
+    def Lenses(cameraName, CalibrationDataRoot = CalibrationDataRoot):
         """
         Gets list of all lenses of selected camera.|
         -------------------------------------------
@@ -450,7 +489,62 @@ class Select():
         
 class Camera():
     
-    def Lenses(CalibrationDataRoot = CalibrationDataRoot, cameraName = cameraName):
+    def GetCameras(Camera_Names = Camera_Names):
+        
+        print ('Cameras:')
+        for cameras in Camera_Names.keys():
+            print (cameras)
+        
+        return cameras
+    
+    def SetCamera(camera = None):
+        
+        if camera is None:
+            print ('Cameras:')
+            for cameras in Camera_Names.keys():
+                print (cameras)
+                
+            camera = input ('Input chosen camera: ')
+            
+        camera_no = Camera_Names[camera]
+        
+        return camera, camera_no
+    
+    def GetLenses(camera, Old_Lenses = Old_Lenses, VR_Lenses = VR_Lenses):
+        
+        print ('Lenses:')
+        
+        if camera == 'Old':
+            for lenses in Old_Lenses.keys():
+                print (lenses)
+        elif camera == 'VR':
+            for lenses in VR_Lenses.keys():
+                print (lenses)
+            
+        return lenses
+    
+    def SetLens(camera, lens = None, Old_Lenses = Old_Lenses, VR_Lenses = VR_Lenses):
+        
+        if lens is None:
+            print ('Lenses:')
+            if camera == 'Old':
+                for lenses in Old_Lenses.keys():
+                    print (lenses)
+            elif camera == 'VR':
+                for lenses in VR_Lenses.keys():
+                    print (lenses)
+            
+            lens = input ('Input chosen lens: ')
+        
+        if camera == 'Old':
+            lens_no = Old_Lenses[lens]
+        elif camera == 'VR':
+            lens_no = VR_Lenses[lens]
+        
+                
+        return lens, lens_no
+    
+    def Lenses(cameraName, CalibrationDataRoot = CalibrationDataRoot):
         """
         Gets list of all lenses of selected camera.|
         -------------------------------------------
@@ -523,7 +617,7 @@ class Camera():
         return FocusFactor_ID
         
     
-    def Open(lmk, lenses, lens_ID):
+    def Open(lmk, camera_no, lens_no):
         """
         Set new camera calibration data.|
         --------------------------------
@@ -537,10 +631,8 @@ class Camera():
                 | If the string is empty a currently existing camera connection
                     is finished.
         """
-        print ('Connecting to Camera...')
-        lensName = lenses[lens_ID]
-        ErrorCode = lmk.iSetNewCamera(CalibrationDataRoot + '/' + cameraName + '/' + lensName)
-        ActiveX.ErrorCode(ErrorCode) # Check for error
+        ErrorCode = lmk.iSetNewCamera(CalibrationDataRoot + '/' + camera_no + '/' + lens_no)
+        ActiveX.ErrorCode(lmk, ErrorCode) # Check for error
             
     def GetConvertingUnits(lmk):
         """
@@ -559,9 +651,8 @@ class Camera():
             :UnitsFactor: float (default: 1.0)
                 | Units factor used
         """
-        print ('Getting converting information...')
         [ErrorCode, UnitsName, Units, UnitsFactor] = lmk.iGetConvertingUnits()
-        ActiveX.ErrorCode(ErrorCode) # Check for error
+        ActiveX.ErrorCode(lmk, ErrorCode) # Check for error
             
         return UnitsName, Units, UnitsFactor
     
@@ -581,9 +672,8 @@ class Camera():
             :UnitsFactor: float (default: 1.0)
                 | Wished units factor
         """
-        print ('Setting new converting values...')
         ErrorCode = lmk.iSetConvertingUnits(UnitsName, Units, UnitsFactor)
-        ActiveX.ErrorCode(ErrorCode) # Check for error
+        ActiveX.ErrorCode(lmk, ErrorCode) # Check for error
         
     def GetFocusFactors(lmk):
         """
@@ -598,9 +688,8 @@ class Camera():
             :FocusFactor: int
                 | Index of current focus factor
         """
-        print ('Getting list of available focus factors...')
         [ErrorCode, FocusFactors, FocusFactor] = lmk.iGetFocusFactorList()
-        ActiveX.ErrorCode(ErrorCode) # Check for error
+        ActiveX.ErrorCode(lmk, ErrorCode) # Check for error
         
         return FocusFactors, FocusFactor
     
@@ -616,11 +705,10 @@ class Camera():
             :FocusFactor: int
                 | Index of focus factor
         """
-        print ('Setting Focus Factor to:', FocusFactor, '...')
         FocusFactors, FocusFactors_Size = Camera.FocusFactors()
         FocusFactor_ID = Camera.FocusFactor(FocusFactors, FocusFactor)
         ErrorCode = lmk.iSetFocusFactor(FocusFactor_ID)
-        ActiveX.ErrorCode(ErrorCode) # Check for error
+        ActiveX.ErrorCode(lmk, ErrorCode) # Check for error
         
     def GetModulationFrequency(lmk):
         """
@@ -634,9 +722,8 @@ class Camera():
                 | Frequency of light source
                 | 0 = no modulation is to be concerned
         """
-        print ('Getting the modulation frequency...')
         [ErrorCode, ModulationFrequency] = lmk.iGetModulationFrequency()
-        ActiveX.ErrorCode(ErrorCode) # Check for error
+        ActiveX.ErrorCode(lmk, ErrorCode) # Check for error
         
         return ModulationFrequency
 
@@ -655,9 +742,8 @@ class Camera():
                 | Frequency of light source
                 | 0 = no modulation is to be concerned
         """
-        print ('Setting modulation frequency to:', ModulationFrequency, '...')
         ErrorCode = lmk.iSetModulationFrequency(ModulationFrequency)
-        ActiveX.ErrorCode(ErrorCode) # Check for error
+        ActiveX.ErrorCode(lmk, ErrorCode) # Check for error
         
     def GetScatteredLight(lmk):
         """
@@ -671,9 +757,8 @@ class Camera():
                 | 1 = scattered light correction is switched on
                 | 0 = scattered light correction is switched off
         """
-        print ('Determining if scattered light switched on...')
         [ErrorCode, ScatteredLight] = lmk.iGetScatteredLight()
-        ActiveX.ErrorCode(ErrorCode) # Check for error
+        ActiveX.ErrorCode(lmk, ErrorCode) # Check for error
         
         return ScatteredLight
         
@@ -690,9 +775,8 @@ class Camera():
                 | 1 = switch on scattered light correction
                 | 0 = switch off scattered light correction
         """
-        print ('Setting scattered light...')
         ErrorCode = lmk.iSetScatteredLight(ScatteredLight)
-        ActiveX.ErrorCode(ErrorCode) # Check for error
+        ActiveX.ErrorCode(lmk, ErrorCode) # Check for error
         
     def GetIntegrationTime(lmk):
         """
@@ -713,9 +797,8 @@ class Camera():
             :MaxTime: float
                 | Maximal possible time
         """
-        print ('Determining current exposure time and other time paramaters...')
         [ErrorCode, CurrentTime, PreviousTime, NextTime, MinTime, MaxTime] = lmk.iGetIntegrationTime()
-        ActiveX.ErrorCode(ErrorCode) # Check for error
+        ActiveX.ErrorCode(lmk, ErrorCode) # Check for error
         
         return CurrentTime, PreviousTime, NextTime, MinTime, MaxTime
         
@@ -732,9 +815,8 @@ class Camera():
             :IntegrationTime: float
                 | Realized integration time
         """
-        print ('Setting new exposure time to:', WishedTime, '...')
         [ErrorCode, IntegrationTime] = lmk.iSetIntegrationTime(WishedTime)
-        ActiveX.ErrorCode(ErrorCode) # Check for error
+        ActiveX.ErrorCode(lmk, ErrorCode) # Check for error
         
         return IntegrationTime
     
@@ -751,9 +833,8 @@ class Camera():
             :MaxTime: float
                 | Current maximum time
         """
-        print ('Determining the maximum possible exposure time...')
         [ErrorCode, MaxTime] = lmk.iGetMaxCameraTime()
-        ActiveX.ErrorCode(ErrorCode) # Check for error
+        ActiveX.ErrorCode(lmk, ErrorCode) # Check for error
         
         return MaxTime
     
@@ -770,9 +851,8 @@ class Camera():
             :MaxTime: float (default: 5.0)
                 | Wished value
         """
-        print ('Setting maximum possible exposure time to:', MaxTime, '...')
         ErrorCode = lmk.iSetMaxCameraTime(MaxTime)
-        ActiveX.ErrorCode(ErrorCode) # Check for error
+        ActiveX.ErrorCode(lmk, ErrorCode) # Check for error
         
     def GetAutoscan(lmk):
         """
@@ -788,9 +868,8 @@ class Camera():
                 | 1 = autoscan is switched on
                 | 0 = autoscan is switched off
         """
-        print ('Getting use of autoscan algorithm...')
         [ErrorCode, Autoscan] = lmk.iGetAutoscan()
-        ActiveX.ErrorCode(ErrorCode) # Check for error
+        ActiveX.ErrorCode(lmk, ErrorCode) # Check for error
         
         return Autoscan
     
@@ -807,9 +886,8 @@ class Camera():
                 | 1 = Use autoscan
                   0 = Do not use autoscan
         """
-        print ('Setting Autoscan...')
         ErrorCode = lmk.iSetAutoscan(Autoscan)
-        ActiveX.ErrorCode(ErrorCode) # Check for error
+        ActiveX.ErrorCode(lmk, ErrorCode) # Check for error
         
     def GetFilterWheel(lmk):
         """
@@ -825,9 +903,8 @@ class Camera():
             :CurrentFilterName: QString
                 | Name of current filter
         """
-        print ('Determining filter state...')
         [ErrorCode, CurrentFilterPos, CurrentFilterName] = lmk.iGetFilterWheel()
-        ActiveX.ErrorCode(ErrorCode) # Check for error
+        ActiveX.ErrorCode(lmk, ErrorCode) # Check for error
         
         return CurrentFilterPos, CurrentFilterName
     
@@ -847,9 +924,8 @@ class Camera():
                 | 0 = none selected
                 | 1 = selected
         """
-        print ('Getting list of available grey filters...')
         [ErrorCode, GreyFilterList, GreyFilterSelected] = lmk.iGetGreyFilterList()
-        ActiveX.ErrorCode(ErrorCode) # Check for error
+        ActiveX.ErrorCode(lmk, ErrorCode) # Check for error
         
         return GreyFilterList, GreyFilterSelected
     
@@ -872,9 +948,8 @@ class Camera():
                 | 0 = none selected
                 | 1 = selected
         """
-        print ('Setting grey filter list...')
         [ErrorCode, GreyFilterSelected] = lmk.iSetGreyFilterList(GreyFilterSelected)
-        ActiveX.ErrorCode(ErrorCode) # Check for error
+        ActiveX.ErrorCode(lmk, ErrorCode) # Check for error
             
         return GreyFilterSelected
     
@@ -889,9 +964,8 @@ class Camera():
                 | 0 = deselect
                 | 1 = select
         """
-        print ('Setting grey filter...')
         ErrorCode = lmk.iSetGreyFilter(GreyFilterIndex, GreyFilterSelected)
-        ActiveX.ErrorCode(ErrorCode) # Check for error
+        ActiveX.ErrorCode(lmk, ErrorCode) # Check for error
         
     def ColorAutoScanTime(lmk):
         """
@@ -917,8 +991,6 @@ class Camera():
                     You can use the returned list of exposure times in the
                     function ColorHighDyn()
         """
-        Filter_Time = time.time()
-        print ('Determining good exposure times for every color filter...')
         
         All = {'All': []}
         ExposureTimes = {'G': [], 'X1': [], 'X2': [], 'Z': [], 'VL': [], 'IR': []}
@@ -956,7 +1028,6 @@ class Camera():
             ExposureTimes['IR'] = str(ExposureTimes['IR'])[3:-3]
             ExposureTimes['IR'] = float(ExposureTimes['IR'])
             
-            print ('Determined good exposure times for every color filter in: {0:.3f} seconds\n'.format(time.time() - Filter_Time))
         
         return ExposureTimes
     
@@ -976,9 +1047,8 @@ class Camera():
                 | 0 = not selected
                 | 1 = selected
         """
-        print ('Getting list of available color correction factors...')
         [ErrorCode, ColCorrList, ColCorrSelected] = lmk.iGetColorCorrList()
-        ActiveX.ErrorCode(ErrorCode) # Check for error
+        ActiveX.ErrorCode(lmk, ErrorCode) # Check for error
             
         return ColCorrList, ColCorrSelected
     
@@ -995,9 +1065,8 @@ class Camera():
                 | 0 = deselect
                 | 1 = select
         """
-        print ('Setting color correction factor...')
         ErrorCode = lmk.iSetColorCorr()
-        ActiveX.ErrorCode(ErrorCode) # Check for error
+        ActiveX.ErrorCode(lmk, ErrorCode) # Check for error
             
     def GetSmear(lmk):
         """
@@ -1012,9 +1081,8 @@ class Camera():
                 | !0 = smear correction with at least 10 dark images captures
                 | > 10 number of dark images
         """
-        print ('Getting the parameter for smear correction...')
         ErrorCode = lmk.iGetSmear()
-        ActiveX.ErrorCode(ErrorCode) # Check for error
+        ActiveX.ErrorCode(lmk, ErrorCode) # Check for error
             
     def SetSmear(lmk, Smear = 0):
         """
@@ -1028,9 +1096,8 @@ class Camera():
                 | !0 = smear correction with at least 10 dark images captures
                 | > 10 number of dark images
         """
-        print ('Setting the parameter for smear correction...')
         ErrorCode = lmk.iGetSmear()
-        ActiveX.ErrorCode(ErrorCode) # Check for error
+        ActiveX.ErrorCode(lmk, ErrorCode) # Check for error
                     
     def GetAutomatic(lmk):
         """
@@ -1046,9 +1113,8 @@ class Camera():
                 | 1 = option is switched on
                 | 0 = option is switched off
         """
-        print ('Getting the state of Automatic-Flag for exposure times...')
         [ErrorCode, Automatic] = lmk.iGetAutomatic()
-        ActiveX.ErrorCode(ErrorCode) # Check for error
+        ActiveX.ErrorCode(lmk, ErrorCode) # Check for error
         
         return Automatic
         
@@ -1066,9 +1132,8 @@ class Camera():
                 | 1 = use autoscan
                 | 0 = do not use autoscan
         """
-        print ('Setting automatic flag for all exposure times...')
         ErrorCode = lmk.iSetAutomatic(Automatic)
-        ActiveX.ErrorCode(ErrorCode) # Check for error
+        ActiveX.ErrorCode(lmk, ErrorCode) # Check for error
             
 class Coordinates():
     
@@ -1093,9 +1158,8 @@ class Coordinates():
             :UnitArea: QString
                 | Unit of area
         """
-        print ('Getting the values and units of the axis...')
         [ErrorCode, X_Value, X_Unit, Y_Value, Y_Unit, UnitArea] = lmk.iCoordSystemGetValueUnit(Image)
-        ActiveX.ErrorCode(ErrorCode) # Check for error
+        ActiveX.ErrorCode(lmk, ErrorCode) # Check for error
             
         return X_Value, X_Unit, Y_Value, Y_Unit, UnitArea
     
@@ -1120,9 +1184,8 @@ class Coordinates():
             :UnitArea: QString (default: 'pix^2')
                 | Unit of area
         """
-        print ('Setting the values and units of the axis...')
         ErrorCode = lmk.iCoordSystemSetValueUnit(Image, X_Value, X_Unit, Y_Value, Y_Unit, UnitArea)
-        ActiveX.ErrorCode(ErrorCode) # Check for error
+        ActiveX.ErrorCode(lmk, ErrorCode) # Check for error
     
 class Capture():
     
@@ -1136,14 +1199,13 @@ class Capture():
             :ExposureTime: float (default: 0.1)
                 | Exposure time to use
         """
-        print ('Capturing SinglePic Image...')
         
         if AutoScan is True:
             ExposureTimes = Camera.ColorAutoScanTime(lmk) # [REQUIRED if wanting best exposure times]
             ErrorCode = lmk.iSinglePic2(max(ExposureTimes.items(), key=operator.itemgetter(1))[1])
         else:
             ErrorCode = lmk.iSinglePic2(ExposureTime)
-        ActiveX.ErrorCode(ErrorCode) # Check for error
+        ActiveX.ErrorCode(lmk, ErrorCode) # Check for error
     
     def MultiPic(lmk, AutoScan = True, ExposureTime = 0.1, PicCount = 1):
         """
@@ -1157,14 +1219,13 @@ class Capture():
             :PicCount: int (default: 1)
                 | Number of camera images
         """
-        print ('Capturing MultiPic Image...')
         
         if AutoScan is True:
             ExposureTimes = Camera.ColorAutoScanTime(lmk) # [REQUIRED if wanting best exposure times]
             ErrorCode = lmk.iMultiPic2(max(ExposureTimes.items(), key=operator.itemgetter(1))[1], PicCount)
         else:
             ErrorCode = lmk.iMultiPic2(ExposureTime, PicCount)
-        ActiveX.ErrorCode(ErrorCode) # Check for error
+        ActiveX.ErrorCode(lmk, ErrorCode) # Check for error
         
     def HighDynPic(lmk, AutoScan = True, ExposureTime = 0.1, StartRatio = 10.0, TimeRatio = 3.0, PicCount = 1):
         """
@@ -1184,7 +1245,6 @@ class Capture():
             :PicCount: int (default: 1)
                 | Number of captures for every exposure time
         """
-        print ('Capturing HighDynPic Image...')
         
         if AutoScan is True:
             ExposureTimes = Camera.ColorAutoScanTime(lmk) # [REQUIRED if wanting best exposure times]
@@ -1192,7 +1252,7 @@ class Capture():
                                          StartRatio, TimeRatio, PicCount)
         else:
             ErrorCode = lmk.iHighDynPic3(ExposureTime, StartRatio, TimeRatio, PicCount)
-        ActiveX.ErrorCode(ErrorCode) # Check for error
+        ActiveX.ErrorCode(lmk, ErrorCode) # Check for error
     
     def ColorHighDyn(lmk, AutoScan = True, MaxTime = 15.0, MinTime = 0.0, TimeRatio = 3.0, PicCount = 1):
         """
@@ -1210,7 +1270,6 @@ class Capture():
             :PicCount: int (default: 1)
                 | Number of shots per integration time
         """
-        print ('Capturing ColorHighDyn Image...')
         
         if AutoScan is True:
             ExposureTimes = Camera.ColorAutoScanTime(lmk) # [REQUIRED if wanting best exposure times]
@@ -1218,7 +1277,7 @@ class Capture():
                                           MinTime, TimeRatio, PicCount)
         else:
             ErrorCode = lmk.iColorHighDynPic2(MaxTime, MinTime, TimeRatio, PicCount)
-        ActiveX.ErrorCode(ErrorCode) # Check for error
+        ActiveX.ErrorCode(lmk, ErrorCode) # Check for error
         
     def GetLastInfo(lmk):
         """
@@ -1257,7 +1316,6 @@ class Capture():
             :ModulationFrequency: float
                 | Modulation frequency
         """
-        print ('Getting last information from capture...')
         LastInfo = {'CaptureSuccess': [], 'CaptureType': [], 'GreyFilter': [],
                     'ColorFilters': [], 'PicCount': [], 'MaxExposureTime': [],
                     'MinExposureTime': [], 'PercentageOverdrivenPixels': [],
@@ -1317,8 +1375,6 @@ class Capture():
             LastInfo['ModulationFrequency'] = str(LastInfo['ModulationFrequency'])[1:-1]
             LastInfo['ModulationFrequency'] = float(LastInfo['ModulationFrequency'])
             
-            print ('Got last information from capture\n')
-        
         return LastInfo
     
 class Image():
@@ -1350,9 +1406,8 @@ class Image():
                 | 1 = gray images
                 | 3 = color images
         """
-        print ('Getting Image Size...')
         [ErrorCode, Image_FirstLine, Image_LastLine, Image_FirstColumn, Image_LastColumn, Image_Dimensions] = lmk.iImageGetSize(Image)
-        ActiveX.ErrorCode(ErrorCode) # Check for error
+        ActiveX.ErrorCode(lmk, ErrorCode) # Check for error
         
         return Image_FirstLine, Image_LastLine, Image_FirstColumn, Image_LastColumn, Image_Dimensions
     
@@ -1371,11 +1426,10 @@ class Image():
                 | Destination file name  
                 | Datetime is the exact datetime of the measurement, not datetime when saved.
         """
-        print ('Saving Image to:', FileName, '...')
         if not os.path.exists(MeasRoot):
             os.makedirs(MeasRoot)
         ErrorCode = lmk.iSaveImage(Image, FileName)
-        ActiveX.ErrorCode(ErrorCode) # Check for error
+        ActiveX.ErrorCode(lmk, ErrorCode) # Check for error
             
     def Load(lmk, Image = imageType['Color'], FileName = MeasRoot + 'Image' + fileType['pcf']):
         """
@@ -1395,9 +1449,8 @@ class Image():
                 | .pf = Luminance Image
                 | .pcf = Color Image
         """
-        print ('Loading Image:', FileName, '...')
         ErrorCode = lmk.iLoadImage(Image, FileName)
-        ActiveX.ErrorCode(ErrorCode) # Check for error
+        ActiveX.ErrorCode(lmk, ErrorCode) # Check for error
             
     def Show(FileName = MeasRoot + 'Image' + fileType['png']):
         """
@@ -1412,7 +1465,6 @@ class Image():
             :image: uint8
                 | Stores image into a numpy array and show it
         """
-        print ('Showing Image:', FileName, '...')
         image = io.imread(FileName) 
         io.imshow(image)
         
@@ -1442,9 +1494,8 @@ class Region():
             :Y: QStringList
                 | List of y-points
         """
-        print ('Creating Region...')
         [ErrorCode, Region_X_Points, Region_Y_Points] = lmk.iCreateRegion(Image, Type, NumPoints, X, Y)
-        ActiveX.ErrorCode(ErrorCode) # Check for error
+        ActiveX.ErrorCode(lmk, ErrorCode) # Check for error
         
         return Region_X_Points, Region_Y_Points
     
@@ -1470,12 +1521,11 @@ class Region():
             :Y: QStringList
                 | List of y-points
         """
-        print ('Creating Region...')
         [Image_FirstLine, Image_LastLine, Image_FirstColumn, Image_LastColumn, _] = Image.GetSize(lmk)
         X = [Image_FirstColumn, Image_LastColumn]
         Y = [Image_FirstLine, Image_LastLine]
         [ErrorCode, Region_X_Points, Region_Y_Points] = lmk.iCreateRegion(Im, Type, NumPoints, X, Y)
-        ActiveX.ErrorCode(ErrorCode) # Check for error
+        ActiveX.ErrorCode(lmk, ErrorCode) # Check for error
         
         return Region_X_Points, Region_Y_Points
     
@@ -1506,7 +1556,6 @@ class Region():
             :Y: QStringList
                 | List of y-points
         """
-        print ('Creating Region...')
         [Image_FirstLine, Image_LastLine, Image_FirstColumn, Image_LastColumn, _] = Image.GetSize(lmk)
         Image_SecondColumn = int(Image_LastColumn/3)
         Image_ThirdColumn = int((Image_LastColumn/3)*2)
@@ -1518,7 +1567,6 @@ class Region():
 #        
 #        for Y in range(Image_FirstLine, Image_LastLine, Y_Size):
 #            Y_Pos = ((Image_FirstColumn, Y - Image_FirstLine), (Image_LastColumn, Y - Image_FirstLine))
-#            print (X_Pos)
             
         Xa = [Image_FirstColumn, Image_SecondColumn]
         Ya = [Image_FirstLine, Image_SecondLine]
@@ -1576,11 +1624,10 @@ class Region():
             :Index_Out: int
                 | Output: Index of this region
         """
-        print ('Getting Index of Region...')
         [ErrorCode, Index_Out] = lmk.iGetIndexOfRegion(Image, Name)
-        ActiveX.ErrorCode(ErrorCode) # Check for error
+#        ActiveX.ErrorCode(lmk, ErrorCode) # Check for error
         
-        return Index_Out
+        return ErrorCode, Index_Out
     
     def Select(lmk, Image = imageType['Color'], Index = 0, Select = 1):
         """
@@ -1596,10 +1643,9 @@ class Region():
             :Select: int (default: 1)
                 | 1= select region, 0= deselect region
         """
-        print ('Selecting a region...')
         ErrorCode = lmk.iSelectRegion(Image, Index, Select)
-        ActiveX.ErrorCode(ErrorCode) # Check for error
-        
+        ActiveX.ErrorCode(lmk, ErrorCode) # Check for error
+                
     def Delete(lmk, Image = imageType['Color'], Index = 0):
         """
         Delete a region.|
@@ -1612,11 +1658,35 @@ class Region():
             :Index: int (default: 0)
                 | Index of region to delete
         """
-        print ('Deleting region...')
         ErrorCode = lmk.iDeleteRegion(Image, Index)
-        ActiveX.ErrorCode(ErrorCode) # Check for error
+        ActiveX.ErrorCode(lmk, ErrorCode) # Check for error
         
 class Evaluation():
+    
+    def StatisticExists(lmk, Image = imageType['Color'], Region = 0):
+        """
+        Proof, if a statistic exists for a image / region / statistic type.|
+        -------------------------------------------------------------------
+        Parameters:
+            :lmk:
+                | Dispatch('lmk4.LMKAxServer')
+            :Image: int (default: Image = imageType['Color'])
+                | Image
+            :Region: int (default: 0)
+                | Index of region in this image
+        Returns:
+            :Exists: int
+                | 1 = statistic exists
+                | 0 = statistic does not exist
+            :Type: int
+                | Index of statistic type
+            :Index: int
+                | Index in statistic list?
+        """
+        [ErrorCode, Exists, StatisticType, StatisticIndex] = lmk.iHaveStatistic(Image, Region)
+        ActiveX.ErrorCode(lmk, ErrorCode) # Check for error
+        
+        return Exists, StatisticType, StatisticIndex
     
     def CreateStatistic(lmk, Type = statisticType['standardColor'],
                         Image = imageType['Color'], Region = 0,
@@ -1637,9 +1707,8 @@ class Evaluation():
                 | Number of parameters for this statistic
             :ParamList: QStringList
         """
-        print ('Creating Statistic...')
         [ErrorCode, Statistic] = lmk.iCreateStatistic(Type, Image, Region, NumParam, ParamList)
-        ActiveX.ErrorCode(ErrorCode) # Check for error
+        ActiveX.ErrorCode(lmk, ErrorCode) # Check for error
         
         return Statistic
     
@@ -1672,7 +1741,6 @@ class Evaluation():
             :Variance: float
                 | Variance (...SD?) in values
         """
-        print ('Determining parameter of the standard statistic...')
         
         Stats = {'Area': [], 'Min': [], 'Max': [], 'Mean': [], 'Variance': []}
         
@@ -1700,21 +1768,19 @@ class Evaluation():
             :Stat_No: int (default: 0)
                 | Index of statistic number
         """
-        print ('Deleting existing statistic...')
         ErrorCode = lmk.iDeleteStatistic(Type, Stat_No)
-        ActiveX.ErrorCode(ErrorCode) # Check for error
+        ActiveX.ErrorCode(lmk, ErrorCode) # Check for error
     
     def GetImageMeanXYZ(lmk):
         """
         Create region size of image and get mean XYZ.|
         ----------------------------------------------
         """
-        print ('Getting image mean XYZ...')
             
         # Create a region the size of the whole image
         Region_X_Points, Region_Y_Points = Region.CreateRectImageSize(lmk)
         # Get ID of region
-        Index_Out = Region.GetID(lmk, imageType['Color'], Name = '1')
+        ErrorCode, Index_Out = Region.GetID(lmk, imageType['Color'], Name = '1')
         # Select region from index of region
         Region.Select(lmk, Index = Index_Out)
         
@@ -1735,25 +1801,70 @@ class Evaluation():
                 
         return Output_Color
     
+    def GetCircleMeanXYZ(lmk):
+        """
+        Get size of image, create eclipse in center, get mean XYZ from circle.|
+        ----------------------------------------------------------------------
+        """
+        
+        # Get size of image
+        Image_FirstLine, Image_LastLine, Image_FirstColumn, Image_LastColumn, Image_Dimensions = Image.GetSize(lmk)
+        
+        # If region already exists, delete it
+        ErrorCode, Index_Out = Region.GetID(lmk)
+        if ErrorCode == 0:
+            Region.Delete(lmk)
+        
+        # If statistic already exists, delete it
+        Exists, StatisticType, StatisticIndex = Evaluation.StatisticExists(lmk)
+        if Exists == 1:
+            Evaluation.DeleteStatistic(lmk)
+        
+        # Create a region the size of the whole image
+        Region_X_Points, Region_Y_Points = Region.Create(lmk,
+                                                         X = [Image_LastColumn/2, 1700, 1700],
+                                                         Y = [Image_LastLine/2, 1700, 1700])
+        # Get ID of region
+        ErrorCode, Index_Out = Region.GetID(lmk, imageType['Color'], Name = '1')
+        # Select region from index of region
+        Region.Select(lmk, Index = Index_Out)
+        
+        ### Evaluate Region
+        Evaluation.CreateStatistic(lmk, statisticType['standardColor'], imageType['Color'], Index_Out, ParamList = [1])
+        
+        Blue_Stats = Evaluation.GetStandardStatistic(lmk, Class = 0)
+        B_Mean = str(Blue_Stats['Mean'])[1:-1]
+        B_Mean = float(B_Mean)
+        Green_Stats = Evaluation.GetStandardStatistic(lmk, Class = 1)
+        G_Mean = str(Green_Stats['Mean'])[1:-1]
+        G_Mean = float(G_Mean)
+        Red_Stats = Evaluation.GetStandardStatistic(lmk, Class = 2)
+        R_Mean = str(Red_Stats['Mean'])[1:-1]
+        R_Mean = float(R_Mean)
+                
+        Output_Color = Evaluation.Convert_CIE_RGB(lmk, CIE_R = R_Mean, CIE_G = G_Mean, CIE_B = B_Mean)
+                
+        return Output_Color
+        
+    
     def GetGridMeanXYZ(lmk):
         """
         Create regions as a grid in image and get mean XYZ.|
         ---------------------------------------------------
         """
-        print ('Getting image mean XYZ...')
             
         # Create a region the size of the whole image
         Region.CreateGrid(lmk)
         # Get ID of region
-        Index_Zero = Region.GetID(lmk, imageType['Color'], Name = '1')
-        Index_One = Region.GetID(lmk, imageType['Color'], Name = '2')
-        Index_Two = Region.GetID(lmk, imageType['Color'], Name = '3')
-        Index_Three = Region.GetID(lmk, imageType['Color'], Name = '4')
-        Index_Four = Region.GetID(lmk, imageType['Color'], Name = '5')
-        Index_Five = Region.GetID(lmk, imageType['Color'], Name = '6')
-        Index_Six = Region.GetID(lmk, imageType['Color'], Name = '7')
-        Index_Seven = Region.GetID(lmk, imageType['Color'], Name = '8')
-        Index_Eight = Region.GetID(lmk, imageType['Color'], Name = '9')
+        ErrorCode, Index_Zero = Region.GetID(lmk, imageType['Color'], Name = '1')
+        ErrorCode, Index_One = Region.GetID(lmk, imageType['Color'], Name = '2')
+        ErrorCode, Index_Two = Region.GetID(lmk, imageType['Color'], Name = '3')
+        ErrorCode, Index_Three = Region.GetID(lmk, imageType['Color'], Name = '4')
+        ErrorCode, Index_Four = Region.GetID(lmk, imageType['Color'], Name = '5')
+        ErrorCode, Index_Five = Region.GetID(lmk, imageType['Color'], Name = '6')
+        ErrorCode, Index_Six = Region.GetID(lmk, imageType['Color'], Name = '7')
+        ErrorCode, Index_Seven = Region.GetID(lmk, imageType['Color'], Name = '8')
+        ErrorCode, Index_Eight = Region.GetID(lmk, imageType['Color'], Name = '9')
         # Select region from index of region
         Region.Select(lmk, Index = Index_Zero)
         Region.Select(lmk, Index = Index_One)
@@ -1900,9 +2011,8 @@ class Evaluation():
             :HistValues: QStringList
                 | Histogram values
         """
-        print ('Getting the values of the histogram in color image...')
         [ErrorCode, NumParam, X_Coords, HistValues] = lmk.iGetColorHistogramValues(Image, Color)
-        ActiveX.ErrorCode(ErrorCode) # Check for error
+        ActiveX.ErrorCode(lmk, ErrorCode) # Check for error
         
         return NumParam, X_Coords, HistValues
     
@@ -1929,9 +2039,8 @@ class Evaluation():
             :CIE_B: float
                 | Gets the blue component of the pixel value
         """
-        print ('Getting Pixel RGB at:', Line, ',', Column, '...')
         [ErrorCode, CIE_R, CIE_G, CIE_B] = lmk.iImageGetPixelColor(Image, Line, Column)
-        ActiveX.ErrorCode(ErrorCode) # Check for error
+        ActiveX.ErrorCode(lmk, ErrorCode) # Check for error
         
         return CIE_R, CIE_G, CIE_B
         
@@ -1969,7 +2078,6 @@ class Evaluation():
             :Output_Color: array
                 | Calculated color in an array shape of (1, 3)
         """
-        print ('Converting CIE-RGB to:', ColorSpace,'...')
         [ErrorCode, Out_I, Out_II, Out_III] = lmk.iGetColor(CIE_R, CIE_G, CIE_B, R_Ref, G_Ref, 
                                                B_Ref, ColorSpace)
         if ErrorCode != 0:
@@ -1991,7 +2099,6 @@ class Evaluation():
         Returns:
             :xy: array (shape: (1, 2))
         """
-        print ('Calculating x, y ...')
         Yxy = lx.xyz_to_Yxy(XYZ)
         Yxy_mean = np.array([[Yxy[:,0].mean(), Yxy[:,1].mean(), Yxy[:,2].mean()]])
         
@@ -2016,7 +2123,6 @@ class Evaluation():
         Returns:
             :u_v_: array (shape: (1, 2))
         """
-        print ('Calculating Y, u_, v_ ...')
         Yuv = lx.xyz_to_Yuv(XYZ)
         Yuv_mean = np.array([[Yuv[:,0].mean(), Yuv[:,1].mean(), Yuv[:,2].mean()]])
         
@@ -2125,9 +2231,8 @@ class Table():
             :Tables_No: int
                 | Returns the number of tables
         """
-        print ('Getting number of tables...')
         [ErrorCode, Tables_No] = lmk.iTableGetNumber()
-        ActiveX.ErrorCode(ErrorCode) # Check for error
+        ActiveX.ErrorCode(lmk, ErrorCode) # Check for error
         
         return Tables_No
     
@@ -2146,9 +2251,8 @@ class Table():
             :Table_Caption: QStringList
                 | Returns the caption of the table
         """
-        print ('Getting name and caption of table...')
         [ErrorCode, Table_Name, Table_Caption] = lmk.iTableGetNameAndCaption(Table_ID)
-        ActiveX.ErrorCode(ErrorCode) # Check for error
+        ActiveX.ErrorCode(lmk, ErrorCode) # Check for error
         
         return Table_Name, Table_Caption
     
@@ -2166,9 +2270,8 @@ class Table():
                 | Index of table
                 | -1 = not found
         """
-        print ('Getting index of table...')
         [ErrorCode, Table_ID] = lmk.iTableGetIndex(Table_NameOrCaption)
-        ActiveX.ErrorCode(ErrorCode) # Check for error
+        ActiveX.ErrorCode(lmk, ErrorCode) # Check for error
         
         return Table_ID
     
@@ -2185,9 +2288,8 @@ class Table():
             :Table_NumberColumns: int
                 | Returns the number of columns in table
         """
-        print ('Getting number of columns of table...')
         [ErrorCode, Table_NumberColumns] = lmk.iTableGetNumberColumns(Table_ID)
-        ActiveX.ErrorCode(ErrorCode) # Check for error
+        ActiveX.ErrorCode(lmk, ErrorCode) # Check for error
         
         return Table_NumberColumns
     
@@ -2204,9 +2306,8 @@ class Table():
             :Table_NumberLines: int
                 | Returns the number of lines in table
         """
-        print ('Getting number of lines of table...')
         [ErrorCode, Table_NumberLines] = lmk.iTableGetNumberLines(Table_ID)
-        ActiveX.ErrorCode(ErrorCode) # Check for error
+        ActiveX.ErrorCode(lmk, ErrorCode) # Check for error
         
         return Table_NumberLines
     
@@ -2229,9 +2330,8 @@ class Table():
             :Table_ColumnUnit: QString
                 | Returns the unit of the column
         """
-        print ('Getting column header of column of table...')
         [ErrorCode, Table_ColumnName, Table_ColumnCaption, Table_ColumnUnit] = lmk.iTableGetColumn(Table_ID, Table_ColumnID)
-        ActiveX.ErrorCode(ErrorCode) # Check for error
+        ActiveX.ErrorCode(lmk, ErrorCode) # Check for error
         
         return Table_ColumnName, Table_ColumnCaption, Table_ColumnUnit
     
@@ -2252,9 +2352,8 @@ class Table():
             :Table_Cell: QString
                 | Returns the content of table cell
         """
-        print ('Getting content of cell of table...')
         [ErrorCode, Table_Cell] = lmk.iTableGetCell(Table_ID, Table_LineID, Table_ColumnID)
-        ActiveX.ErrorCode(ErrorCode) # Check for error
+        ActiveX.ErrorCode(lmk, ErrorCode) # Check for error
         
         return Table_Cell
     
@@ -2273,57 +2372,447 @@ class Table():
             :Table_Content: QStringList
                 | List with content of all cells
         """
-        print ('Getting all content from table...')
         [ErrorCode, Table_Content] = lmk.iGetAllContent(Table_ID)
-        ActiveX.ErrorCode(ErrorCode) # Check for error
+        ActiveX.ErrorCode(lmk, ErrorCode) # Check for error
         
         return Table_Content
-        
-class Characterize():
     
-    def VR_HMD(ModulationFrequency = 90.0, MinTime = 0.0, TimeRatio = 3.0, PicCount = 1):
+class TIG():
+    """
+    Target Image Generator (TIG)|
+    ----------------------------
+    """
+    
+    def GetNoDisplays(lmk):
+        """
+        Number of connected displays.|
+        -----------------------------
+        At lease there is one - on which the program is shown.
+        -----------------------------------------------------------------------
+        Parameters:
+            :lmk:
+                | Dispatch('lmk4.LMKAxServer')
+        Returns:
+            :NoDisplays: int
+                | Get number of available displays, at least one.
+        """
+        [ErrorCode, NoDisplays] = lmk.iTIG_GetNumberTargetDisplays()
+        ActiveX.ErrorCode(lmk, ErrorCode) # Check for error
+        
+        return NoDisplays
+    
+    def GetTarget(lmk):
+        """
+        Get current target for template image generation.|
+        -------------------------------------------------
+        Parameters:
+            :lmk:
+                | Dispatch('lmk4.LMKAxServer')
+        Returns:
+            :DisplayID: int
+                | -1 = Use given image name
+                | 0...N-1 = One of the connected displays
+            :DisplayName: QString
+                | Image name is only returned if 'DisplayID' == -1
+        """
+        [ErrorCode, DisplayID, DisplayName] = lmk.iTIG_GetTarget()
+        ActiveX.ErrorCode(lmk, ErrorCode) # Check for error
+        
+        return DisplayID, DisplayName
+    
+    def SetTarget(lmk, DisplayName, DisplayID):
+        """
+        Get current target for template image generation.|
+        -------------------------------------------------
+        Parameters:
+            :lmk:
+                | Dispatch('lmk4.LMKAxServer')
+            :DisplayID: int
+                | -1 = Use given image name
+                | 0...N-1 = One of the connected displays
+            :DisplayName: QString
+                | Image name is only necessary if 'DisplayID' == -1
+        """
+        ErrorCode = lmk.iTIG_SetTarget(DisplayID, DisplayName)
+        ActiveX.ErrorCode(lmk, ErrorCode) # Check for error
+        
+    def GetTargetProperties(lmk):
+        """
+        Get properties of current target.|
+        ---------------------------------
+        The size of the target image is fixed.
+        -----------------------------------------------------------------------
+        Parameters:
+            :lmk:
+                | Dispatch('lmk4.LMKAxServer')
+        Returns:
+            :TargetType: int
+                | 1 = Monochrome image
+                | 2 = Color image
+                | 3 = Display
+                |       in this case the type (monochrome or color)
+                |       is chosen automatically
+            :TargetHeight: int
+                | Height in millimeters
+            :TargetWidth: int
+                | Width in millimeters
+            :TargetLines: int
+                | Number of image lines
+            :TargetColumns: int
+                | Number of image columns
+        """
+        [ErrorCode, TargetType, TargetHeight, TargetWidth, TargetLines, TargetColumns] = lmk.iTIG_GetTargetProperties()
+        ActiveX.ErrorCode(lmk, ErrorCode) # Check for error
+        
+        return TargetType, TargetHeight, TargetWidth, TargetLines, TargetColumns
+    
+    def GetListOfCategories(lmk):
+        """
+        Get list of categories of template images.|
+        ------------------------------------------
+        Parameters:
+            :lmk:
+                | Dispatch('lmk4.LMKAxServer')
+        Returns:
+            :Categories: QStringList
+                | Shows list of categories for TIG
+        """
+        [ErrorCode, Categories] = lmk.iTIG_GetListOfCategories()
+        ActiveX.ErrorCode(lmk, ErrorCode) # Check for error
+        
+        return Categories
+    
+    def GetListOfOperations(lmk, Category):
+        """
+        Get list of types of template images for the given category.|
+        ------------------------------------------------------------
+        Parameters:
+            :lmk:
+                | Dispatch('lmk4.LMKAxServer')
+            :Category: QString
+                | Chosen category
+        Returns:
+            :Operations: QStringList
+                | Shows list of template image types for given category
+        """
+        [ErrorCode, Operations] = lmk.iTIG_GetListOfOperations(Category)
+        ActiveX.ErrorCode(lmk, ErrorCode) # Check for error
+        
+        return Operations
+    
+    def SetOperation(lmk, Category, Operation, Set = 1):
+        """
+        Set a type of template image or an option.|
+        ------------------------------------------
+        Parameters:
+            :lmk:
+                | Dispatch('lmk4.LMKAxServer')
+            :Category: QString
+                | Name of category
+            :Operation: QString
+                | Name of operation or option
+            :Set: int
+                | Set or unset.
+                | This parameter is only valied if this is an option.
+                |   (checkbox, not a radio button)
+        """
+        ErrorCode = lmk.iTIG_SetOperation(Category, Operation, Set)
+        ActiveX.ErrorCode(lmk, ErrorCode) # Check for error
+        
+    def GetListOfParameterNames(lmk):
+        """
+        Get a parameter name list for the given template image type.|
+        ------------------------------------------------------------
+        Parameters:
+            :lmk:
+                | Dispatch('lmk4.LMKAxServer')
+        Returns:
+            :Parameters: QStringList
+                | Show parameter names in a list
+        """
+        [ErrorCode, Parameters] = lmk.iTIG_GetListOfParameterNames()
+        ActiveX.ErrorCode(lmk, ErrorCode) # Check for error
+        
+        return Parameters
+    
+    def GetParameterValue(lmk, Parameter):
+        """
+        Get a certain parameter value.|
+        ------------------------------
+        Parameters:
+            :lmk: 
+                | Dispatch('lmk4.LMKAxServer')
+            :Parameter: QString
+                | Name of parameter
+        Returns:
+            :Parameter_Value: float
+                | Value of parameter (if bool, then 0 or 1)
+        """
+        [ErrorCode, Parameter_Value] = lmk.iTIG_GetParameterValue(Parameter)
+        ActiveX.ErrorCode(lmk, ErrorCode) # Check for error
+        
+        return Parameter_Value
+    
+    def SetParameterValue(lmk, Parameter, Parameter_Value):
+        """
+        Set a certain parameter value.|
+        ------------------------------
+        Parameters:
+            :lmk:
+                | Dispatch('lmk4.LMKAxServer')
+            :Parameter: QString
+                | Name of parameter
+            :Parameter_Value: float
+                | Value of parameter (if bool, then 0 or 1)                
+        """
+        ErrorCode = lmk.iTIG_SetParameterValue(Parameter, Parameter_Value)
+        ActiveX.ErrorCode(lmk, ErrorCode) # Check for error
+    
+    def ShowDialog(lmk):
+        """
+        Make template image dialog visible.|
+        -----------------------------------
+        Parameters:
+            :lmk:
+                | Dispatch('lmk4.LMKAxServer')
+        """
+        ErrorCode = lmk.iTIG_ShowDialog()
+        ActiveX.ErrorCode(lmk, ErrorCode) # Check for error
+        
+    def HideDialog(lmk):
+        """
+        Make template image dialog invisible.|
+        -------------------------------------
+        Parameters:
+            :lmk:
+                | Dispatch('lmk4.LMKAxServer')
+        """
+        ErrorCode = lmk.iTIG_HideDialog()
+        ActiveX.ErrorCode(lmk, ErrorCode) # Check for error
+        
+    def CreateImage(lmk):
+        """
+        Create template image with the adjusted parameters.|
+        ---------------------------------------------------
+        Parameters:
+            :lmk:
+                | Dispatch('lmk4.LMKAxServer')
+        """
+        ErrorCode = lmk.iTIG_CreateImage()
+        ActiveX.ErrorCode(lmk, ErrorCode) # Check for error
+        
+    def DeleteImage(lmk):
+        """
+        Remove template image from the display.|
+        ---------------------------------------
+        Template images can only be deleted from a display. If the target is an
+        evaluation image, deletion is not possible.
+        -----------------------------------------------------------------------
+        Parameters:
+            :lmk:
+                | Dispatch('lmk4.LMKAxServer')
+        """
+        ErrorCode = lmk.iTIG_DeleteImage()
+        ActiveX.ErrorCode(lmk, ErrorCode) # Check for error
+        
+    def LoadImage(lmk, FileName):
+        """
+        Load template image file to the target.|
+        ---------------------------------------
+        This operation is only allowed for category 'User Defined'.
+        -----------------------------------------------------------------------
+        Parameters:
+            :lmk:
+                | Dispatch('lmk4.LMKAxServer')
+            :FileName: QString
+                | Name of an image file.
+                | Allowed file extensions:
+                |   .puc, .pus, .pf, .pco, .pcf, .bmp, .png, .jpg
+        """
+        ErrorCode = lmk.iTIG_LoadImage(FileName)
+        ActiveX.ErrorCode(lmk, ErrorCode) # Check for error
+        
+def Setup(ModulationFrequency = 90.0):
+            
+        ### Initialize
+        # Connect to ActiveX device
+        lmk = ActiveX.Connect()
+        # Open LMK LabSoft4 Standard Color ActiveX
+        LabSoft.Open(lmk)
+        camera, camera_no = Camera.SetCamera(camera = 'VR')
+        lens, lens_no = Camera.SetLens(camera, lens = 'Conoscopic')
+        Camera.Open(lmk, camera_no, lens_no)
+        
+        ### Adjust Camera
+        # Set Modulation Frequency
+        Camera.SetModulationFrequency(lmk, ModulationFrequency)
+        # Change converting units so it doesn't multiply by two
+        Camera.SetConvertingUnits(lmk)
+                
+        return lmk
+    
+def Max_Luminance(lmk, MinTime = 0.0, TimeRatio = 3.0, PicCount = 1):
+        
+    ### Capture Image
+    # Capture a ColorHighDyn Image with Max Exposure Time of all Filters
+    Capture.ColorHighDyn(lmk, AutoScan = False, MaxTime = 0.33, MinTime = MinTime,
+                         TimeRatio = TimeRatio, PicCount = PicCount)
+    
+    ### Evaluate
+    # Create a region the size of the whole image
+    Region_X_Points, Region_Y_Points = Region.CreateRectImageSize(lmk)
+    # Get ID of region
+    ErrorCode, Index_Out = Region.GetID(lmk, imageType['Luminance'], Name = '1')
+    # Select region from index of region
+    Region.Select(lmk, Index = Index_Out)
+        
+    # Create statistic
+    Evaluation.CreateStatistic(lmk, statisticType['standardGrey'], imageType['Luminance'], Index_Out, ParamList = [1])
+    # Get max luminance of region
+    Max_Lum = Table.GetCell(lmk, Table_ID = 2, Table_LineID = 0, Table_ColumnID = 6)
+        
+    Max_Lum = np.float64(Max_Lum)
+    
+    ### Save Measurement
+    LabSoft.Save(lmk, FileName = MeasRoot + datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S') + fileType['ttcs'])
+        
+    return Max_Lum
+        
+def Characterize(lmk, MinTime = 0.0, TimeRatio = 3.0, PicCount = 1):
+    
+    Char_Start = datetime.datetime.now()
+    
+    ### Capture Image
+    # Capture a ColorHighDyn Image with Max Exposure Time of all Filters
+    Capture.ColorHighDyn(lmk, AutoScan = False, MinTime = MinTime, TimeRatio = TimeRatio, PicCount = PicCount)
+            
+    ### Save Measurement
+    LabSoft.Save(lmk, FileName = MeasRoot + datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S') + fileType['ttcs'])
+    
+    Char_Fin = datetime.datetime.now()
+    print ('Measured Image in: {}\n'.format(Char_Fin - Char_Start))
+    
+def Measure_WarmUp(warm_up = True, time_total = 120):
+    
+    time_warm = 0
+    Output = []
+    
+    while time_warm < time_total:
+        start = time.time()
+        if datetime.datetime.now().minute % 1 == 0: 
+            lmk = Setup()
+            Max_Lum = Max_Luminance(lmk)
+            LabSoft.Close(lmk)
+            print (time_warm + 1, '(of', time_total, 'minutes)', '|', datetime.datetime.now().time(),
+                   '|', Max_Lum, 'cd/m^2 (max)')
+        time_warm = time_warm + 1
+        Output.append([time_warm, Max_Lum])
+        overlay = time.time() - start
+        time.sleep(60 - overlay)
+    
+    if Output != []:
+        Output = np.vstack((Output))
+        
+    return Output
+
+def Get_Result_From_Folder(MeasRoot = 'E:/Measurements/2019-09-13-Char/', target = 'XYZ', region = 'Center Circle'):
+    
+    lmk = ActiveX.Connect()
+    LabSoft.Open(lmk)
+    
+    Results = []
+    
+    for measurement in os.listdir(MeasRoot):
+        if measurement.endswith('.ttcs'):
+            LabSoft.Load(lmk, MeasRoot + '/' + measurement)
+            if target == 'XYZ':
+                if region == 'Whole Image':
+                    Output = Evaluation.GetImageMeanXYZ(lmk)
+                elif region == 'Center Circle':
+                    Output = Evaluation.GetCircleMeanXYZ(lmk)
+            elif target =='Y':
+                if region == 'Whole Image':
+                    Output = Max_Luminance(lmk)
+            Results.append(Output)
+        
+    if Results != []:
+        Results = np.vstack((Results))
+        
+    return Results
+        
+class VR_HMD():
+    
+    def __init__(self, ModulationFrequency = 90.0):
+        
+        
+        ### Initialize
+        # Connect to ActiveX device
+        self.lmk = ActiveX.Connect()
+        # Open LMK LabSoft4 Standard Color ActiveX
+        LabSoft.Open(self.lmk)
+        self.camera, self.camera_no = Camera.SetCamera(camera = 'VR')
+        self.lens, self.lens_no = Camera.SetLens(self.camera, lens = 'Conoscopic')
+        Camera.Open(self.lmk, self.camera_no, self.lens_no)
+        
+        ### Adjust Camera
+        # Set Modulation Frequency
+        Camera.SetModulationFrequency(self.lmk, ModulationFrequency)
+        # Change converting units so it doesn't multiply by two
+        Camera.SetConvertingUnits(self.lmk)
+        
+    
+    def Characterize(self, MinTime = 0.0, TimeRatio = 3.0, PicCount = 1):
         """
         Characterize a Virtual Reality Head-Mounted-Display.|
         ----------------------------------------------------
         """
-        Char_Time = time.time()
-        
-        ### Initialize
-        # Connect to ActiveX device
-        lmk = ActiveX.Connect() # [REQUIRED]
-        # Open LMK LabSoft4 Standard Color ActiveX
-        LabSoft.Open(lmk) # [REQUIRED]
-        # Connect to Camera, lenses, and focus factor
-        lenses = Camera.Lenses() # [REQUIRED]
-        lens_ID = Camera.Lens(lenses) # [REQUIRED]
-        Camera.Open(lmk, lenses, lens_ID) # [REQUIRED]
-        Camera.SetFocusFactor(lmk) # [REQUIRED]
-    
-        ### Adjust Camera
-        # Set Modulation Frequency
-        Camera.SetModulationFrequency(lmk, ModulationFrequency) # [REQUIRED if modulation exists]
-        # Change converting units so it doesn't multiply by two
-        Camera.SetConvertingUnits(lmk) # [REQUIRED if converting to XYZ]
+        Char_Start = datetime.datetime.now()
         
         ### Capture Image
         # Capture a ColorHighDyn Image with Max Exposure Time of all Filters
-        Capture.ColorHighDyn(lmk, AutoScan = False, MinTime = MinTime, TimeRatio = TimeRatio, PicCount = PicCount)
+        Capture.ColorHighDyn(self.lmk, AutoScan = False, MinTime = MinTime, TimeRatio = TimeRatio, PicCount = PicCount)
 #        # Pre-defined exposure time
 #        MaxTime = Camera.SetIntegrationTime(lmk) # [REQUIRED for pre-defined exposure time]
 #        Capture.ColorHighDyn(lmk, AutScan = False, MaxTime = MaxTime, MinTime = MinTime,
 #                             TimeRatio = TimeRatio, PicCount = PicCount)
         
         ### Get Image Mean XYZ
-        Output_Color = Evaluation.GetImageMeanXYZ(lmk)
-        
+        Output_Color = Evaluation.GetImageMeanXYZ(self.lmk)
 #        Output_Color_Zero, Output_Color_One, Output_Color_Two, Output_Color_Three, Output_Color_Four, Output_Color_Five, Output_Color_Six, Output_Color_Seven, Output_Color_Eight = Evaluation.GetGridMeanXYZ(lmk)
         
         ### Save Measurement
-        LabSoft.Save(lmk, FileName = MeasRoot + datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S') + fileType['ttcs'])
+        LabSoft.Save(self.lmk, FileName = MeasRoot + datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S') + fileType['ttcs'])
         
-        print ('Measured Image in: {0:.3f} seconds\n'.format(time.time() - Char_Time))
+        Char_Fin = datetime.datetime.now()
+        print ('Measured Image in: {}\n'.format(Char_Fin - Char_Start))
         
         return Output_Color
+    
+class Email():
+    # Setup an email address to email from and to
+    # https://automatetheboringstuff.com/chapter16/
+    def Connect(email, password, SMTP = 'smtp.gmail.com', gate = 587):
+        
+        # Connect to an SMTP server
+        smtpObj = smtplib.SMTP(SMTP, gate)
+        # Establish a connection to the SMTP server
+        smtpObj.ehlo()
+        # Enable encryption for connection
+        smtpObj.starttls()
+        # Enter login details
+        smtpObj.login(email, password)
+        
+        return smtpObj
+    
+    # Send email to given email address    
+    def Send(smtpObj, email):
+        # Send mail with text to email
+        smtpObj.sendmail(email, email, 'Subject: Measurement\nMeasurement finished.')
+        
+    def Disconnect(smtpObj):
+        # Close email connection
+        smtpObj.quit()
+
 
 #if __name__ == '__main__':
 #    # Define Camera Parameters
@@ -2361,7 +2850,7 @@ class Characterize():
 #    # Create a region the size of the whole image
 #    Region_X_Points, Region_Y_Points = Region.CreateRectImageSize(lmk)
 #    # Get ID of region
-#    Index_Out = Region.GetID(lmk, imageType['Color'], Name = '1')
+#    ErrorCode, Index_Out = Region.GetID(lmk, imageType['Color'], Name = '1')
 #    # Select region from index of region
 #    Region.Select(lmk, Index = Index_Out)    
 #    

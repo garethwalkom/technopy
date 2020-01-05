@@ -4,35 +4,59 @@ Created on Wed Jun 19 08:57:18 2019
 @author: Gareth V. Walkom (walkga04 at googlemail.com)
 """
 import time
-import glob
 import csv
 import os
 import numpy as np
 import pandas as pd
+from scipy import stats
 from matplotlib import pyplot as plt
 import luxpy as lx
 from luxpy.toolboxes import spectro as sp
-import errno
+#import glob
+#import errno
 
 import TechnoPy as tp
 
-class CSV():
+class CSV:
     
     def Open(Root, File_Name):
         
-        CSV = pd.read_csv(Root + File_Name + '.csv')
+        csv_file = pd.read_csv(Root + File_Name + '.csv')
         
-        return CSV    
+        return csv_file 
         
     def Save(df, Root, File_Name):
         
         df.to_csv(Root + File_Name + '.csv')
         
+class LMK:
+    
+    def Read_TXT(readTxt):
+        ## Read measurement into pandas dataframe and name columns
+        startReadFile = time.time()
+        print ('Reading LMK Measurement...')
+        LMK_Meas = pd.read_csv(readTxt, delimiter = '\t',
+                               names=['Pix X', 'Pix Y', 'X', 'Y', 'Z'])
+        print ('Measurement read in: {0:.3f} seconds\n'.format(time.time() - startReadFile))
+        
+        ## Get XYZ from file
+        startGet_XYZ = time.time()
+        print ('Getting XYZ from LMK Measurement...')
+        xyzm = LMK_Meas.values
+        row_no = xyzm[:,0] - xyzm[0,0] + 1  # image started at row 11
+        col_no = xyzm[:,1] - xyzm[0,1] + 1  # image started at col 61
+        xyzm = xyzm[:,2:]
+        row_max, col_max = np.int(row_no.max()), np.int(col_no.max())
+        im_meas_xyzm = xyzm.reshape((row_max, col_max, 3))
+        xyz = im_meas_xyzm.reshape(np.hstack((im_meas_xyzm.shape[0]*im_meas_xyzm.shape[1],3)))
+        print ('Got XYZ in: {0:.3f} seconds\n'.format(time.time() - startGet_XYZ))
+        
+        return xyz
 
 class CheckExists:
 
     def File(CSV_Root, MeasDate, header):
-        ### Check if file and header exist already
+        ## Check if file and header exist already
         print ('Checking if file and header exist...')
         startCheckMeasExists = time.time()
         if os.path.isfile(CSV_Root): # If the root to the file is the file
@@ -63,7 +87,7 @@ class CheckExists:
         
         return writer, file, checkCSV
     
-    def Meas(checkCSV, MeasDate, MeasTarget, header):
+    def Meas(checkCSV, MeasDate, MeasTarget, R_In, G_In, B_In):
         ## Checked by looking if unique data in measurement matches a row in CSV file
         measExists = checkCSV[checkCSV['Meas_Date'].isin([MeasDate]) & checkCSV['Meas_Target'].isin([MeasTarget]) & checkCSV['R_In'].isin([R_In]) & checkCSV['G_In'].isin([G_In]) & checkCSV['B_In'].isin([B_In])]
     
@@ -71,7 +95,6 @@ class CheckExists:
 
 class Split:
     
-    ### Split path name
     ## Name of the file needs to be the RGB (0-1) input of the measurement.
     ## E.g. 1-0-0
     ## This is then split accordingly and then written to a file later
@@ -80,7 +103,6 @@ class Split:
         return path.strip('/').strip('\\').split('/')[-1].split('\\')[-1]
     
     def Meas(readFile):
-        ### Split file name
         ## File name is split to get RGB Input
         MeasName = Split.Path(readFile)[:-4] # Splits the file and removes '.txt' using '[:-4]'
         R_In = '-'.join(MeasName.split('-')[:-2]) # Split file name to get R input
@@ -89,23 +111,20 @@ class Split:
         
         return MeasName, R_In, G_In, B_In
     
-    def RGB_Char(Output, header = ['X', 'Y', 'Z']):
+    def RGB_Char(Output, Input = 'list.rgb', header = ['X', 'Y', 'Z']):
         
-        RGBs = np.array([0, 15, 30, 45, 51, 60, 102, 128, 153, 178, 204, 230, 245, 255,
-                         15, 30, 45, 51, 60, 102, 128, 153, 178, 204, 230, 245, 255,
-                         15, 30, 45, 51, 60, 102, 128, 153, 178, 204, 230, 245, 255,
-                         15, 30, 45, 51, 60, 102, 128, 153, 178, 204, 230, 245, 255,
-                         32, 64, 96, 128, 159, 191, 223,
-                         32, 64, 96, 128, 159, 191, 223, 255,
-                         32, 64, 96, 128, 159, 191, 223, 255,
-                         32, 64, 96, 128, 159, 191, 223, 255])
+        RGBs = np.genfromtxt(Input, delimiter='\t', dtype = 'uint8')
+        
+        RGB_Max = []
+        for RGB in RGBs:
+            RGB_Max.append(np.max(RGB))
         
         if header is None:
-            Output_df = pd.DataFrame(Output, index = RGBs)
+            Output_df = pd.DataFrame(Output, index = RGB_Max)
         else:
-            Output_df = pd.DataFrame(Output, index = RGBs, columns = header)
+            Output_df = pd.DataFrame(Output, index = RGB_Max, columns = header)
         
-        black = Output_df.iloc[0]
+        black = Output_df.iloc[[0]]
         grays = Output_df.iloc[1:14]
         grays_extra = Output_df.iloc[53:60]
         reds = Output_df.iloc[14:27]
@@ -118,6 +137,7 @@ class Split:
         return RGBs, black, grays, grays_extra, reds, greens, blues, magentas, cyans, yellows
     
 class Measure:
+    
     def SPD(device = 'jeti', Tint = 0, wait = 0.1):
         # Initializes spectrometer 'jeti' or 'oceanoptics'
         sp.init(device)
@@ -145,34 +165,10 @@ class Measure:
             
         return XYZs
 
-class Read:
-    
-    def LMK(readTxt):
-        ## Read measurement into pandas dataframe and name columns
-        startReadFile = time.time()
-        print ('Reading LMK Measurement...')
-        LMK_Meas = pd.read_csv(readTxt, delimiter = '\t',
-                               names=['Pix X', 'Pix Y', 'X', 'Y', 'Z'])
-        print ('Measurement read in: {0:.3f} seconds\n'.format(time.time() - startReadFile))
-        
-        ### Get XYZ from file
-        startGet_XYZ = time.time()
-        print ('Getting XYZ from LMK Measurement...')
-        xyzm = LMK_Meas.values
-        row_no = xyzm[:,0] - xyzm[0,0] + 1  # image started at row 11
-        col_no = xyzm[:,1] - xyzm[0,1] + 1  # image started at col 61
-        xyzm = xyzm[:,2:]
-        row_max, col_max = np.int(row_no.max()), np.int(col_no.max())
-        im_meas_xyzm = xyzm.reshape((row_max, col_max, 3))
-        xyz = im_meas_xyzm.reshape(np.hstack((im_meas_xyzm.shape[0]*im_meas_xyzm.shape[1],3)))
-        print ('Got XYZ in: {0:.3f} seconds\n'.format(time.time() - startGet_XYZ))
-        
-        return xyz
-
 class Calculate:
     
     def XYZ(xyz):
-        ### Calculate Mean XYZ
+        ## Calculate Mean XYZ
         print ('Calculating XYZ ...')
         xyz_mean = np.array([[xyz[:,0].mean(), xyz[:,1].mean(), xyz[:,2].mean()]])
         xyz_SD = np.array([[xyz[:,0].std(), xyz[:,1].std(), xyz[:,2].std()]])
@@ -196,7 +192,7 @@ class Calculate:
         return xyz_mean, X_Mean, X_SD, Y_Mean, Y_SD, Z_Mean, Z_SD 
     
     def Yxy(xyz):
-        ### Calculate (Y, x, y)
+        ## Calculate (Y, x, y)
         print ('Calculating Y, x, y ...')
         Yxy = lx.xyz_to_Yxy(xyz)
         Yxy_mean = np.array([[Yxy[:,0].mean(), Yxy[:,1].mean(), Yxy[:,2].mean()]])
@@ -211,7 +207,7 @@ class Calculate:
         return x, y
     
     def Yuv(xyz):
-        ### Calculate CIE 1976 (Y, u', v')
+        ## Calculate CIE 1976 (Y, u', v')
         print ('Calculating Y, u_, v_ ...')
         Yuv = lx.xyz_to_Yuv(xyz)
         Yuv_mean = np.array([[Yuv[:,0].mean(), Yuv[:,1].mean(), Yuv[:,2].mean()]])
@@ -227,7 +223,7 @@ class Calculate:
         return u_, v_
     
     def LMS(xyz):
-        ### Calculate Cone Fundamentals (L, M, S)
+        ## Calculate Cone Fundamentals (L, M, S)
         print ('Calculating L, M, S ...')
         LMS = lx.xyz_to_lms(xyz)
         LMS_mean = np.array([[LMS[:,0].mean(), LMS[:,1].mean(), LMS[:,2].mean()]])
@@ -236,7 +232,7 @@ class Calculate:
         return LMS_mean, LMS_SD
     
     def Lab(xyz):
-        ### Calculate CIE 1976 (L*, a*, b*)
+        ## Calculate CIE 1976 (L*, a*, b*)
         print ('Calculating L*, a*, b* ...')
         Lab = lx.xyz_to_lab(xyz)
         Lab_mean = np.array([[Lab[:,0].mean(), Lab[:,1].mean(), Lab[:,2].mean()]])
@@ -253,7 +249,7 @@ class Calculate:
         return CIE_L_, CIE_a_, CIE_b_
     
     def sRGB(xyz):
-        ### Calculate sRGB output
+        ## Calculate sRGB output
         print ('Calculating sR, sG, sB ...')
         sRGB = lx.xyz_to_srgb(xyz)
         sRGB_mean = np.array([[sRGB[:,0].mean(), sRGB[:,1].mean(), sRGB[:,2].mean()]])
@@ -270,7 +266,7 @@ class Calculate:
         return R_Out, G_Out, B_Out
     
     def Luv(xyz):
-        ### Calculate CIE 1976 (L*, u*, v*)
+        ## Calculate CIE 1976 (L*, u*, v*)
         print ('Calculating L*, u*, v* ...')
         Luv = lx.xyz_to_luv(xyz)
         Luv_mean = np.array([[Luv[:,0].mean(), Luv[:,1].mean(), Luv[:,2].mean()]])
@@ -279,7 +275,7 @@ class Calculate:
         return Luv_mean, Luv_SD
     
     def Vrb(xyz):
-        ### Calculate V, r, b [Macleod & Boyton, 1979]
+        ## Calculate V, r, b [Macleod & Boyton, 1979]
         print ('Calculating V, r, b ...')
         Vrb = lx.xyz_to_Vrb_mb(xyz)
         Vrb_mean = np.array([[Vrb[:,0].mean(), Vrb[:,1].mean(), Vrb[:,2].mean()]])
@@ -287,12 +283,23 @@ class Calculate:
         
         return Vrb_mean, Vrb_SD
         
-    def Ydlep(xyz):
-        ### Calculate Y, dl, ep
+    def Ydlep(xyz_mean):
+        ## Calculate Y, dl, ep
         print ('Calculating Y, dl, ep ...')
         Ydlep = lx.xyz_to_Ydlep(xyz_mean)
         
         return Ydlep
+    
+class ConvertTo:
+    
+    def Linear(Input):
+        
+        plt.subplots()
+        
+        for l in Input.index:
+            slope, intercept, r_value, p_value, std_err = stats.linregress(Input.index, Input[l])
+    
+        return slope, intercept, r_value, p_value, std_err
     
 class Show:
     
@@ -317,16 +324,21 @@ class Show:
         lx.SPD(spd).plot(linestyle = linestyle,
               ylabel = 'Spectral radiance (W/nm.m².sr)')
         
-    def XYZ(XYZ, linestyle='--'):
+    def XYZ(XYZ, linestyle='--', linear = False):
         
-        fig, ax = plt.subplots()
-        ax.set_xlabel('RGB', fontsize=20)
-        ax.set_ylabel('Value', fontsize=20)
-        lineObjects = plt.plot(XYZ, linestyle = linestyle)
-        plt.legend(iter(lineObjects), ('X', 'Y', 'Z'))
+        _, ax = plt.subplots()
+        ax.set_xlabel('RGB', fontsize = 20)
+        ax.set_ylabel('Value', fontsize = 20)
+        XYZs = ax.plot(XYZ, linestyle = linestyle)
+        plt.legend(iter(XYZs), ('X', 'Y', 'Z'))
+        
+        if linear is not False:
+            for l in linear:
+                slope, intercept = stats.linregress(XYZ.index, XYZ[l])
+                ax.plot(XYZ.index, intercept + slope * XYZ.index, 'r', linestyle = ':')
         
     def xy(x, y, gamut=None, label='x, y', facecolors='none', color='k',
-           linestyle='--', title='x, y', grid=True, **kwargs):
+           linestyle='--', title='x, y', grid=True):
         """
         Plot x, y color coordinates using Luxpy.|
         ----------------------------------------
@@ -382,7 +394,7 @@ class Show:
         ax_xy.legend()
         
     def uv(u_, v_, gamut=None, label='u_, v_', facecolors='none', color='k',
-           linestyle='--', title='u_, v_', grid=True, **kwargs):
+           linestyle='--', title='u_, v_', grid=True, new=False):
         """
         Plot u', v' color coordinates using Luxpy.|
         ------------------------------------------
@@ -424,7 +436,8 @@ class Show:
         Returns:
             
         """
-        plt.figure()
+        if new is True:
+            plt.figure()
         ax_uv = plt.axes()
         lx.plot_chromaticity_diagram_colors(256,0.3,1,lx._CIEOBS,'Yuv',{},True,ax_uv,
                                             grid,'Times New Roman',12)
@@ -437,7 +450,7 @@ class Show:
         ax_uv.set_ylim([-0.1, 0.7])
         ax_uv.legend()
         
-class Compare():
+class Compare:
     
     def XYZ(XYZ, linestyle='--'):
         
@@ -445,7 +458,6 @@ class Compare():
         plt.legend(iter(lineObjects), ('X', 'Y', 'Z'))
 
 #if __name__ == '__main__':
-#    # Initiate timer for whole morphing
 #    start = time.time()
 #    print ('Started script to export LMK measurements from a folder...')
 #    print ('Setting up parameters...')
