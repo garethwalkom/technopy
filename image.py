@@ -8,8 +8,8 @@ import os
 from win32com.client import Dispatch
 from skimage import io
 
-import ActiveX as ax
-import Dicts as dic
+import activex as ax
+import dicts as dic
 
 LMK = Dispatch('lmk4.LMKAxServer')
 
@@ -43,6 +43,22 @@ def create(image=0, name='Evaluation[1]'):
     ax.error_code(err_code)
 
     return index
+
+def delete(image=dic.IMAGE_TYPES['Color']):
+    """
+    [ADD THIS]
+
+    Parameters
+    ----------
+    image : TYPE, optional
+        DESCRIPTION. The default is dic.IMAGE_TYPES['Color'].
+
+    Returns
+    -------
+    None.
+
+    """
+    LMK.iImageDelete(image)
 
 def save(image=dic.IMAGE_TYPES['Color'], file_name=MEAS_ROOT + \
          datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S') + \

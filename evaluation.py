@@ -122,6 +122,51 @@ def delete_statistic(statistic_type = dic.STATISTIC_TYPES['standardColor'], stat
     err_code = LMK.iDeleteStatistic(statistic_type, stat_no)
     ax.error_code(err_code) # Check for error
 
+def ProjectRectifLum():
+    """
+    [ADD THIS]
+
+    Returns
+    -------
+    None.
+
+    """
+    LMK.iExecMenuPoint('Macros|ProjRectLum')
+
+def ProjectRectifCol():
+    """
+    [ADD THIS]
+
+    Returns
+    -------
+    None.
+
+    """
+    LMK.iExecMenuPoint('Macros|ProjRectCol')
+
+def CoordTransformLum():
+    """
+    [ADD THIS]
+
+    Returns
+    -------
+    None.
+
+    """
+    LMK.iExecMenuPoint('Macros|CoordTransLum')
+
+def CoordTransformCol():
+    """
+    [ADD THIS]
+
+    Returns
+    -------
+    None.
+
+    """
+    LMK.iExecMenuPoint('Macros|CoordTransCol')
+
+
 def get_image_mean_xyz():
     """
     Create region size of image and get mean XYZ.|
