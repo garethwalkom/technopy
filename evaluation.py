@@ -27,7 +27,6 @@ show_xy():                  Plot x, y color coordinates using Luxpy.
 show_u_v_():                Plot u', v' color coordinates using Luxpy.
 
 """
-from win32com.client import Dispatch
 import numpy as np
 from matplotlib import pyplot as plt
 import luxpy as lx
@@ -36,8 +35,6 @@ import activex as ax
 import dicts as dic
 import image as im
 import region as reg
-
-LMK = Dispatch('lmk4.LMKAxServer')
 
 def statistic_exists(image = dic.IMAGE_TYPES['Color'], region = 0):
     """
@@ -59,8 +56,7 @@ def statistic_exists(image = dic.IMAGE_TYPES['Color'], region = 0):
         :statistic_index: int
             | Index in statistic list?
     """
-    err_code, exists, statistic_type, statistic_index = LMK.iHaveStatistic(image, region)
-    ax.error_code(err_code) # Check for error
+    err_code, exists, statistic_type, statistic_index = ax.LMK.iHaveStatistic(image, region)
 
     return exists, statistic_type, statistic_index
 
@@ -83,7 +79,7 @@ def create_statistic(statistic_type = dic.STATISTIC_TYPES['standardColor'],
             | Number of parameters for this statistic
         :param_list: QStringList
     """
-    [err_code, statistic] = LMK.iCreateStatistic(statistic_type, image, region, num_param, param_list)
+    [err_code, statistic] = ax.LMK.iCreateStatistic(statistic_type, image, region, num_param, param_list)
     ax.error_code(err_code) # Check for error
 
     return statistic
@@ -120,14 +116,14 @@ def get_standard_statistic(statistic_type = dic.STATISTIC_TYPES['standardColor']
 
     stats = {'Area': [], 'Min': [], 'Max': [], 'Mean': [], 'Variance': []}
 
-    err_code, area, stat_min, stat_max, stat_mean, variance = LMK.iGetStandardStatistic2(statistic_type, region, color_class)
+    err_code, area, stat_min, stat_max, stat_mean, variance = ax.LMK.iGetStandardStatistic2(statistic_type, region, color_class)
     ax.error_code(err_code) # Check for error
 
-    stats['Area'].append(LMK.iGetStandardStatistic2(statistic_type, region, color_class)[1])
-    stats['Min'].append(LMK.iGetStandardStatistic2(statistic_type, region, color_class)[2])
-    stats['Max'].append(LMK.iGetStandardStatistic2(statistic_type, region, color_class)[3])
-    stats['Mean'].append(LMK.iGetStandardStatistic2(statistic_type, region, color_class)[4])
-    stats['Variance'].append(LMK.iGetStandardStatistic2(statistic_type, region, color_class)[5])
+    stats['Area'].append(ax.LMK.iGetStandardStatistic2(statistic_type, region, color_class)[1])
+    stats['Min'].append(ax.LMK.iGetStandardStatistic2(statistic_type, region, color_class)[2])
+    stats['Max'].append(ax.LMK.iGetStandardStatistic2(statistic_type, region, color_class)[3])
+    stats['Mean'].append(ax.LMK.iGetStandardStatistic2(statistic_type, region, color_class)[4])
+    stats['Variance'].append(ax.LMK.iGetStandardStatistic2(statistic_type, region, color_class)[5])
 
     return stats
 
@@ -143,7 +139,7 @@ def delete_statistic(statistic_type = dic.STATISTIC_TYPES['standardColor'], stat
         :stat_no: int (default: 0)
             | Index of statistic number
     """
-    err_code = LMK.iDeleteStatistic(statistic_type, stat_no)
+    err_code = ax.LMK.iDeleteStatistic(statistic_type, stat_no)
     ax.error_code(err_code) # Check for error
 
 def proj_rect_lum():
@@ -155,7 +151,7 @@ def proj_rect_lum():
     None.
 
     """
-    LMK.iExecMenuPoint('Macros|ProjRectLum')
+    ax.LMK.iExecMenuPoint('Macros|ProjRectLum')
 
 def proj_rect_col():
     """
@@ -166,7 +162,7 @@ def proj_rect_col():
     None.
 
     """
-    LMK.iExecMenuPoint('Macros|ProjRectCol')
+    ax.LMK.iExecMenuPoint('Macros|ProjRectCol')
 
 def coord_trans_lum():
     """
@@ -177,7 +173,7 @@ def coord_trans_lum():
     None.
 
     """
-    LMK.iExecMenuPoint('Macros|CoordTransLum')
+    ax.LMK.iExecMenuPoint('Macros|CoordTransLum')
 
 def coord_trans_col():
     """
@@ -188,7 +184,7 @@ def coord_trans_col():
     None.
 
     """
-    LMK.iExecMenuPoint('Macros|CoordTransCol')
+    ax.LMK.iExecMenuPoint('Macros|CoordTransCol')
 
 
 def get_image_mean_xyz():
@@ -430,7 +426,7 @@ def get_color_hist_vals(image = dic.IMAGE_TYPES['Color'],
         :hist_values: QStringList
             | Histogram values
     """
-    err_code, num_param, x_coords, hist_values = LMK.iGetColorHistogramValues(image, color_space)
+    err_code, num_param, x_coords, hist_values = ax.LMK.iGetColorHistogramValues(image, color_space)
     ax.error_code(err_code) # Check for error
 
     return num_param, x_coords, hist_values
@@ -458,7 +454,7 @@ def get_pixel_color(image = dic.IMAGE_TYPES['Color'], line = 500, column = 500):
         :cie_b: float
             | Gets the blue component of the pixel value
     """
-    err_code, cie_r, cie_g, cie_b = LMK.iImageGetPixelColor(image, line, column)
+    err_code, cie_r, cie_g, cie_b = ax.LMK.iImageGetPixelColor(image, line, column)
     ax.error_code(err_code) # Check for error
 
     return cie_r, cie_g, cie_b
@@ -498,7 +494,7 @@ def convert_cie_rgb(cie_r = 255.0, cie_g = 0.0, cie_b = 0.0, r_ref = 0.0,
             | Calculated color in an array shape of (1, 3)
     """
     [err_code, out_i, out_ii, out_iii] = \
-        LMK.iGetColor(cie_r, cie_g, cie_b, r_ref, g_ref, b_ref, color_space)
+        ax.LMK.iGetColor(cie_r, cie_g, cie_b, r_ref, g_ref, b_ref, color_space)
     ax.error_code(err_code) # Check for error
 
     # Place new values into an array

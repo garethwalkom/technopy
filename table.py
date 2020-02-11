@@ -16,11 +16,7 @@ Structure:|
 # get_all_content():          Returns all cells of a table as a list.
 
 """
-from win32com.client import Dispatch
-
 import activex as ax
-
-LMK = Dispatch('lmk4.LMKAxServer')
 
 def get_number():
     """
@@ -33,7 +29,7 @@ def get_number():
         :tables_no: int
             | Returns the number of tables
     """
-    err_code, tables_no = LMK.iTableGetNumber()
+    err_code, tables_no = ax.LMK.iTableGetNumber()
     ax.error_code(err_code) # Check for error
 
     return tables_no
@@ -53,7 +49,7 @@ def get_name_and_caption(table_id=2):
         :table_caption: QStringList
             | Returns the caption of the table
     """
-    err_code, table_name, table_caption = LMK.iTableGetNameAndCaption(table_id)
+    err_code, table_name, table_caption = ax.LMK.iTableGetNameAndCaption(table_id)
     ax.error_code(err_code) # Check for error
 
     return table_name, table_caption
@@ -72,7 +68,7 @@ def get_index(table_name_or_caption='Last capture'):
             | Index of table
             | -1 = not found
     """
-    err_code, table_id = LMK.iTableGetIndex(table_name_or_caption)
+    err_code, table_id = ax.LMK.iTableGetIndex(table_name_or_caption)
     ax.error_code(err_code) # Check for error
 
     return table_id
@@ -90,7 +86,7 @@ def get_number_columns(table_id=2):
         :table_number_columns: int
             | Returns the number of columns in table
     """
-    err_code, table_number_columns = LMK.iTableGetNumberColumns(table_id)
+    err_code, table_number_columns = ax.LMK.iTableGetNumberColumns(table_id)
     ax.error_code(err_code) # Check for error
 
     return table_number_columns
@@ -108,7 +104,7 @@ def get_number_lines(table_id=2):
         :table_number_lines: int
             | Returns the number of lines in table
     """
-    err_code, table_number_lines = LMK.iTableGetNumberLines(table_id)
+    err_code, table_number_lines = ax.LMK.iTableGetNumberLines(table_id)
     ax.error_code(err_code) # Check for error
 
     return table_number_lines
@@ -133,7 +129,7 @@ def get_column(table_id=2, table_column_id=0):
             | Returns the unit of the column
     """
     err_code, table_column_name, table_column_caption,\
-        table_column_unit = LMK.iTableGetColumn(table_id, table_column_id)
+        table_column_unit = ax.LMK.iTableGetColumn(table_id, table_column_id)
     ax.error_code(err_code) # Check for error
 
     return table_column_name, table_column_caption, table_column_unit
@@ -155,7 +151,7 @@ def get_cell(table_id=2, table_line_id=1, table_column_id=8):
         :table_cell: QString
             | Returns the content of table cell
     """
-    err_code, table_cell = LMK.iTableGetCell(table_id, table_line_id, table_column_id)
+    err_code, table_cell = ax.LMK.iTableGetCell(table_id, table_line_id, table_column_id)
     ax.error_code(err_code) # Check for error
 
     return table_cell
@@ -175,7 +171,7 @@ def get_all_content(table_id=2):
         :table_content: QStringList
             | List with content of all cells
     """
-    [err_code, table_content] = LMK.iGetAllContent(table_id)
+    [err_code, table_content] = ax.LMK.iGetAllContent(table_id)
     ax.error_code(err_code) # Check for error
 
     return table_content

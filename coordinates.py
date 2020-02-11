@@ -10,12 +10,8 @@ get_value_unit():           Get the values and units of the axis.
 set_value_unit():           Set the values and units of the axis.
 
 """
-from win32com.client import Dispatch
-
 import activex as ax
 import dicts as dic
-
-LMK = Dispatch('lmk4.LMKAxServer')
 
 def get_value_unit(image=dic.IMAGE_TYPES['Color']):
     """
@@ -38,7 +34,7 @@ def get_value_unit(image=dic.IMAGE_TYPES['Color']):
         :unit_area: QString
             | Unit of area
     """
-    [err_code, x_value, x_unit, y_value, y_unit, unit_area] = LMK.iCoordSystemGetValueUnit(image)
+    [err_code, x_value, x_unit, y_value, y_unit, unit_area] = ax.LMK.iCoordSystemGetValueUnit(image)
     ax.error_code(err_code) # Check for error
 
     return x_value, x_unit, y_value, y_unit, unit_area
@@ -64,5 +60,5 @@ def set_value_unit(image=dic.IMAGE_TYPES['Color'], x_value='x',
         :unit_area: QString (default: 'pix^2')
             | Unit of area
     """
-    err_code = LMK.iCoordSystemSetValueUnit(image, x_value, x_unit, y_value, y_unit, unit_area)
+    err_code = ax.LMK.iCoordSystemSetValueUnit(image, x_value, x_unit, y_value, y_unit, unit_area)
     ax.error_code(err_code) # Check for error

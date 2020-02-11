@@ -46,12 +46,8 @@ import os
 import glob
 import configparser
 
-from win32com.client import Dispatch
-
 import activex as ax
 import dicts as dic
-
-LMK = Dispatch('lmk4.LMKAxServer')
 
 # Define the root to the calibration data
 CALIB_DATA_ROOT = 'F:/LMK/Calibration Data'
@@ -243,7 +239,7 @@ def get_focus_factors_old():
         :focus_factor: int
             | Index of current focus factor
     """
-    err_code, focus_factors, focus_factor = LMK.iGetFocusFactorList()
+    err_code, focus_factors, focus_factor = ax.LMK.iGetFocusFactorList()
     ax.error_code(err_code) # Check for error
 
     return focus_factors, focus_factor
@@ -278,7 +274,7 @@ def set_focus_factor():
     """
     focus_factors, focus_factors_size = get_focus_factors()
     focus_factor_id = get_focus_factor_id(focus_factors)
-    err_code = LMK.iSetFocusFactor(focus_factor_id)
+    err_code = ax.LMK.iSetFocusFactor(focus_factor_id)
     ax.error_code(err_code) # Check for error
 
 def open_camera(camera_no, lens_no):
@@ -295,7 +291,7 @@ def open_camera(camera_no, lens_no):
             | If the string is empty a currently existing camera connection
                 is finished.
     """
-    err_code = LMK.iSetNewCamera(CALIB_DATA_ROOT + '/' + camera_no + '/' + lens_no)
+    err_code = ax.LMK.iSetNewCamera(CALIB_DATA_ROOT + '/' + camera_no + '/' + lens_no)
     ax.error_code(err_code) # Check for error
 
 def get_converting_units():
@@ -315,7 +311,7 @@ def get_converting_units():
         :units_factor: float (default: 1.0)
             | Units factor used
     """
-    err_code, units_name, units, units_factor = LMK.iGetConvertingUnits()
+    err_code, units_name, units, units_factor = ax.LMK.iGetConvertingUnits()
     ax.error_code(err_code) # Check for error
 
     return units_name, units, units_factor
@@ -336,7 +332,7 @@ def set_converting_units(units_name='L', units='cd/m^2', units_factor=1.0):
         :units_factor: float (default: 1.0)
             | Wished units factor
     """
-    err_code = LMK.iSetConvertingUnits(units_name, units, units_factor)
+    err_code = ax.LMK.iSetConvertingUnits(units_name, units, units_factor)
     ax.error_code(err_code) # Check for error
 
 def get_modulation_frequency():
@@ -351,7 +347,7 @@ def get_modulation_frequency():
             | Frequency of light source
             | 0 = no modulation is to be concerned
     """
-    err_code, modulation_frequency = LMK.iGetModulationFrequency()
+    err_code, modulation_frequency = ax.LMK.iGetModulationFrequency()
     ax.error_code(err_code) # Check for error
 
     return modulation_frequency
@@ -371,7 +367,7 @@ def set_modulation_frequency(modulation_frequency=90.0):
             | Frequency of light source
             | 0 = no modulation is to be concerned
     """
-    err_code = LMK.iSetModulationFrequency(modulation_frequency)
+    err_code = ax.LMK.iSetModulationFrequency(modulation_frequency)
     ax.error_code(err_code) # Check for error
 
 def get_scattered_light():
@@ -386,7 +382,7 @@ def get_scattered_light():
             | 1 = scattered light correction is switched on
             | 0 = scattered light correction is switched off
     """
-    err_code, scattered_light = LMK.iGetScatteredLight()
+    err_code, scattered_light = ax.LMK.iGetScatteredLight()
     ax.error_code(err_code) # Check for error
 
     return scattered_light
@@ -404,7 +400,7 @@ def set_scattered_light(scattered_light=1):
             | 1 = switch on scattered light correction
             | 0 = switch off scattered light correction
     """
-    err_code = LMK.iSetScatteredLight(scattered_light)
+    err_code = ax.LMK.iSetScatteredLight(scattered_light)
     ax.error_code(err_code) # Check for error
 
 def get_integration_time():
@@ -426,7 +422,7 @@ def get_integration_time():
         :max_time: float
             | Maximal possible time
     """
-    err_code, current_time, previous_time, next_time, min_time, max_time = LMK.iGetIntegrationTime()
+    err_code, current_time, previous_time, next_time, min_time, max_time = ax.LMK.iGetIntegrationTime()
     ax.error_code(err_code) # Check for error
 
     return current_time, previous_time, next_time, min_time, max_time
@@ -444,7 +440,7 @@ def set_integration_time(wished_time=5.0):
         :IntegrationTime: float
             | Realized integration time
     """
-    err_code, integration_time = LMK.iSetIntegrationTime(wished_time)
+    err_code, integration_time = ax.LMK.iSetIntegrationTime(wished_time)
     ax.error_code(err_code) # Check for error
 
     return integration_time
@@ -462,7 +458,7 @@ def get_max_camera_time():
         :max_time: float
             | Current maximum time
     """
-    err_code, max_time = LMK.iGetMaxCameraTime()
+    err_code, max_time = ax.LMK.iGetMaxCameraTime()
     ax.error_code(err_code) # Check for error
 
     return max_time
@@ -480,7 +476,7 @@ def set_max_camera_time(max_time=5.0):
         :max_time: float (default: 5.0)
             | Wished value
     """
-    err_code = LMK.iSetMaxCameraTime(max_time)
+    err_code = ax.LMK.iSetMaxCameraTime(max_time)
     ax.error_code(err_code) # Check for error
 
 def get_autoscan():
@@ -497,7 +493,7 @@ def get_autoscan():
             | 1 = autoscan is switched on
             | 0 = autoscan is switched off
     """
-    err_code, autoscan = LMK.iGetAutoscan()
+    err_code, autoscan = ax.LMK.iGetAutoscan()
     ax.error_code(err_code) # Check for error
 
     return autoscan
@@ -515,7 +511,7 @@ def set_autoscan(autoscan=1):
             | 1 = Use autoscan
               0 = Do not use autoscan
     """
-    err_code = LMK.iSetAutoscan(autoscan)
+    err_code = ax.LMK.iSetAutoscan(autoscan)
     ax.error_code(err_code) # Check for error
 
 def get_filter_wheel():
@@ -532,7 +528,7 @@ def get_filter_wheel():
         :current_filter_name: QString
             | Name of current filter
     """
-    err_code, current_filter_pos, current_filter_name = LMK.iGetFilterWheel()
+    err_code, current_filter_pos, current_filter_name = ax.LMK.iGetFilterWheel()
     ax.error_code(err_code) # Check for error
 
     return current_filter_pos, current_filter_name
@@ -553,7 +549,7 @@ def get_grey_filter_list():
             | 0 = none selected
             | 1 = selected
     """
-    err_code, grey_filter_list, grey_filter_selected = LMK.iGetGreyFilterList()
+    err_code, grey_filter_list, grey_filter_selected = ax.LMK.iGetGreyFilterList()
     ax.error_code(err_code) # Check for error
 
     return grey_filter_list, grey_filter_selected
@@ -577,7 +573,7 @@ def set_grey_filter_list(grey_filter_selected=('0', '0', '0')):
             | 0 = none selected
             | 1 = selected
     """
-    err_code, grey_filter_selected = LMK.iSetGreyFilterList(grey_filter_selected)
+    err_code, grey_filter_selected = ax.LMK.iSetGreyFilterList(grey_filter_selected)
     ax.error_code(err_code) # Check for error
 
     return grey_filter_selected
@@ -593,7 +589,7 @@ def set_grey_filter(grey_filter_index=0, grey_filter_selected=0):
             | 0 = deselect
             | 1 = select
     """
-    err_code = LMK.iSetGreyFilter(grey_filter_index, grey_filter_selected)
+    err_code = ax.LMK.iSetGreyFilter(grey_filter_index, grey_filter_selected)
     ax.error_code(err_code) # Check for error
 
 def color_autoscan_time():
@@ -624,12 +620,12 @@ def color_autoscan_time():
     color_filters = {'All': []}
     exposure_times = {'G': [], 'X1': [], 'X2': [], 'Z': [], 'VL': [], 'IR': []}
 
-    err_code = LMK.iColorAutoScanTime()[0]
+    err_code = ax.LMK.iColorAutoScanTime()[0]
 
     if err_code != 0:
         print('Error code:', err_code)
     else:
-        color_filters['All'].append(LMK.iColorAutoScanTime()[1])
+        color_filters['All'].append(ax.LMK.iColorAutoScanTime()[1])
         color_filters['All'] = str(All['All'])[2:-2]
         temp = color_filters['All'].split(" ", 6)
 
@@ -676,7 +672,7 @@ def get_color_correction_list():
             | 0 = not selected
             | 1 = selected
     """
-    [err_code, col_corr_list, col_corr_selected] = LMK.iGetColorCorrList()
+    [err_code, col_corr_list, col_corr_selected] = ax.LMK.iGetColorCorrList()
     ax.error_code(err_code) # Check for error
 
     return col_corr_list, col_corr_selected
@@ -694,7 +690,7 @@ def set_color_correction(col_corr_index=0, col_corr_selected=1):
             | 0 = deselect
             | 1 = select
     """
-    err_code = LMK.iSetColorCorr(col_corr_index, col_corr_selected)
+    err_code = ax.LMK.iSetColorCorr(col_corr_index, col_corr_selected)
     ax.error_code(err_code) # Check for error
 
 def get_smear():
@@ -710,7 +706,7 @@ def get_smear():
             | !0 = smear correction with at least 10 dark images captures
             | > 10 number of dark images
     """
-    err_code, smear = LMK.iGetSmear()
+    err_code, smear = ax.LMK.iGetSmear()
     ax.error_code(err_code) # Check for error
 
     return smear
@@ -727,7 +723,7 @@ def set_smear(smear=0):
             | !0 = smear correction with at least 10 dark images captures
             | > 10 number of dark images
     """
-    err_code = LMK.iGetSmear()
+    err_code = ax.LMK.iGetSmear()
     ax.error_code(err_code) # Check for error
 
 def get_automatic():
@@ -744,7 +740,7 @@ def get_automatic():
             | 1 = option is switched on
             | 0 = option is switched off
     """
-    err_code, automatic = LMK.iGetAutomatic()
+    err_code, automatic = ax.LMK.iGetAutomatic()
     ax.error_code(err_code) # Check for error
 
     return automatic
@@ -763,7 +759,7 @@ def set_automatic(automatic=1):
             | 1 = use autoscan
             | 0 = do not use autoscan
     """
-    err_code = LMK.iSetAutomatic(automatic)
+    err_code = ax.LMK.iSetAutomatic(automatic)
     ax.error_code(err_code) # Check for error
 
 # class Select():

@@ -22,11 +22,7 @@ Structure:|
 # load_image():               Load template image file to the target.
 
 """
-from win32com.client import Dispatch
-
 import activex as ax
-
-LMK = Dispatch('lmk4.LMKAxServer')
 
 def get_no_displays():
     """
@@ -41,7 +37,7 @@ def get_no_displays():
         :no_displays: int
             | Get number of available displays, at least one.
     """
-    err_code, no_displays = LMK.iTIG_GetNumberTargetDisplays()
+    err_code, no_displays = ax.LMK.iTIG_GetNumberTargetDisplays()
     ax.error_code(err_code) # Check for error
 
     return no_displays
@@ -60,7 +56,7 @@ def get_target():
         :display_name: QString
             | Image name is only returned if 'DisplayID' == -1
     """
-    err_code, display_id, display_name = LMK.iTIG_GetTarget()
+    err_code, display_id, display_name = ax.LMK.iTIG_GetTarget()
     ax.error_code(err_code) # Check for error
 
     return display_id, display_name
@@ -78,7 +74,7 @@ def set_target(display_id, display_name):
         :display_name: QString
             | Image name is only necessary if 'DisplayID' == -1
     """
-    err_code = LMK.iTIG_SetTarget(display_id, display_name)
+    err_code = ax.LMK.iTIG_SetTarget(display_id, display_name)
     ax.error_code(err_code) # Check for error
 
 def get_target_properties():
@@ -108,7 +104,7 @@ def get_target_properties():
     """
     err_code, target_type, target_height, \
         target_width, target_lines, \
-            target_columns = LMK.iTIG_GetTargetProperties()
+            target_columns = ax.LMK.iTIG_GetTargetProperties()
     ax.error_code(err_code) # Check for error
 
     return target_type, target_height, target_width, target_lines, target_columns
@@ -124,7 +120,7 @@ def get_list_of_categories():
         :categories: QStringList
             | Shows list of categories for TIG
     """
-    err_code, categories = LMK.iTIG_GetListOfCategories()
+    err_code, categories = ax.LMK.iTIG_GetListOfCategories()
     ax.error_code(err_code) # Check for error
 
     return categories
@@ -142,7 +138,7 @@ def get_list_of_operations(category):
         :operations: QStringList
             | Shows list of template image types for given category
     """
-    [err_code, operations] = LMK.iTIG_GetListOfOperations(category)
+    [err_code, operations] = ax.LMK.iTIG_GetListOfOperations(category)
     ax.error_code(err_code) # Check for error
 
     return operations
@@ -163,7 +159,7 @@ def set_operation(category, operation, check=1):
             | This parameter is only valied if this is an option.
             |   (checkbox, not a radio button)
     """
-    err_code = LMK.iTIG_SetOperation(category, operation, check)
+    err_code = ax.LMK.iTIG_SetOperation(category, operation, check)
     ax.error_code(err_code) # Check for error
 
 def get_list_of_param_names():
@@ -177,7 +173,7 @@ def get_list_of_param_names():
         :parameters: QStringList
             | Show parameter names in a list
     """
-    err_code, parameters = LMK.iTIG_GetListOfParameterNames()
+    err_code, parameters = ax.LMK.iTIG_GetListOfParameterNames()
     ax.error_code(err_code) # Check for error
 
     return parameters
@@ -195,7 +191,7 @@ def get_param_value(parameter):
         :parameter_value: float
             | Value of parameter (if bool, then 0 or 1)
     """
-    err_code, parameter_value = LMK.iTIG_GetParameterValue(parameter)
+    err_code, parameter_value = ax.LMK.iTIG_GetParameterValue(parameter)
     ax.error_code(err_code) # Check for error
 
     return parameter_value
@@ -212,7 +208,7 @@ def set_param_value(parameter, parameter_value):
         :parameter_value: float
             | Value of parameter (if bool, then 0 or 1)
     """
-    err_code = LMK.iTIG_SetParameterValue(parameter, parameter_value)
+    err_code = ax.LMK.iTIG_SetParameterValue(parameter, parameter_value)
     ax.error_code(err_code) # Check for error
 
 def show_dialog():
@@ -223,7 +219,7 @@ def show_dialog():
         :LMK:
             | Dispatch('lmk4.LMKAxServer')
     """
-    err_code = LMK.iTIG_ShowDialog()
+    err_code = ax.LMK.iTIG_ShowDialog()
     ax.error_code(err_code) # Check for error
 
 def hide_dialog():
@@ -234,7 +230,7 @@ def hide_dialog():
         :LMK:
             | Dispatch('lmk4.LMKAxServer')
     """
-    err_code = LMK.iTIG_HideDialog()
+    err_code = ax.LMK.iTIG_HideDialog()
     ax.error_code(err_code) # Check for error
 
 def create_image():
@@ -245,7 +241,7 @@ def create_image():
         :LMK:
             | Dispatch('lmk4.LMKAxServer')
     """
-    err_code = LMK.iTIG_CreateImage()
+    err_code = ax.LMK.iTIG_CreateImage()
     ax.error_code(err_code) # Check for error
 
 def delete_image():
@@ -259,7 +255,7 @@ def delete_image():
         :LMK:
             | Dispatch('lmk4.LMKAxServer')
     """
-    err_code = LMK.iTIG_DeleteImage()
+    err_code = ax.LMK.iTIG_DeleteImage()
     ax.error_code(err_code) # Check for error
 
 def load_image(file_name):
@@ -276,5 +272,5 @@ def load_image(file_name):
             | Allowed file extensions:
             |   .puc, .pus, .pf, .pco, .pcf, .bmp, .png, .jpg
     """
-    err_code = LMK.iTIG_LoadImage(file_name)
+    err_code = ax.LMK.iTIG_LoadImage(file_name)
     ax.error_code(err_code) # Check for error

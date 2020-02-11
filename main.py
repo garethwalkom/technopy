@@ -43,8 +43,8 @@ import os
 import datetime
 import time
 import numpy as np
-from win32com.client import Dispatch
 
+import activex as ax
 import labsoft as ls
 import camera as cam
 import capture as cap
@@ -57,19 +57,8 @@ import table as tab
 # Define the root to the calibration data
 CALIB_DATA_ROOT = 'F:/LMK/Calibration Data'
 
-# Name of the TechnoTeam LMK Camera
-CAMERA_NAME = str(os.listdir(CALIB_DATA_ROOT))[2:-2]
-
-# Define the Lens and focus factor in use.
-LENS = '12'
-SCALE = 'infinite'
-
 # Define Save Parameters
 MEAS_ROOT = 'E:/Measurements/' + str(datetime.date.today()) + '/'
-MEAS_NAME = datetime.datetime.now().strftime('%H:%M:%S')
-EXTENSION = dic.FILE_TYPES['png']
-
-LMK = Dispatch('lmk4.LMKAxServer')
 
 def max_luminance(min_time=0.0, time_ratio=3.0, pic_count=1):
     """
@@ -101,19 +90,23 @@ def max_luminance(min_time=0.0, time_ratio=3.0, pic_count=1):
     # Create a region the size of the whole image
     region_x_points, region_y_points = reg.create_rect_image_size()
     # Get ID of region
-    err_code, index_out = reg.get_id(dic.IMAGE_TYPES['Luminance'], name='1')
+    _, index_out = reg.get_id(dic.IMAGE_TYPES['Luminance'], name='1')
     # Select region from index of region
     reg.select(index=index_out)
 
     # Create statistic
-    eva.create_statistic(dic.STATISTIC_TYPES['standardGrey'], dic.IMAGE_TYPES['Luminance'], index_out, param_list=[1])
+    eva.create_statistic(dic.STATISTIC_TYPES['standardGrey'],
+                         dic.IMAGE_TYPES['Luminance'], index_out,
+                         param_list=[1])
     # Get max luminance of region
     max_lum = tab.get_cell(table_id=2, table_line_id=0, table_column_id=6)
 
     max_lum = np.float64(max_lum)
 
     ### Save Measurement
-    ls.save(file_name=MEAS_ROOT + datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S') + dic.FILE_TYPES['ttcs'])
+    ls.save(file_name=MEAS_ROOT + \
+            datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S') + \
+                dic.FILE_TYPES['ttcs'])
 
     return max_lum
 
@@ -140,15 +133,18 @@ def characterize(min_time=0.0, time_ratio=3.0, pic_count=1):
 
     ### Capture Image
     # Capture a ColorHighDyn Image with Max Exposure Time of all Filters
-    cap.color_high_dyn(autoscan=False, min_time=min_time, time_ratio=time_ratio, pic_count=pic_count)
+    cap.color_high_dyn(autoscan=False, min_time=min_time,
+                       time_ratio=time_ratio, pic_count=pic_count)
 
     ### Save Measurement
-    ls.save(file_name=MEAS_ROOT + datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S') + dic.FILE_TYPES['ttcs'])
+    ls.save(file_name=MEAS_ROOT + \
+            datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S') + \
+                dic.FILE_TYPES['ttcs'])
 
     char_fin = datetime.datetime.now()
     print('Measured Image in: {}\n'.format(char_fin - car_start))
 
-def measure_warm_up(warm_up=True, time_total=120):
+def measure_warm_up(time_total=120):
     """
     [ADD THIS]
 
@@ -187,7 +183,8 @@ def measure_warm_up(warm_up=True, time_total=120):
 
     return output
 
-def get_result_from_folder(MEAS_ROOT='E:/Measurements/2019-09-13-Char/', target='XYZ', region='Center Circle'):
+def get_result_from_folder(MEAS_ROOT='E:/Measurements/2019-09-13-Char/',
+                           target='XYZ', region='Center Circle'):
     """
     [AdD THIS]
 
@@ -231,7 +228,9 @@ def get_result_from_folder(MEAS_ROOT='E:/Measurements/2019-09-13-Char/', target=
 
 class vr_hmd():
 
-    def __init__(self, modulation_frequency=90.0, MEAS_ROOT='E:/Measurements/2020-02-08/OpenVR/', connect_camera=True):
+    def __init__(self, modulation_frequency=90.0,
+                 MEAS_ROOT='E:/Measurements/2020-02-08/OpenVR/',
+                 connect_camera=True):
         """
         Initializes LMK for HMD.|
         ------------------------
@@ -254,7 +253,8 @@ class vr_hmd():
         ls.open_labsoft()
         if connect_camera is True:
             self.camera, self.camera_no = cam.set_camera(camera='VR')
-            self.lens, self.lens_no = cam.set_lens(self.camera, lens='Conoscopic')
+            self.lens, self.lens_no = cam.set_lens(self.camera,
+                                                   lens='Conoscopic')
             cam.open_camera(self.camera_no, self.lens_no)
 
             ### Adjust Camera
@@ -286,19 +286,16 @@ class vr_hmd():
         char_start = datetime.datetime.now()
 
         ### Capture Image
-        # Capture a ColorHighDyn Image with Max Exposure Time of all Filters
-        cap.color_high_dyn(autoscan=False, min_time=min_time, time_ratio=time_ratio, pic_count=pic_count)
-#        # Pre-defined exposure time
-#        MaxTime = Camera.SetIntegrationTime() # [REQUIRED for pre-defined exposure time]
-#        Capture.ColorHighDyn(, AutScan = False, MaxTime = MaxTime, MinTime = MinTime,
-#                             TimeRatio = TimeRatio, PicCount = PicCount)
+        cap.color_high_dyn(autoscan=False, min_time=min_time,
+                           time_ratio=time_ratio, pic_count=pic_count)
 
         ### Get Image Mean XYZ
         output_color = eva.get_image_mean_xyz()
-#        Output_Color_Zero, Output_Color_One, Output_Color_Two, Output_Color_Three, Output_Color_Four, Output_Color_Five, Output_Color_Six, Output_Color_Seven, Output_Color_Eight = Evaluation.GetGridMeanXYZ()
 
         ### Save Measurement
-        ls.save(file_name=MEAS_ROOT + datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S') + dic.FILE_TYPES['ttcs'])
+        ls.save(file_name=MEAS_ROOT + \
+                datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S') + \
+                    dic.FILE_TYPES['ttcs'])
 
         char_fin = datetime.datetime.now()
         print('Measured Image in: {}\n'.format(char_fin - char_start))
@@ -332,26 +329,25 @@ class vr_hmd():
                     self.IMAGE = dic.IMAGE_TYPES['Luminance']
                     self.COLOR = 0
                     self.IMAGE_NAME = 'Evaluation[1]'
-                    self.REGION_NAME = '1'
                     self.STATISTIC = dic.STATISTIC_TYPES['standardGrey']
 
                 elif target == 'XYZ':
-                    self.IMAGE = dic.IMAGE_TYPES['Color']
+                    # self.IMAGE = dic.IMAGE_TYPES['Color']
                     self.COLOR = 1
                     self.IMAGE_NAME = 'Evaluation[2]'
-                    self.REGION_NAME = '2'
                     self.STATISTIC = dic.STATISTIC_TYPES['standardColor']
 
+                self.REGION_NAME = '1'
                 images_no = im.get_amount()
                 if images_no != 0:
                     im.delete()
 
-                im.create(self.COLOR, self.IMAGE_NAME)
+                self.IMAGE = im.create(self.COLOR, self.IMAGE_NAME)
 
                 if target == 'Y':
-                    eva.CoordTransformLum()
+                    eva.coord_trans_lum()
                 elif target == 'XYZ':
-                    eva.CoordTransformCol()
+                    eva.coord_trans_col()
 
                 # Get size of image
                 self.image_first_line, self.image_last_line, \
@@ -359,48 +355,68 @@ class vr_hmd():
                 self.image_dimensions = im.get_size()
 
                 # If region already exists, delete it
-                err_code, self.index_out = reg.get_id()
+                err_code, self.index_out = \
+                    reg.get_id(dic.IMAGE_TYPES[self.IMAGE_NAME],
+                               self.REGION_NAME)
                 if err_code == 0:
-                    reg.delete()
+                    reg.delete(dic.IMAGE_TYPES[self.IMAGE_NAME],
+                               self.index_out)
 
                 # If statistic already exists, delete it
-                exists, self.statistic_type, self.statistic_index = eva.statistic_exists()
+                exists, self.statistic_type, self.statistic_index  \
+                    = eva.statistic_exists(dic.IMAGE_TYPES[self.IMAGE_NAME],
+                                           self.index_out)
                 if exists == 1:
                     eva.delete_statistic()
 
-                reg.create(self.IMAGE, dic.REGION_TYPES['Rectangle']['identifier'],
-                              x_coords=[567, 1969], y_coords=[391, 2045])
+                reg.create(self.IMAGE,
+                           dic.REGION_TYPES['Rectangle']['identifier'],
+                           dic.REGION_TYPES['Rectangle']['points'],
+                           x_coords=[567, 1969], y_coords=[391, 2045])
 
                 # Get ID of region
-                err_code, self.index_out = reg.get_id(self.IMAGE,
-                                                      self.REGION_NAME)
+                _, self.index_out = reg.get_id(self.IMAGE,
+                                               self.REGION_NAME)
                 # Select region from index of region
-                reg.select(index=self.index_out)
+                reg.select(self.IMAGE, self.index_out)
 
                 ### Evaluate Region
-                eva.create_statistic(self.STATISTIC, self.IMAGE, self.index_out, param_list=[1])
+                eva.create_statistic(self.STATISTIC,
+                                     self.IMAGE,
+                                     self.index_out)
 
                 if target == 'Y':
-                    max_lum = tab.get_cell(table_id=2, table_line_id=0, table_column_id=6)
+                    max_lum = tab.get_cell(table_id=2, table_line_id=0,
+                                           table_column_id=6)
                     output = np.float64(max_lum)
 
                 elif target == 'XYZ':
-                    blue_stats = eva.get_standard_statistic(color_class=0)
+                    blue_stats = eva.get_standard_statistic(self.STATISTIC,
+                                                            self.index_out,
+                                                            color_class=0)
                     b_mean = str(blue_stats['Mean'])[1:-1]
                     b_mean = float(b_mean)
-                    green_stats = eva.get_standard_statistic(color_class=1)
+                    green_stats = eva.get_standard_statistic(self.STATISTIC,
+                                                             self.index_out,
+                                                             color_class=1)
                     g_mean = str(green_stats['Mean'])[1:-1]
                     g_mean = float(g_mean)
-                    red_stats = eva.get_standard_statistic(color_class=2)
+                    red_stats = eva.get_standard_statistic(self.STATISTIC,
+                                                           self.index_out,
+                                                           color_class=2)
                     r_mean = str(red_stats['Mean'])[1:-1]
                     r_mean = float(r_mean)
 
-                    output = eva.convert_cie_rgb(cie_r=r_mean, cie_g=g_mean, cie_b=b_mean)
+                    output = eva.convert_cie_rgb(cie_r=r_mean, cie_g=g_mean,
+                                                 cie_b=b_mean)
 
                 results.append(output)
 
         if results != []:
             results = np.vstack((results))
+
+        ls.close_labsoft()
+        del ax.LMK
 
         return results
 

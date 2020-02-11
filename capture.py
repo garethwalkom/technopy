@@ -17,12 +17,8 @@ get_last_info():            Determine information about the preceeding capture.
 import operator
 import datetime
 
-from win32com.client import Dispatch
-
 import activex as ax
 import camera as cam
-
-LMK = Dispatch('lmk4.LMKAxServer')
 
 def single_pic(autoscan=True, exposure_time=0.1):
     """
@@ -37,9 +33,9 @@ def single_pic(autoscan=True, exposure_time=0.1):
 
     if autoscan is True:
         exposure_times = cam.color_autoscan_time() # [REQUIRED if wanting best exposure times]
-        err_code = LMK.iSinglePic2(max(exposure_times.items(), key=operator.itemgetter(1))[1])
+        err_code = ax.LMK.iSinglePic2(max(exposure_times.items(), key=operator.itemgetter(1))[1])
     else:
-        err_code = LMK.iSinglePic2(exposure_time)
+        err_code = ax.LMK.iSinglePic2(exposure_time)
     ax.error_code(err_code) # Check for error
 
 def multi_pic(autoscan=True, exposure_time=0.1, pic_count=1):
@@ -57,10 +53,10 @@ def multi_pic(autoscan=True, exposure_time=0.1, pic_count=1):
 
     if autoscan is True:
         exposure_times = cam.color_autoscan_time() # [REQUIRED if wanting best exposure times]
-        err_code = LMK.iMultiPic2(max(exposure_times.items(), \
+        err_code = ax.LMK.iMultiPic2(max(exposure_times.items(), \
                                       key=operator.itemgetter(1))[1], pic_count)
     else:
-        err_code = LMK.iMultiPic2(exposure_time, pic_count)
+        err_code = ax.LMK.iMultiPic2(exposure_time, pic_count)
     ax.error_code(err_code) # Check for error
 
 def high_dyn_pic(autoscan=True, exposure_time=0.1, start_ratio=10.0, time_ratio=3.0, pic_count=1):
@@ -84,11 +80,11 @@ def high_dyn_pic(autoscan=True, exposure_time=0.1, start_ratio=10.0, time_ratio=
 
     if autoscan is True:
         exposure_times = cam.color_autoscan_time() # [REQUIRED if wanting best exposure times]
-        err_code = LMK.iHighDynPic3(max(exposure_times.items(),
+        err_code = ax.LMK.iHighDynPic3(max(exposure_times.items(),
                                         key=operator.itemgetter(1))[1],
                                     start_ratio, time_ratio, pic_count)
     else:
-        err_code = LMK.iHighDynPic3(exposure_time, start_ratio, time_ratio, pic_count)
+        err_code = ax.LMK.iHighDynPic3(exposure_time, start_ratio, time_ratio, pic_count)
     ax.error_code(err_code) # Check for error
 
 def color_high_dyn(autoscan=True, max_time=15.0, min_time=0.0, time_ratio=3.0, pic_count=1):
@@ -110,11 +106,11 @@ def color_high_dyn(autoscan=True, max_time=15.0, min_time=0.0, time_ratio=3.0, p
 
     if autoscan is True:
         exposure_times = cam.color_autoscan_time() # [REQUIRED if wanting best exposure times]
-        err_code = LMK.iColorHighDynPic2(max(exposure_times.items(),
+        err_code = ax.LMK.iColorHighDynPic2(max(exposure_times.items(),
                                              key=operator.itemgetter(1))[1],
                                          min_time, time_ratio, pic_count)
     else:
-        err_code = LMK.iColorHighDynPic2(max_time, min_time, time_ratio, pic_count)
+        err_code = ax.LMK.iColorHighDynPic2(max_time, min_time, time_ratio, pic_count)
     ax.error_code(err_code) # Check for error
 
 def get_last_info():
@@ -161,54 +157,54 @@ def get_last_info():
                  'SmearedImages': [], 'ModulationFrequency': []}
 
     # Messy, sorts properly into a dictionary in correct types for now.
-    err_code = LMK.iCaptureGetlast_info()[0]
+    err_code = ax.LMK.iCaptureGetlast_info()[0]
     ax.error_code(err_code) # Check for error
 
-    last_info['CaptureSuccess'].append(LMK.iCaptureGetlast_info()[1])
+    last_info['CaptureSuccess'].append(ax.LMK.iCaptureGetlast_info()[1])
     last_info['CaptureSuccess'] = str(last_info['CaptureSuccess'])[1:-1]
     last_info['CaptureSuccess'] = int(last_info['CaptureSuccess'])
 
-    last_info['CaptureType'].append(LMK.iCaptureGetlast_info()[2])
+    last_info['CaptureType'].append(ax.LMK.iCaptureGetlast_info()[2])
     last_info['CaptureType'] = str(last_info['CaptureType'])[1:-1]
     last_info['CaptureType'] = int(last_info['CaptureType'])
 
-    last_info['GreyFilter'].append(LMK.iCaptureGetlast_info()[3])
+    last_info['GreyFilter'].append(ax.LMK.iCaptureGetlast_info()[3])
     last_info['GreyFilter'] = str(last_info['GreyFilter'])[1:-1]
 
-    last_info['ColorFilters'].append(LMK.iCaptureGetlast_info()[4])
+    last_info['ColorFilters'].append(ax.LMK.iCaptureGetlast_info()[4])
     last_info['ColorFilters'] = str(last_info['ColorFilters'])[1:-1]
 
-    last_info['PicCount'].append(LMK.iCaptureGetlast_info()[5])
+    last_info['PicCount'].append(ax.LMK.iCaptureGetlast_info()[5])
     last_info['PicCount'] = str(last_info['PicCount'])[1:-1]
     last_info['PicCount'] = int(last_info['PicCount'])
 
-    last_info['MaxExposureTime'].append(LMK.iCaptureGetlast_info()[6])
+    last_info['MaxExposureTime'].append(ax.LMK.iCaptureGetlast_info()[6])
     last_info['MaxExposureTime'] = str(last_info['MaxExposureTime'])[1:-1]
     last_info['MaxExposureTime'] = float(last_info['MaxExposureTime'])
 
-    last_info['MinExposureTime'].append(LMK.iCaptureGetlast_info()[7])
+    last_info['MinExposureTime'].append(ax.LMK.iCaptureGetlast_info()[7])
     last_info['MinExposureTime'] = str(last_info['MinExposureTime'])[1:-1]
     last_info['MinExposureTime'] = float(last_info['MinExposureTime'])
 
-    last_info['PercentageOverdrivenPixels'].append(LMK.iCaptureGetlast_info()[8])
+    last_info['PercentageOverdrivenPixels'].append(ax.LMK.iCaptureGetlast_info()[8])
     last_info['PercentageOverdrivenPixels'] = str(last_info['PercentageOverdrivenPixels'])[1:-1]
     last_info['PercentageOverdrivenPixels'] = float(last_info['PercentageOverdrivenPixels'])
 
-    last_info['PercentageOverdrive'].append(LMK.iCaptureGetlast_info()[9])
+    last_info['PercentageOverdrive'].append(ax.LMK.iCaptureGetlast_info()[9])
     last_info['PercentageOverdrive'] = str(last_info['PercentageOverdrive'])[1:-1]
     last_info['PercentageOverdrive'] = float(last_info['PercentageOverdrive'])
 
-    last_info['CaptureDateTime'].append(LMK.iCaptureGetlast_info()[10])
+    last_info['CaptureDateTime'].append(ax.LMK.iCaptureGetlast_info()[10])
     last_info['CaptureDateTime'] = str(last_info['CaptureDateTime'])[1:-1]
     last_info['CaptureDateTime'] = float(last_info['CaptureDateTime'])
     seconds = (last_info['CaptureDateTime'] - 25569) * 86400.0
     last_info['CaptureDateTime'] = datetime.datetime.utcfromtimestamp(seconds)
 
-    last_info['SmearedImages'].append(LMK.iCaptureGetlast_info()[11])
+    last_info['SmearedImages'].append(ax.LMK.iCaptureGetlast_info()[11])
     last_info['SmearedImages'] = str(last_info['SmearedImages'])[1:-1]
     last_info['SmearedImages'] = int(last_info['SmearedImages'])
 
-    last_info['ModulationFrequency'].append(LMK.iCaptureGetlast_info()[12])
+    last_info['ModulationFrequency'].append(ax.LMK.iCaptureGetlast_info()[12])
     last_info['ModulationFrequency'] = str(last_info['ModulationFrequency'])[1:-1]
     last_info['ModulationFrequency'] = float(last_info['ModulationFrequency'])
 

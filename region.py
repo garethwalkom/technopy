@@ -15,13 +15,9 @@ select():                   Selects or deselects a region.
 delete():                   Delete a region.
 
 """
-from win32com.client import Dispatch
-
 import activex as ax
 import image as im
 import dicts as dic
-
-LMK = Dispatch('lmk4.LMKAxServer')
 
 def create(image=dic.IMAGE_TYPES['Color'],
            region_id=dic.REGION_TYPES['Ellipse']['identifier'],
@@ -46,7 +42,7 @@ def create(image=dic.IMAGE_TYPES['Color'],
             | List of y-points
     """
     [err_code, region_x_points, region_y_points] \
-        = LMK.iCreateRegion(image, region_id, region_points, x_coords, y_coords)
+        = ax.LMK.iCreateRegion(image, region_id, region_points, x_coords, y_coords)
     ax.error_code(err_code) # Check for error
 
     return region_x_points, region_y_points
@@ -78,7 +74,7 @@ def create_rect_image_size(image=dic.IMAGE_TYPES['Color'],
     x_coords = [image_first_col, image_last_col]
     y_coords = [image_first_line, image_last_line]
     [err_code, region_x_points, region_y_points] \
-        = LMK.iCreateRegion(image, region_id, region_points, x_coords, y_coords)
+        = ax.LMK.iCreateRegion(image, region_id, region_points, x_coords, y_coords)
     ax.error_code(err_code) # Check for error
 
     return region_x_points, region_y_points
@@ -125,43 +121,43 @@ def create_grid(image=dic.IMAGE_TYPES['Color'],
 
     x_a = [image_first_col, image_second_col]
     y_a = [image_first_line, image_second_line]
-    LMK.iCreateRegion(image, region_id, region_points, x_a, y_a)
+    ax.LMK.iCreateRegion(image, region_id, region_points, x_a, y_a)
 
     x_b = [image_second_col, image_third_col]
     y_b = [image_first_line, image_second_line]
-    LMK.iCreateRegion(image, region_id, region_points, x_b, y_b)
+    ax.LMK.iCreateRegion(image, region_id, region_points, x_b, y_b)
 
     x_c = [image_third_col, image_last_col]
     y_c = [image_first_line, image_second_line]
-    LMK.iCreateRegion(image, region_id, region_points, x_c, y_c)
+    ax.LMK.iCreateRegion(image, region_id, region_points, x_c, y_c)
 
     x_d = [image_first_col, image_second_col]
     y_d = [image_second_line, image_third_line]
-    LMK.iCreateRegion(image, region_id, region_points, x_d, y_d)
+    ax.LMK.iCreateRegion(image, region_id, region_points, x_d, y_d)
 
     x_e = [image_second_col, image_third_col]
     y_e = [image_second_line, image_third_line]
-    LMK.iCreateRegion(image, region_id, region_points, x_e, y_e)
+    ax.LMK.iCreateRegion(image, region_id, region_points, x_e, y_e)
 
     x_f = [image_third_col, image_last_col]
     y_f = [image_second_line, image_third_line]
-    LMK.iCreateRegion(image, region_id, region_points, x_f, y_f)
+    ax.LMK.iCreateRegion(image, region_id, region_points, x_f, y_f)
 
     x_g = [image_first_col, image_second_col]
     y_g = [image_third_line, image_last_line]
-    LMK.iCreateRegion(image, region_id, region_points, x_g, y_g)
+    ax.LMK.iCreateRegion(image, region_id, region_points, x_g, y_g)
 
     x_h = [image_second_col, image_third_col]
     y_h = [image_third_line, image_last_line]
-    LMK.iCreateRegion(image, region_id, region_points, x_h, y_h)
+    ax.LMK.iCreateRegion(image, region_id, region_points, x_h, y_h)
 
     x_i = [image_third_col, image_last_col]
     y_i = [image_third_line, image_last_line]
-    LMK.iCreateRegion(image, region_id, region_points, x_i, y_i)
+    ax.LMK.iCreateRegion(image, region_id, region_points, x_i, y_i)
 
 #        X = [Image_FirstColumn, Image_LastColumn]
 #        Y = [Image_FirstLine, Image_LastLine]
-#        [err_code, Region_X_Points, Region_Y_Points] = LMK.iCreateRegion(Im, Type, NumPoints, X, Y)
+#        [err_code, Region_X_Points, Region_Y_Points] = ax.LMK.iCreateRegion(Im, Type, NumPoints, X, Y)
 
 def get_id(image=dic.IMAGE_TYPES['Color'], name='1'):
     """
@@ -178,10 +174,9 @@ def get_id(image=dic.IMAGE_TYPES['Color'], name='1'):
         :index_out: int
             | Output: Index of this region
     """
-    err_code, index_out = LMK.iGetIndexOfRegion(image, name)
-    ax.error_code(err_code) # Check for error
+    err_code, index_out = ax.LMK.iGetIndexOfRegion(image, name)
 
-    return index_out
+    return err_code, index_out
 
 def select(image=dic.IMAGE_TYPES['Color'], index=0, check=1):
     """
@@ -197,7 +192,7 @@ def select(image=dic.IMAGE_TYPES['Color'], index=0, check=1):
         :check: int (default: 1)
             | 1= select region, 0= deselect region
     """
-    err_code = LMK.iSelectRegion(image, index, check)
+    err_code = ax.LMK.iSelectRegion(image, index, check)
     ax.error_code(err_code) # Check for error
 
 def delete(image=dic.IMAGE_TYPES['Color'], index=0):
@@ -212,5 +207,5 @@ def delete(image=dic.IMAGE_TYPES['Color'], index=0):
         :index: int (default: 0)
             | Index of region to delete
     """
-    err_code = LMK.iDeleteRegion(image, index)
+    err_code = ax.LMK.iDeleteRegion(image, index)
     ax.error_code(err_code) # Check for error

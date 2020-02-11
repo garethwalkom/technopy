@@ -14,14 +14,12 @@ get_program_info():         Get some information about program version and
                                 camera current used.
 
 """
+from win32com.client import Dispatch
 import os
 import datetime
-from win32com.client import Dispatch
 
 import activex as ax
 import dicts as dic
-
-LMK = Dispatch('lmk4.LMKAxServer')
 
 MEAS_ROOT = 'E:/Measurements/' + str(datetime.date.today()) + '/'
 
@@ -35,7 +33,8 @@ def open_labsoft():
         :LMK:
             | Dispatch('lmk4.LMKAxServer')
     """
-    err_code = LMK.iOpen()
+    ax.LMK = Dispatch('lmk4.LMKAxServer')
+    err_code = ax.LMK.iOpen()
     ax.error_code(err_code) # Check for error
 
 def close_labsoft(question=0):
@@ -51,7 +50,7 @@ def close_labsoft(question=0):
                     or cancel the closing of the program.
             | 0 = No dialogue window
     """
-    err_code = LMK.iClose(question)
+    err_code = ax.LMK.iClose(question)
     ax.error_code(err_code) # Check for error
 
 def save(file_name=MEAS_ROOT + \
@@ -69,7 +68,7 @@ def save(file_name=MEAS_ROOT + \
     """
     if not os.path.exists(MEAS_ROOT):
         os.makedirs(MEAS_ROOT)
-    err_code = LMK.iSaveProtokoll(file_name)
+    err_code = ax.LMK.iSaveProtokoll(file_name)
     ax.error_code(err_code) # Check for error
 
 def load(file_name='Meas.ttcs'):
@@ -82,7 +81,7 @@ def load(file_name='Meas.ttcs'):
         :file_name: QString, optional (default: 'Meas.ttcs')
             | Change to adjust root to load measurement
     """
-    err_code = LMK.iLoadProtokoll(file_name)
+    err_code = ax.LMK.iLoadProtokoll(file_name)
     ax.error_code(err_code) # Check for error
 
 def get_program_info():
@@ -111,7 +110,7 @@ def get_program_info():
 
     """
 
-    err_code, program_type, program_version, camera_type, camera_no, lens_no = LMK.iGetProgramInfo()
+    err_code, program_type, program_version, camera_type, camera_no, lens_no = ax.LMK.iGetProgramInfo()
     ax.error_code(err_code) # Check for error
 
     return program_type, program_version, camera_type, camera_no, lens_no

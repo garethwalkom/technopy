@@ -18,13 +18,10 @@ show():                     Show image.
 """
 import datetime
 import os
-from win32com.client import Dispatch
 from skimage import io
 
 import activex as ax
 import dicts as dic
-
-LMK = Dispatch('lmk4.LMKAxServer')
 
 MEAS_ROOT = 'E:/Measurements/' + str(datetime.date.today()) + '/'
 
@@ -52,7 +49,7 @@ def create(image=0, name='Evaluation[1]'):
 
     """
 
-    err_code, index = LMK.iImageCreate(image, name)
+    err_code, index = ax.LMK.iImageCreate(image, name)
     ax.error_code(err_code)
 
     return index
@@ -71,7 +68,7 @@ def delete(image=dic.IMAGE_TYPES['Color']):
     None.
 
     """
-    LMK.iImageDelete(image)
+    ax.LMK.iImageDelete(image)
 
 def save(image=dic.IMAGE_TYPES['Color'], file_name=MEAS_ROOT + \
          datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S') + \
@@ -92,7 +89,7 @@ def save(image=dic.IMAGE_TYPES['Color'], file_name=MEAS_ROOT + \
     """
     if not os.path.exists(MEAS_ROOT):
         os.makedirs(MEAS_ROOT)
-    err_code = LMK.iSaveImage(image, file_name)
+    err_code = ax.LMK.iSaveImage(image, file_name)
     ax.error_code(err_code) # Check for error
 
 def load(image=dic.IMAGE_TYPES['Color'], file_name=MEAS_ROOT + 'Image' + dic.FILE_TYPES['pcf']):
@@ -113,7 +110,7 @@ def load(image=dic.IMAGE_TYPES['Color'], file_name=MEAS_ROOT + 'Image' + dic.FIL
             | .pf = Luminance Image
             | .pcf = Color Image
     """
-    err_code = LMK.iLoadImage(image, file_name)
+    err_code = ax.LMK.iLoadImage(image, file_name)
     ax.error_code(err_code) # Check for error
 
 def get_amount():
@@ -127,7 +124,7 @@ def get_amount():
 
     """
 
-    err_code, images_no = LMK.iGetNumberImages()
+    err_code, images_no = ax.LMK.iGetNumberImages()
     ax.error_code(err_code) # Check for error
 
     return images_no
@@ -160,7 +157,7 @@ def get_size(image=dic.IMAGE_TYPES['Color']):
             | 3 = color images
     """
     err_code, image_first_line, image_last_line, image_first_col, \
-        image_las_col, image_dimensions = LMK.iImageGetSize(image)
+        image_las_col, image_dimensions = ax.LMK.iImageGetSize(image)
     ax.error_code(err_code) # Check for error
 
     return image_first_line, image_last_line, image_first_col, \
@@ -196,7 +193,7 @@ def rotate(code=dic.OPERATION_TYPES['Rotate'],
     None.
 
     """
-    err_code = LMK.imageArithmeticIP1(code, src_image, param, dst_image)
+    err_code = ax.LMK.imageArithmeticIP1(code, src_image, param, dst_image)
     ax.error_code(err_code) # Check for error
 
 def show(file_name=MEAS_ROOT + 'Image' + dic.FILE_TYPES['png']):
