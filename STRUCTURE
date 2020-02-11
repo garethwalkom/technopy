@@ -90,6 +90,7 @@ evaluation.py:
     proj_rect_col():            Projective Rectifaction of Color Image.
     coord_trans_lum():          Coordinate Transformation of Luminance Image.
     coord_trans_col():          Coordinate Transformation of Color Image.
+    get_xyz():
     get_image_mean_xyz():       Create region size of image and get mean XYZ.
     get_circle_mean_xyz():      Get size of image, create eclipse in center,
                                     get mean XYZ from circle.
