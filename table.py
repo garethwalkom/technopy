@@ -2,6 +2,19 @@
 """
 Created on Sun Feb  9 21:37:15 2020
 @author: Gareth V. Walkom (walkga04 at googlemail.com)
+
+Structure:|
+----------
+
+# get_number():               Returns the number of tables in the result tab widget.
+# get_name_and_caption():     Returns the name and the caption of an existing table.
+# get_index():                Search for a table, given by name or caption.
+# get_number_columns():       Returns the number of columns of a table.
+# get_number_lines():         Returns the number of lines of a table.
+# get_column():               Returns the column header of a column of a table.
+# get_cell():                 Returns the content of a cell of a table.
+# get_all_content():          Returns all cells of a table as a list.
+
 """
 from win32com.client import Dispatch
 
@@ -25,7 +38,7 @@ def get_number():
 
     return tables_no
 
-def table_get_name_and_caption(table_id=2):
+def get_name_and_caption(table_id=2):
     """
     Returns the name and the caption of an existing table.|
     ------------------------------------------------------

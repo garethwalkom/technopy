@@ -2,6 +2,19 @@
 """
 Created on Mon Feb 10 19:23:42 2020
 @author: Gareth V. Walkom (walkga04 at googlemail.com)
+
+Structure:|
+----------
+
+create():                   Creates an image.
+delete():
+save():                     Save image.
+load():                     Load image from .pcf.
+get_amount():
+get_size():                 Get image size and parameter.
+rotate():                   Rotates image to desired image.
+show():                     Show image.
+
 """
 import datetime
 import os

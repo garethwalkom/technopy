@@ -2,6 +2,13 @@
 """
 Created on Mon Feb 10 19:22:05 2020
 @author: Gareth V. Walkom (walkga04 at googlemail.com)
+
+Structure:|
+----------
+
+get_value_unit():           Get the values and units of the axis.
+set_value_unit():           Set the values and units of the axis.
+
 """
 from win32com.client import Dispatch
 

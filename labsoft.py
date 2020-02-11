@@ -2,6 +2,17 @@
 """
 Created on Sun Feb  9 21:44:49 2020
 @author: Gareth V. Walkom (walkga04 at googlemail.com)
+
+Structure:|
+----------
+
+open_labsoft():             Opens the LMK4 application.
+close_labsoft():            Closes the LMK4 application.
+save():                     Save the measurement as a .ttcs file.
+load():                     Load a measurement from a .ttcs file.
+get_program_info():         Get some information about program version and
+                                camera current used.
+
 """
 import os
 import datetime

@@ -2,6 +2,18 @@
 """
 Created on Mon Feb 10 19:28:01 2020
 @author: Gareth V. Walkom (walkga04 at googlemail.com)
+
+Structure:|
+----------
+
+create():                   Create a region.
+create_rect_image_size():   Create a rectangular region the size of the whole image.
+create_grid():              Create a grid region within whole image with
+                                defined amount of squares.
+get_id():                   Get index of region given region name.
+select():                   Selects or deselects a region.
+delete():                   Delete a region.
+
 """
 from win32com.client import Dispatch
 

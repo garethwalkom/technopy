@@ -2,6 +2,30 @@
 """
 Created on Mon Feb 10 19:42:21 2020
 @author: Gareth V. Walkom (walkga04 at googlemail.com)
+
+Structure:|
+----------
+
+statistic_exists():         Proof, if a statistic for a image/region/statistic type
+create_statistic():         Create a new statistic.
+get_standard_statistic():   Determine parameter of the standard statistic.
+delete_statistic():         Delete an existing statistic.
+proj_rect_lum():            Projective Rectifaction of Luminance Image.
+proj_rect_col():            Projective Rectifaction of Color Image.
+coord_trans_lum():          Coordinate Transformation of Luminance Image.
+coord_trans_col():          Coordinate Transformation of Color Image.
+get_image_mean_xyz():       Create region size of image and get mean XYZ.
+get_circle_mean_xyz():      Get size of image, create eclipse in center,
+                                get mean XYZ from circle.
+# get_grid_mean_xyz():        Create regions as a grid in image and get mean XYZ.
+# get_color_hist_vals():      Get the values of the histogram in a color image.
+get_pixel_color():          Get a pixel value of a color image.
+convert_cie_rgb():          Conversion of a color value from CIE-RGB to another color space.
+xyz_to_xy():                Convert XYZ to x, y.
+xyz_to_u_v_():              Convert XYZ to u', v'.
+show_xy():                  Plot x, y color coordinates using Luxpy.
+show_u_v_():                Plot u', v' color coordinates using Luxpy.
+
 """
 from win32com.client import Dispatch
 import numpy as np
@@ -122,7 +146,7 @@ def delete_statistic(statistic_type = dic.STATISTIC_TYPES['standardColor'], stat
     err_code = LMK.iDeleteStatistic(statistic_type, stat_no)
     ax.error_code(err_code) # Check for error
 
-def ProjectRectifLum():
+def proj_rect_lum():
     """
     [ADD THIS]
 
@@ -133,7 +157,7 @@ def ProjectRectifLum():
     """
     LMK.iExecMenuPoint('Macros|ProjRectLum')
 
-def ProjectRectifCol():
+def proj_rect_col():
     """
     [ADD THIS]
 
@@ -144,7 +168,7 @@ def ProjectRectifCol():
     """
     LMK.iExecMenuPoint('Macros|ProjRectCol')
 
-def CoordTransformLum():
+def coord_trans_lum():
     """
     [ADD THIS]
 
@@ -155,7 +179,7 @@ def CoordTransformLum():
     """
     LMK.iExecMenuPoint('Macros|CoordTransLum')
 
-def CoordTransformCol():
+def coord_trans_col():
     """
     [ADD THIS]
 
@@ -384,7 +408,7 @@ def get_circle_mean_xyz():
 
 #     return Output_Color_Zero, Output_Color_One, Output_Color_Two, Output_Color_Three, Output_Color_Four, Output_Color_Five, Output_Color_Six, Output_Color_Seven, Output_Color_Eight
 
-def get_color_histogram_values(image = dic.IMAGE_TYPES['Color'],
+def get_color_hist_vals(image = dic.IMAGE_TYPES['Color'],
                             color_space = dic.COLOR_SPACES['XYZ']):
     """
     Get the values of the histogram in a color image.|

@@ -2,6 +2,14 @@
 """
 Created on Sun Feb  9 22:08:49 2020
 @author: Gareth V. Walkom (walkga04 at googlemail.com)
+
+Structure:|
+----------
+
+connect():
+send():
+disconnect():
+
 """
 import smtplib
 

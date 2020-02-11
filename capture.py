@@ -2,6 +2,17 @@
 """
 Created on Mon Feb 10 19:19:29 2020
 @author: Gareth V. Walkom (walkga04 at googlemail.com)
+
+Structure:|
+----------
+
+single_pic():               SinglePic capture algorithm.
+multi_pic():                MultiPic capture algorithm.
+high_dyn_pic():             HighDyn capturing for luminance image.
+color_high_dyn():           HighDyn capturing for color image.
+get_last_info():            Determine information about the preceeding capture.
+
+
 """
 import operator
 import datetime

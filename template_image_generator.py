@@ -2,6 +2,25 @@
 """
 Created on Sun Feb  9 22:06:28 2020
 @author: Gareth V. Walkom (walkga04 at googlemail.com)
+
+Structure:|
+----------
+
+# get_no_displays():          Number of connected displays.
+# get_target():               Get current target for template image generation.
+# set_target():               Set target for template image generation.
+# get_target_properties():    Get properties of current target.
+# get_list_of_categories():   Get list of categories of template images.
+# get_list_of_operations():   Get list of tpes of tamplate images for the given category.
+# set_operation():            Set a type of template or an option.
+# get_list_of_param_names():  Get a parameter name list for the given template image type.
+# get_param_value():          Get a certain parameter value.
+# set_param_value():          Set a certain parameter value.
+# hide_dialog():              Make template image dialog invisible.
+# create_image():             Create template image with the adjusted parameters.
+# delete_image():             Remove template image from the display.
+# load_image():               Load template image file to the target.
+
 """
 from win32com.client import Dispatch
 
@@ -147,7 +166,7 @@ def set_operation(category, operation, check=1):
     err_code = LMK.iTIG_SetOperation(category, operation, check)
     ax.error_code(err_code) # Check for error
 
-def get_list_of_parameter_names():
+def get_list_of_param_names():
     """
     Get a parameter name list for the given template image type.|
     ------------------------------------------------------------
@@ -163,7 +182,7 @@ def get_list_of_parameter_names():
 
     return parameters
 
-def get_parameter_value(parameter):
+def get_param_value(parameter):
     """
     Get a certain parameter value.|
     ------------------------------
@@ -181,7 +200,7 @@ def get_parameter_value(parameter):
 
     return parameter_value
 
-def set_parameter_value(parameter, parameter_value):
+def set_param_value(parameter, parameter_value):
     """
     Set a certain parameter value.|
     ------------------------------

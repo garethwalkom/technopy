@@ -2,6 +2,12 @@
 """
 Created on Sun Feb  9 21:38:59 2020
 @author: Gareth V. Walkom (walkga04 at googlemail.com)
+
+Structure:|
+----------
+
+error_code():               Prints error code if error occurs.
+
 """
 from win32com.client import Dispatch
 

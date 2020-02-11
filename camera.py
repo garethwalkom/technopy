@@ -2,6 +2,45 @@
 """
 Created on Mon Feb 10 19:08:19 2020
 @author: Gareth V. Walkom (walkga04 at googlemail.com)
+
+Structure:|
+----------
+
+get_cameras():
+set_camera():
+get_lenses():
+set_lens():
+lenses():                   Gets list of all lenses of selected camera.
+lens():                     Gets ID of selected lens.
+get_focus_factors():        Gets list of all focus factors of current lens.
+get_focus_factors_old():    List of available focus factors
+get_focus_factor_id():      Gets ID of selected focus factor.
+set_focus_factor():         Set a focus factor.
+open_camera():              Set new camera calibration data.
+get_converting_units():     Get converting information.
+set_converting_units():     Set new converting values.
+get_modulation_frequency(): Get the modulation frequency.
+set_modulation_frequency(): Set the frequency of modulated light.
+get_scattered_light():      Is scattered light correction switched on?
+set_scattered_light():      Use of scattered light correction.
+get_integration_time():     Determine current exposure time and other time parameters.
+set_integration_time():     Set new exposure time.
+get_max_camera_time():      Determine the maximum possible exposure time.
+set_max_camera_time():      Set the maximum possible exposure time.
+get_autoscan():             Get use of autoscan algorithm.
+set_autoscan():             Set use of autoscan algorithm.
+get_filter_wheel():         Determine filter state.
+get_grey_filter_list():     List of available grey filters.
+set_grey_filter_list():     Set grey filters.
+set_grey_filter():          Selection of a grey filter.
+color_autoscan_time():      Determine good exposure times for every color filter.
+get_color_correction_list():List of available color correction factors.
+set_color_correction_list():Selection of a color correction factor.
+get_smear():                Get the parameter for smear correction.
+set_smear():                Set the parameter for smear correction.
+get_automatic():            Get the state of Automatic-Flag for exposure times.
+set_automatic():            Set Automatic-Flag for all exposure times.
+
 """
 import os
 import glob
