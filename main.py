@@ -1,41 +1,15 @@
 # -*- coding: utf-8 -*-
-# =============================================================================
-# Created on Wed Jun 19 14:27:57 2019
-# @author: Gareth V. Walkom (walkga04 at googlemail.com)
-#
-# (-_(-_(-_(-_(-_(-_(-_(-_(-_(-_(-_(-_(-_-)_-)_-)_-)_-)_-)_-)_-)_-)_-)_-)_-)_-)
-# _(-_(-_(-_(-_(-_(-_(-_(-_(-_(-_(-_( ͡° ͜ʖ ͡°)_-)_-)_-)_-)_-)_-)_-)_-)_-)_-)_
-# (-_(-_(-_(-_(-_(-_(-_(-_(-_(-_(-_(-_(-_-)_-)_-)_-)_-)_-)_-)_-)_-)_-)_-)_-)_-)
-# (-_(-_(-_(-_(-_(-_(-_(-_(-_(-_(-_(TechnoPy)_-)_-)_-)_-)_-)_-)_-)_-)_-)_-)_-)
-# (-_(-_(-_(-_(-_(-_(-_(-_(-_(-_(-_(-_(-_-)_-)_-)_-)_-)_-)_-)_-)_-)_-)_-)_-)_-)
-# (-_(-_(-_(-_(-_(-_(-_(-_(-_(-_(-_(¯\_(ツ)_/¯)_-)_-)_-)_-)_-)_-)_-)_-)_-)_-)_-)
-# (-_(-_(-_(-_(-_(-_(-_(-_(-_(-_(-_(-_(-_-)_-)_-)_-)_-)_-)_-)_-)_-)_-)_-)_-)_-)
-#
-# Good afternoon and welcome to TechnoPy.
-#
-# TechnoPy allows you to control your TechnoTeam LMK.
-#
-# Initially created in Matlab by TechnoTeam and Jan Audenaert, it has now been
-# created for use in Python by Gareth V. Walkom. Once connected to the ax
-# server, you can then open the LMK LabSoft4 Standard Color ax (ax
-# version of the software is needed to run this script), access the Calibration
-# data, and control the camera to make measurements.
-#
-# Please listen to the TechnoPy playlist while making measurements for inspo:
-# https://www.youtube.com/playlist?list=PLu3mtT1o6gSieYEqJEBHm5NX9lWljoED
-# =============================================================================
 """
 
 Structure:|
 ----------
 
 max_luminance():
-characterize():
 measure_warm_up():
 get_result_from_folder():
-vr_hmd():                   Characterize a Virtual Reality Head-Mounted-Display.
-    characterize():
+VirtualRealityHmd():        Characterize a Virtual Reality Head-Mounted-Display.
     __init__():             Initializes LMK for HMD
+    characterize():
     analyze():
 
 """
@@ -53,12 +27,6 @@ import region as reg
 import evaluation as eva
 import dicts as dic
 import table as tab
-
-# Define the root to the calibration data
-CALIB_DATA_ROOT = 'F:/LMK/Calibration Data'
-
-# Define Save Parameters
-MEAS_ROOT = 'E:/Measurements/' + str(datetime.date.today()) + '/'
 
 def max_luminance(min_time=0.0, time_ratio=3.0, pic_count=1):
     """
@@ -88,7 +56,7 @@ def max_luminance(min_time=0.0, time_ratio=3.0, pic_count=1):
 
     ### Evaluate
     # Create a region the size of the whole image
-    region_x_points, region_y_points = reg.create_rect_image_size()
+    _, _ = reg.create_rect_image_size()
     # Get ID of region
     _, index_out = reg.get_id(dic.IMAGE_TYPES['Luminance'], name='1')
     # Select region from index of region
@@ -104,45 +72,11 @@ def max_luminance(min_time=0.0, time_ratio=3.0, pic_count=1):
     max_lum = np.float64(max_lum)
 
     ### Save Measurement
-    ls.save(file_name=MEAS_ROOT + \
+    ls.save(file_name=SAVE_ROOT + \
             datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S') + \
                 dic.FILE_TYPES['ttcs'])
 
     return max_lum
-
-def characterize(min_time=0.0, time_ratio=3.0, pic_count=1):
-    """
-    [ADD THIS]
-
-    Parameters
-    ----------
-    min_time : TYPE, optional
-        DESCRIPTION. The default is 0.0.
-    time_ratio : TYPE, optional
-        DESCRIPTION. The default is 3.0.
-    pic_count : TYPE, optional
-        DESCRIPTION. The default is 1.
-
-    Returns
-    -------
-    None.
-
-    """
-
-    car_start = datetime.datetime.now()
-
-    ### Capture Image
-    # Capture a ColorHighDyn Image with Max Exposure Time of all Filters
-    cap.color_high_dyn(autoscan=False, min_time=min_time,
-                       time_ratio=time_ratio, pic_count=pic_count)
-
-    ### Save Measurement
-    ls.save(file_name=MEAS_ROOT + \
-            datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S') + \
-                dic.FILE_TYPES['ttcs'])
-
-    char_fin = datetime.datetime.now()
-    print('Measured Image in: {}\n'.format(char_fin - car_start))
 
 def measure_warm_up(time_total=120):
     """
@@ -150,8 +84,6 @@ def measure_warm_up(time_total=120):
 
     Parameters
     ----------
-    warm_up : TYPE, optional
-        DESCRIPTION. The default is True.
     time_total : TYPE, optional
         DESCRIPTION. The default is 120.
 
@@ -183,15 +115,12 @@ def measure_warm_up(time_total=120):
 
     return output
 
-def get_result_from_folder(MEAS_ROOT='E:/Measurements/2019-09-13-Char/',
-                           target='XYZ', region='Center Circle'):
+def get_result_from_folder(target='XYZ', region='Center Circle'):
     """
-    [AdD THIS]
+    [ADD THIS]
 
     Parameters
     ----------
-    MEAS_ROOT : TYPE, optional
-        DESCRIPTION. The default is 'E:/Measurements/2019-09-13-Char/'.
     target : TYPE, optional
         DESCRIPTION. The default is 'XYZ'.
     region : TYPE, optional
@@ -208,9 +137,9 @@ def get_result_from_folder(MEAS_ROOT='E:/Measurements/2019-09-13-Char/',
 
     results = []
 
-    for measurement in os.listdir(MEAS_ROOT):
+    for measurement in os.listdir(LOAD_ROOT):
         if measurement.endswith('.ttcs'):
-            ls.load(MEAS_ROOT + '/' + measurement)
+            ls.load(LOAD_ROOT + '/' + measurement)
             if target == 'XYZ':
                 if region == 'Whole Image':
                     output = eva.get_image_mean_xyz()
@@ -226,19 +155,36 @@ def get_result_from_folder(MEAS_ROOT='E:/Measurements/2019-09-13-Char/',
 
     return results
 
-class vr_hmd():
+class VirtualRealityHmd():
+    """
+    [ADD THIS]
+    """
 
-    def __init__(self, modulation_frequency=90.0,
-                 MEAS_ROOT='E:/Measurements/2020-02-08/OpenVR/',
+    def __init__(self, camera='VR', lens='Conoscopic', mod_freq=90.0,
+                 autoscan=False, min_time=0.0, time_ratio=3.0, pic_count=1,
                  connect_camera=True):
         """
-        Initializes LMK for HMD.|
-        ------------------------
+        Initializes LMK for VR-HMD.|
+        ---------------------------
 
         Parameters
         ----------
-        ModulationFrequency : int, optional
-            Modulation frequency of HMD. The default is 90.0.
+        camera : TYPE, optional
+            DESCRIPTION. The default is 'VR'.
+        lens : TYPE, optional
+            DESCRIPTION. The default is 'Conoscopic'.
+        mod_freq : TYPE, optional
+            DESCRIPTION. The default is 90.0.
+        autoscan : TYPE, optional
+            DESCRIPTION. The default is False.
+        min_time : TYPE, optional
+            DESCRIPTION. The default is 0.0.
+        time_ratio : TYPE, optional
+            DESCRIPTION. The default is 3.0.
+        pic_count : TYPE, optional
+            DESCRIPTION. The default is 1.
+        connect_camera : TYPE, optional
+            DESCRIPTION. The default is True.
 
         Returns
         -------
@@ -246,63 +192,57 @@ class vr_hmd():
 
         """
 
-        self.MEAS_ROOT = MEAS_ROOT
+        self.load_root = LOAD_ROOT
+        self.camera = camera
+        self.lens = lens
+        self.mod_freq = mod_freq
+        self.autoscan = autoscan
+        self.min_time = min_time
+        self.time_ratio = time_ratio
+        self.pic_count = pic_count
 
         ### Initialize
         # Open LMK LabSoft4 Standard Color ax
         ls.open_labsoft()
         if connect_camera is True:
-            self.camera, self.camera_no = cam.set_camera(camera='VR')
-            self.lens, self.lens_no = cam.set_lens(self.camera,
-                                                   lens='Conoscopic')
+            _, self.camera_no = cam.set_camera(self.camera)
+            _, self.lens_no = cam.set_lens(self.camera, self.lens)
             cam.open_camera(self.camera_no, self.lens_no)
 
             ### Adjust Camera
             # Set Modulation Frequency
-            cam.set_modulation_frequency(modulation_frequency)
+            cam.set_modulation_frequency(self.mod_freq)
             # Change converting units so it doesn't multiply by two
             cam.set_converting_units()
 
 
-    def characterize(self, min_time=0.0, time_ratio=3.0, pic_count=1):
+    def characterize(self):
         """
         Characterize a Virtual Reality Head-Mounted-Display.|
         ----------------------------------------------------
 
-        Parameters
-        ----------
-        MinTime : int, optional
-            Minimum time for capture. The default is 0.0.
-        TimeRatio : int, optional
-            Time ratio of capture. The default is 3.0.
-        PicCount : int, optional
-            Amount of pictures per capture. The default is 1.
-
         Returns
         -------
-        None.
+        output_color : TYPE
+            DESCRIPTION.
 
         """
         char_start = datetime.datetime.now()
 
         ### Capture Image
-        cap.color_high_dyn(autoscan=False, min_time=min_time,
-                           time_ratio=time_ratio, pic_count=pic_count)
-
-        ### Get Image Mean XYZ
-        output_color = eva.get_image_mean_xyz()
+        cap.color_high_dyn(self.autoscan, self.min_time,
+                           self.time_ratio, self.pic_count)
 
         ### Save Measurement
-        ls.save(file_name=MEAS_ROOT + \
+        ls.save(file_name=SAVE_ROOT + \
                 datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S') + \
                     dic.FILE_TYPES['ttcs'])
 
         char_fin = datetime.datetime.now()
         print('Measured Image in: {}\n'.format(char_fin - char_start))
 
-        return output_color
-
-    def analyze(self, target='XYZ'):
+    def analyze(self, target='XYZ', first_col=567, last_col=1969,
+                first_line=391, last_line=2045):
         """
         [ADD THIS]
 
@@ -310,6 +250,14 @@ class vr_hmd():
         ----------
         target : TYPE, optional
             DESCRIPTION. The default is 'XYZ'.
+        first_col : TYPE, optional
+            DESCRIPTION. The default is 567.
+        last_col : TYPE, optional
+            DESCRIPTION. The default is 1969.
+        first_line : TYPE, optional
+            DESCRIPTION. The default is 391.
+        last_line : TYPE, optional
+            DESCRIPTION. The default is 2045.
 
         Returns
         -------
@@ -320,70 +268,63 @@ class vr_hmd():
 
         results = []
 
-        for measurement in os.listdir(self.MEAS_ROOT):
+        for measurement in os.listdir(self.load_root):
             if measurement.endswith('.ttcs'):
 
-                ls.load(self.MEAS_ROOT + measurement)
+                ls.load(self.load_root + measurement)
 
                 if target == 'Y':
-                    self.IMAGE = dic.IMAGE_TYPES['Luminance']
-                    self.COLOR = 0
-                    self.IMAGE_NAME = 'Evaluation[1]'
-                    self.STATISTIC = dic.STATISTIC_TYPES['standardGrey']
+                    color = 0
+                    image_name = 'Evaluation[1]'
+                    statistic = dic.STATISTIC_TYPES['standardGrey']
 
                 elif target == 'XYZ':
-                    # self.IMAGE = dic.IMAGE_TYPES['Color']
-                    self.COLOR = 1
-                    self.IMAGE_NAME = 'Evaluation[2]'
-                    self.STATISTIC = dic.STATISTIC_TYPES['standardColor']
+                    color = 1
+                    image_name = 'Evaluation[2]'
+                    statistic = dic.STATISTIC_TYPES['standardColor']
 
-                self.REGION_NAME = '1'
+                region_name = '1'
                 images_no = im.get_amount()
                 if images_no != 0:
                     im.delete()
 
-                self.IMAGE = im.create(self.COLOR, self.IMAGE_NAME)
+                image = im.create(color, image_name)
 
                 if target == 'Y':
                     eva.coord_trans_lum()
                 elif target == 'XYZ':
                     eva.coord_trans_col()
 
-                # Get size of image
-                self.image_first_line, self.image_last_line, \
-                self.image_first_col, self.image_last_col, \
-                self.image_dimensions = im.get_size()
-
                 # If region already exists, delete it
-                err_code, self.index_out = \
-                    reg.get_id(dic.IMAGE_TYPES[self.IMAGE_NAME],
-                               self.REGION_NAME)
+                err_code, index_out = \
+                    reg.get_id(dic.IMAGE_TYPES[image_name],
+                               region_name)
                 if err_code == 0:
-                    reg.delete(dic.IMAGE_TYPES[self.IMAGE_NAME],
-                               self.index_out)
+                    reg.delete(dic.IMAGE_TYPES[image_name],
+                               index_out)
 
                 # If statistic already exists, delete it
-                exists, self.statistic_type, self.statistic_index  \
-                    = eva.statistic_exists(dic.IMAGE_TYPES[self.IMAGE_NAME],
-                                           self.index_out)
+                exists, _, _ = eva.statistic_exists(dic.IMAGE_TYPES[image_name],
+                                                    index_out)
                 if exists == 1:
                     eva.delete_statistic()
 
-                reg.create(self.IMAGE,
+                reg.create(image,
                            dic.REGION_TYPES['Rectangle']['identifier'],
                            dic.REGION_TYPES['Rectangle']['points'],
-                           x_coords=[567, 1969], y_coords=[391, 2045])
+                           x_coords=[first_col, last_col],
+                           y_coords=[first_line, last_line])
 
                 # Get ID of region
-                _, self.index_out = reg.get_id(self.IMAGE,
-                                               self.REGION_NAME)
+                _, index_out = reg.get_id(image,
+                                          region_name)
                 # Select region from index of region
-                reg.select(self.IMAGE, self.index_out)
+                reg.select(image, index_out)
 
                 ### Evaluate Region
-                eva.create_statistic(self.STATISTIC,
-                                     self.IMAGE,
-                                     self.index_out)
+                eva.create_statistic(statistic,
+                                     image,
+                                     index_out)
 
                 if target == 'Y':
                     max_lum = tab.get_cell(table_id=2, table_line_id=0,
@@ -392,7 +333,7 @@ class vr_hmd():
 
                 elif target == 'XYZ':
 
-                    output = eva.get_xyz(self.index_out)
+                    output = eva.get_xyz(index_out)
 
                 results.append(output)
 
@@ -405,64 +346,13 @@ class vr_hmd():
         return results
 
 
-#if __name__ == '__main__':
-#    # Define Camera Parameters
-#    ModulationFrequency = 90.0   # Modulation Frequency
-#    MinTime = 0.0                # Smallest Exposure Time (proposal: 0.0)
-#    TimeRatio = 3.0              # TimeRatio between two times (proposal: 3.0)
-#    PicCount = 1                 # Number of shots per integration time
-#
-#    ### Initialize [REQUIRED]
-#    # Open LMK LabSoft4 Standard Color ax [REQUIRED]
-#    LabSoft.Open()
-#    # Connect to Camera [REQUIRED]
-#    Camera.Open(CALIB_DATA_ROOT)
-#
-#    ### Adjust Camera
-#    # Set Modulation Frequency
-#    Camera.SetModulationFrequency(ModulationFrequency)
-#    # Calculate Max Exposure Times for all filters
-#    ExposureTimes = Camera.ColorAutoScanTime()
-#
-#    ### Capture Image
-#    # Capture a ColorHighDyn Image with Max Exposure Time of all Filters
-#    Capture.ColorHighDyn(MaxTime = max(ExposureTimes.items(),
-#                                            key=operator.itemgetter(1))[1],
-#        MinTime = MinTime, TimeRatio = TimeRatio, PicCount = PicCount)
-#
-#    ### Create Region on Image
-#    # Create an ellipse region on image
-#    Region.Create(IMAGE_TYPES['Color'],
-#                          REGION_TYPES['Ellipse']['identifier'],
-#                          REGION_TYPES['Ellipse']['points'],
-#                          X = [1226, 500, 500], Y = [1026, 500, 500])
-#    # Create a region the size of the whole image
-#    Region_X_Points, Region_Y_Points = Region.CreateRectImageSize()
-#    # Get ID of region
-#    err_code, Index_Out = Region.GetID(IMAGE_TYPES['Color'], Name = '1')
-#    # Select region from index of region
-#    Region.Select(Index = Index_Out)
-#
-#    ### Evaluate Image
-#    # Create a standard color statistic
-#    Evaluation.CreateStatistic(STATISTIC_TYPES['standardColor'],
-#                               IMAGE_TYPES['Color'], Index_Out, ParamList = [1])
+if __name__ == '__main__':
 
-#    Blue_Stats = Evaluation.GetStandardStatistic(Class = 0)
-#    Green_Stats = Evaluation.GetStandardStatistic(Class = 1)
-#    Red_Stats = Evaluation.GetStandardStatistic(Class = 2)
+    # Define Calibration Data Root
+    CALIB_DATA_ROOT = 'F:/LMK/Calibration Data'
 
-    # Get Pixel Color
-#    R, G, B = Evaluation.GetPixelColor(Line = 800, Column = 1300)
-##    Convert CIE-RGB to XYZ
-#    Output_Color = Evaluation.Convert_CIE_RGB(CIE_R = R, CIE_G = G, CIE_B = B)
-#    # Convert XYZ into Yuv
-#    u_v_ = Evaluation.XYZ_To_u_v_(Output_Color)
-#    # Show u'v' in diagram
-#    Evaluation.Show_u_v_(u_ = u_v_[:,0], v_ = u_v_[:,1])
+    # Define Save Root
+    SAVE_ROOT = 'E:/Measurements/' + str(datetime.date.today()) + '/'
 
-#    ### Save
-#    # Save measurement as an image
-#    Image.Save(IMAGE_TYPES['Color'], MEAS_ROOT + MEAS_NAME + EXTENSION)
-#    # Save measurement as .ttcs file. Can be reopened again.
-#    LabSoft.Save(PathName = MEAS_ROOT + 'Meas' + FILE_TYPES['ttcs'])
+    # Define Load Root
+    LOAD_ROOT = 'E:/Measurements/2020-02-08/OpenVR/'

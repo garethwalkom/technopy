@@ -29,8 +29,9 @@ show_u_v_():                Plot u', v' color coordinates using Luxpy.
 
 """
 import numpy as np
-from matplotlib import pyplot as plt
-import luxpy as lx
+## COMMENTED OUT BECAUSE OF LUXPY ERROR
+# from matplotlib import pyplot as plt
+# import luxpy as lx
 
 import activex as ax
 import dicts as dic
@@ -530,130 +531,130 @@ def convert_cie_rgb(cie_r = 255.0, cie_g = 0.0, cie_b = 0.0, r_ref = 0.0,
 
     return output_color
 
-def xyz_to_xy(xyz):
-    """
-    Convert XYZ to x, y.|
-    ---------------
-    Parameters:
-        :xyz: array (shape: (1, 3))
-    Returns:
-        :xy_mean: array (shape: (1, 2))
-    """
-    y_xy = lx.xyz_to_Yxy(xyz)
-    y_xy_mean = np.array([[y_xy[:,0].mean(), y_xy[:,1].mean(), y_xy[:,2].mean()]])
+# def xyz_to_xy(xyz):
+#     """
+#     Convert XYZ to x, y.|
+#     ---------------
+#     Parameters:
+#         :xyz: array (shape: (1, 3))
+#     Returns:
+#         :xy_mean: array (shape: (1, 2))
+#     """
+#     y_xy = lx.xyz_to_Yxy(xyz)
+#     y_xy_mean = np.array([[y_xy[:,0].mean(), y_xy[:,1].mean(), y_xy[:,2].mean()]])
 
-    y_xy_mean = np.around(y_xy_mean, decimals=3)
+#     y_xy_mean = np.around(y_xy_mean, decimals=3)
 
-    x_mean = y_xy_mean[:,1]
-    x_mean = str(x_mean)[1:-1]
-    y_mean = y_xy_mean[:,2]
-    y_mean = str(y_mean)[1:-1]
+#     x_mean = y_xy_mean[:,1]
+#     x_mean = str(x_mean)[1:-1]
+#     y_mean = y_xy_mean[:,2]
+#     y_mean = str(y_mean)[1:-1]
 
-    xy_mean = np.array([[x_mean], [y_mean]])
-    xy_mean = xy_mean.T
+#     xy_mean = np.array([[x_mean], [y_mean]])
+#     xy_mean = xy_mean.T
 
-    return xy_mean
+#     return xy_mean
 
-def xyz_to_u_v_(xyz):
-    """
-    Conver XYZ to u', v'.|
-    ---------------
-    Parameters:
-        :xyz: array (shape: (1, 3))
-    Returns:
-        :u_v_mean: array (shape: (1, 2))
-    """
-    y_uv = lx.xyz_to_Yuv(xyz)
-    y_uv_mean = np.array([[y_uv[:,0].mean(), y_uv[:,1].mean(), y_uv[:,2].mean()]])
+# def xyz_to_u_v_(xyz):
+#     """
+#     Conver XYZ to u', v'.|
+#     ---------------
+#     Parameters:
+#         :xyz: array (shape: (1, 3))
+#     Returns:
+#         :u_v_mean: array (shape: (1, 2))
+#     """
+#     y_uv = lx.xyz_to_Yuv(xyz)
+#     y_uv_mean = np.array([[y_uv[:,0].mean(), y_uv[:,1].mean(), y_uv[:,2].mean()]])
 
-    y_uv_mean = np.around(y_uv_mean, decimals=3)
+#     y_uv_mean = np.around(y_uv_mean, decimals=3)
 
-    u_mean = y_uv_mean[:,1]
-    u_mean = str(u_mean)[1:-1]
-    v_mean = y_uv_mean[:,2]
-    v_mean = str(v_mean)[1:-1]
+#     u_mean = y_uv_mean[:,1]
+#     u_mean = str(u_mean)[1:-1]
+#     v_mean = y_uv_mean[:,2]
+#     v_mean = str(v_mean)[1:-1]
 
-    u_v_mean = np.array([[u_mean], [v_mean]])
-    u_v_mean = u_v_mean.T
+#     u_v_mean = np.array([[u_mean], [v_mean]])
+#     u_v_mean = u_v_mean.T
 
-    return u_v_mean
+#     return u_v_mean
 
-def Show_xy(x_val, y_val, label='x, y', facecolors='none', color='k',
-            linestyle='--', title='x, y', grid=True, **kwargs):
-    """
-    Plot x, y color coordinates using Luxpy.
+# def Show_xy(x_val, y_val, label='x, y', facecolors='none', color='k',
+#             linestyle='--', title='x, y', grid=True, **kwargs):
+#     """
+#     Plot x, y color coordinates using Luxpy.
 
-    Parameters:
-        :x_val: float, int, or array
-            | x coordinate(s)
-        :y_val: float, int, or array
-            | y coordinate(s)
-        :label: string (default: 'x, y')
-            | Change to adjust label within diagram of the input.
-        :facecolors: string (default: 'none')
-            | Change to adjust face color of value within diagram. Only if
-                gamut=None
-        :color: string (default: 'k')
-            | Change to adjust color of either edge color or line color,
-                depending on if 'gamut' is chosen.
-        :linestyle: string (default: '--')
-            | Change to adjust style of line if gamut is not None.
-        :title: string (default: 'x, y')
-            | Change to adjust title of figure.
-        :grid: True of None (default: True)
-            | Change to 'None' for no grid in diagram.
-        :kwargs:
-            | Additional keyword arguments for use with matplotlib.pyplot
+#     Parameters:
+#         :x_val: float, int, or array
+#             | x coordinate(s)
+#         :y_val: float, int, or array
+#             | y coordinate(s)
+#         :label: string (default: 'x, y')
+#             | Change to adjust label within diagram of the input.
+#         :facecolors: string (default: 'none')
+#             | Change to adjust face color of value within diagram. Only if
+#                 gamut=None
+#         :color: string (default: 'k')
+#             | Change to adjust color of either edge color or line color,
+#                 depending on if 'gamut' is chosen.
+#         :linestyle: string (default: '--')
+#             | Change to adjust style of line if gamut is not None.
+#         :title: string (default: 'x, y')
+#             | Change to adjust title of figure.
+#         :grid: True of None (default: True)
+#             | Change to 'None' for no grid in diagram.
+#         :kwargs:
+#             | Additional keyword arguments for use with matplotlib.pyplot
 
-    Returns:
+#     Returns:
 
-    """
-    plt.figure()
-    ax_xy = plt.axes()
-    lx.plot_chromaticity_diagram_colors(256,0.3,1,lx._CIEOBS,'Yxy',{},True,ax_xy,
-                                        grid,'Times New Roman',12)
-    plt.scatter(float(x_val), float(y_val), label = label, facecolors = facecolors, edgecolors = color)
-    ax_xy.set_title(title)
-    ax_xy.set_xlim([-0.1, 0.8])
-    ax_xy.set_ylim([-0.1, 0.9])
-    ax_xy.legend()
+#     """
+#     plt.figure()
+#     ax_xy = plt.axes()
+#     lx.plot_chromaticity_diagram_colors(256,0.3,1,lx._CIEOBS,'Yxy',{},True,ax_xy,
+#                                         grid,'Times New Roman',12)
+#     plt.scatter(float(x_val), float(y_val), label = label, facecolors = facecolors, edgecolors = color)
+#     ax_xy.set_title(title)
+#     ax_xy.set_xlim([-0.1, 0.8])
+#     ax_xy.set_ylim([-0.1, 0.9])
+#     ax_xy.legend()
 
-def Show_u_v_(u_val, v_val, label='u_, v_', facecolors='none', color='k',
-       linestyle='--', title='u_, v_', grid=True, **kwargs):
-    """
-    Plot u', v' color coordinates using Luxpy.
+# def Show_u_v_(u_val, v_val, label='u_, v_', facecolors='none', color='k',
+#        linestyle='--', title='u_, v_', grid=True, **kwargs):
+#     """
+#     Plot u', v' color coordinates using Luxpy.
 
-    Parameters:
-        :u_val: float, int, or array
-            | u' coordinate(s)
-        :v_val: float, int, or array
-            | v' coordinate(s)
-        :label: string (default: 'u_, v_')
-            | Change to adjust label within diagram of the input.
-        :facecolors: string (default: 'none')
-            | Change to adjust face color of value within diagram. Only if
-                gamut=None
-        :color: string (default: 'k')
-            | Change to adjust color of either edge color or line color,
-                depending on if 'gamut' is chosen.
-        :linestyle: string (default: '--')
-            | Change to adjust style of line if gamut is not None.
-        :title: string (default: 'u_, v_')
-            | Change to adjust title of figure.
-        :grid: True of None (default: True)
-            | Change to 'None' for no grid in diagram.
-        :kwargs:
-            | Additional keyword arguments for use with matplotlib.pyplot
+#     Parameters:
+#         :u_val: float, int, or array
+#             | u' coordinate(s)
+#         :v_val: float, int, or array
+#             | v' coordinate(s)
+#         :label: string (default: 'u_, v_')
+#             | Change to adjust label within diagram of the input.
+#         :facecolors: string (default: 'none')
+#             | Change to adjust face color of value within diagram. Only if
+#                 gamut=None
+#         :color: string (default: 'k')
+#             | Change to adjust color of either edge color or line color,
+#                 depending on if 'gamut' is chosen.
+#         :linestyle: string (default: '--')
+#             | Change to adjust style of line if gamut is not None.
+#         :title: string (default: 'u_, v_')
+#             | Change to adjust title of figure.
+#         :grid: True of None (default: True)
+#             | Change to 'None' for no grid in diagram.
+#         :kwargs:
+#             | Additional keyword arguments for use with matplotlib.pyplot
 
-    Returns:
+#     Returns:
 
-    """
-    plt.figure()
-    ax_uv = plt.axes()
-    lx.plot_chromaticity_diagram_colors(256,0.3,1,lx._CIEOBS,'Yuv',{},True,ax_uv,
-                                        grid,'Times New Roman',12)
-    plt.scatter(float(u_val), float(v_val), label = label, facecolors = facecolors, edgecolors = color)
-    ax_uv.set_title(title)
-    ax_uv.set_xlim([-0.1, 0.7])
-    ax_uv.set_ylim([-0.1, 0.7])
-    ax_uv.legend()
+#     """
+#     plt.figure()
+#     ax_uv = plt.axes()
+#     lx.plot_chromaticity_diagram_colors(256,0.3,1,lx._CIEOBS,'Yuv',{},True,ax_uv,
+#                                         grid,'Times New Roman',12)
+#     plt.scatter(float(u_val), float(v_val), label = label, facecolors = facecolors, edgecolors = color)
+#     ax_uv.set_title(title)
+#     ax_uv.set_xlim([-0.1, 0.7])
+#     ax_uv.set_ylim([-0.1, 0.7])
+#     ax_uv.legend()
