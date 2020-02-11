@@ -14,6 +14,7 @@ proj_rect_lum():            Projective Rectifaction of Luminance Image.
 proj_rect_col():            Projective Rectifaction of Color Image.
 coord_trans_lum():          Coordinate Transformation of Luminance Image.
 coord_trans_col():          Coordinate Transformation of Color Image.
+get_xyz():
 get_image_mean_xyz():       Create region size of image and get mean XYZ.
 get_circle_mean_xyz():      Get size of image, create eclipse in center,
                                 get mean XYZ from circle.
@@ -185,6 +186,31 @@ def coord_trans_col():
 
     """
     ax.LMK.iExecMenuPoint('Macros|CoordTransCol')
+
+
+def get_xyz(index_out):
+    """
+    [ADD THIS]
+
+    Returns
+    -------
+    None.
+
+    """
+
+    blue_stats = get_standard_statistic(region = index_out, color_class = 0)
+    b_mean = str(blue_stats['Mean'])[1:-1]
+    b_mean = float(b_mean)
+    green_stats = get_standard_statistic(region = index_out, color_class = 1)
+    g_mean = str(green_stats['Mean'])[1:-1]
+    g_mean = float(g_mean)
+    red_stats = get_standard_statistic(region = index_out, color_class = 2)
+    r_mean = str(red_stats['Mean'])[1:-1]
+    r_mean = float(r_mean)
+
+    output_color = convert_cie_rgb(cie_r = r_mean, cie_g = g_mean, cie_b = b_mean)
+
+    return output_color
 
 
 def get_image_mean_xyz():

@@ -391,24 +391,8 @@ class vr_hmd():
                     output = np.float64(max_lum)
 
                 elif target == 'XYZ':
-                    blue_stats = eva.get_standard_statistic(self.STATISTIC,
-                                                            self.index_out,
-                                                            color_class=0)
-                    b_mean = str(blue_stats['Mean'])[1:-1]
-                    b_mean = float(b_mean)
-                    green_stats = eva.get_standard_statistic(self.STATISTIC,
-                                                             self.index_out,
-                                                             color_class=1)
-                    g_mean = str(green_stats['Mean'])[1:-1]
-                    g_mean = float(g_mean)
-                    red_stats = eva.get_standard_statistic(self.STATISTIC,
-                                                           self.index_out,
-                                                           color_class=2)
-                    r_mean = str(red_stats['Mean'])[1:-1]
-                    r_mean = float(r_mean)
 
-                    output = eva.convert_cie_rgb(cie_r=r_mean, cie_g=g_mean,
-                                                 cie_b=b_mean)
+                    output = eva.get_xyz(self.index_out)
 
                 results.append(output)
 
