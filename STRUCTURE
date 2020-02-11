@@ -4,84 +4,137 @@ Structure:|
 Key:
 # = not working properly
 
-ActiveX():
-    Connect():                  Connect to LMK ActiveX Server.
-    ErrorCode():                Prints error code if error occurs.
+activex.py:
+    error_code():               Prints error code if error occurs.
 
-LabSoft():
-    Open():                     Opens the LMK4 application.
-    Close():                    Closes the LMK4 application.
-    Save():                     Save the measurement as a .ttcs file.
-    Load():                     Load a measurement from a .ttcs file.
+labsoft.py:
+    open_labsoft():             Opens the LMK4 application.
+    close_labsoft():            Closes the LMK4 application.
+    save():                     Save the measurement as a .ttcs file.
+    load():                     Load a measurement from a .ttcs file.
+    get_program_info():         Get some information about program version and
+                                    camera current used.
 
-Camera():
-    Lenses():                   Gets list of all lenses of selected camera.
-    Lens():                     Gets ID of selected lens.
-    FocusFactors():             Gets list of all focus factors of current lens.
-    FocusFactor():              Gets ID of selected focus factor.
-    Open():                     Set new camera calibration data.
-    GetConvertingUnits():       Get converting information.
-    SetConvertingUnits():       Set new converting values.
-    GetFocusFactors():          List of available focus factors.
-    SetFocusFactor():           Set a focus factor.
-    GetModulationFrequency():   Get the modulation frequency.
-    SetModulationFrequency():   Set the frequency of modulated light.
-    GetScatteredLight():        Is scattered light correction switched on?
-    SetScatteredLight():        Use of scattered light correction.
-    GetIntegrationTime():       Determine current exposure time and other time parameters.
-    SetIntegrationTime():       Set new exposure time.
-    GetMaxCameraTime():         Determine the maximum possible exposure time.
-    SetMaxCameraTime():         Set the maximum possible exposure time.
-    GetAutoScan():              Get use of autoscan algorithm.
-    SetAutoScan():              Set use of autoscan algorithm.
-    GetFilterWheel():           Determine filter state.
-    GetGreyFilterList():        List of available grey filters.
-    SetGreyFilterList():        Set grey filters.
-    SetGreyFilter():            Selection of a grey filter.
-    ColorAutoScanTime():        Determine good exposure times for every color filter.
-    GetColorCorrectionList():   List of available color correction factors.
-    SetColorCorrection():       Selection of a color correction factor.
-    GetSmear():                 Get the parameter for smear correction.
-    SetSmear():                 Set the parameter for smear correction.
-    GetAutomatic():             Get the state of Automatic-Flag for exposure times.
-    SetAutomatic():             Set Automatic-Flag for all exposure times.
-    
-Coordinates():
-    GetValueUnit():             Get the values and units of the axis.
-    SetValueUnit():             Set the values and units of the axis.
-    
-Capture():
-    SinglePic():                SinglePic capture algorithm.
-    MultiPic():                 MultiPic capture algorithm.
-    HighDynPic():               HighDyn capturing for luminance image.
-    ColorHighDyn():             HighDyn capturing for color image.
-    GetLastInfo():              Determine information about the preceeding capture.
-    
-Image():
-    GetSize():                  Get image size and parameter.
-    Save():                     Save image.
-    Load():                     Load Image.
-    
-Region():
-    Create():                   Create a region.
-    CreateRectImageSize():      Create a rectangular region the size of the whole image.
-    CreateGrid():               Create a grid region within whole image with defined amount of squares.
-    GetID():                    Get index of region given region name.
-    Select():                   Selects or deselects a region.
-    Delete():                   Delete a region.
-    
-Evaluation():
-    CreateStatistic():          Create a new statistic.
-    GetStandardStatistic():     Determine parameter of the standard statistic.
-    GetImageMeanXYZ():          Create region size of image and get mean XYZ.
-#    GetGridMeanXYZ():           Create regions as a grid in image and get mean XYZ.
-#    GetColorHistogramValues():  Get the values of the histogram in a color image.
-    GetPixelColor():            Get a pixel value of a color image.
-    Convert_CIE_RGB():          Conversion of a color value from CIE-RGB to another color space.
-    XYZ_To_xy():                Convert XYZ to x, y.
-    XYZ_To_u_v_():              Convert XYZ to u', v'.
-    Show_xy():                  Plot x, y color coordinates using Luxpy.
-    Show_u_v_():                Plot u', v' color coordinates using Luxpy.
-    
-Characterize():
-    VR_HMD():                   Characterize a Virtual Reality Head-Mounted-Display.
+camera.py:
+    get_cameras():
+    set_camera():
+    get_lenses():
+    set_lens():
+    lenses():                   Gets list of all lenses of selected camera.
+    lens():                     Gets ID of selected lens.
+    get_focus_factors():        Gets list of all focus factors of current lens.
+    get_focus_factors_old():    List of available focus factors
+    get_focus_factor_id():      Gets ID of selected focus factor.
+    set_focus_factor():         Set a focus factor.
+    open_camera():              Set new camera calibration data.
+    get_converting_units():     Get converting information.
+    set_converting_units():     Set new converting values.
+    get_modulation_frequency(): Get the modulation frequency.
+    set_modulation_frequency(): Set the frequency of modulated light.
+    get_scattered_light():      Is scattered light correction switched on?
+    set_scattered_light():      Use of scattered light correction.
+    get_integration_time():     Determine current exposure time and other time parameters.
+    set_integration_time():     Set new exposure time.
+    get_max_camera_time():      Determine the maximum possible exposure time.
+    set_max_camera_time():      Set the maximum possible exposure time.
+    get_autoscan():             Get use of autoscan algorithm.
+    set_autoscan():             Set use of autoscan algorithm.
+    get_filter_wheel():         Determine filter state.
+    get_grey_filter_list():     List of available grey filters.
+    set_grey_filter_list():     Set grey filters.
+    set_grey_filter():          Selection of a grey filter.
+    color_autoscan_time():      Determine good exposure times for every color filter.
+    get_color_correction_list():List of available color correction factors.
+    set_color_correction_list():Selection of a color correction factor.
+    get_smear():                Get the parameter for smear correction.
+    set_smear():                Set the parameter for smear correction.
+    get_automatic():            Get the state of Automatic-Flag for exposure times.
+    set_automatic():            Set Automatic-Flag for all exposure times.
+
+coordinates.py:
+    get_value_unit():           Get the values and units of the axis.
+    set_value_unit():           Set the values and units of the axis.
+
+capture.py:
+    single_pic():               SinglePic capture algorithm.
+    multi_pic():                MultiPic capture algorithm.
+    high_dyn_pic():             HighDyn capturing for luminance image.
+    color_high_dyn():           HighDyn capturing for color image.
+    get_last_info():            Determine information about the preceeding capture.
+
+image.py:
+    create():                   Creates an image.
+    delete():
+    save():                     Save image.
+    load():                     Load image from .pcf.
+    get_amount():
+    get_size():                 Get image size and parameter.
+    rotate():                   Rotates image to desired image.
+    show():                     Show image.
+
+region.py:
+    create():                   Create a region.
+    create_rect_image_size():   Create a rectangular region the size of the whole image.
+    create_grid():              Create a grid region within whole image with
+                                    defined amount of squares.
+    get_id():                   Get index of region given region name.
+    select():                   Selects or deselects a region.
+    delete():                   Delete a region.
+
+evaluation.py:
+    statistic_exists():         Proof, if a statistic for a image/region/statistic type
+    create_statistic():         Create a new statistic.
+    get_standard_statistic():   Determine parameter of the standard statistic.
+    delete_statistic():         Delete an existing statistic.
+    proj_rect_lum():            Projective Rectifaction of Luminance Image.
+    proj_rect_col():            Projective Rectifaction of Color Image.
+    coord_trans_lum():          Coordinate Transformation of Luminance Image.
+    coord_trans_col():          Coordinate Transformation of Color Image.
+    get_image_mean_xyz():       Create region size of image and get mean XYZ.
+    get_circle_mean_xyz():      Get size of image, create eclipse in center,
+                                    get mean XYZ from circle.
+#    get_grid_mean_xyz():        Create regions as a grid in image and get mean XYZ.
+#    get_color_hist_vals():      Get the values of the histogram in a color image.
+    get_pixel_color():          Get a pixel value of a color image.
+    convert_cie_rgb():          Conversion of a color value from CIE-RGB to another color space.
+    xyz_to_xy():                Convert XYZ to x, y.
+    xyz_to_u_v_():              Convert XYZ to u', v'.
+    show_xy():                  Plot x, y color coordinates using Luxpy.
+    show_u_v_():                Plot u', v' color coordinates using Luxpy.
+
+table.py:
+#    get_number():               Returns the number of tables in the result tab widget.
+#    get_name_and_caption():     Returns the name and the caption of an existing table.
+#    get_index():                Search for a table, given by name or caption.
+#    get_number_columns():       Returns the number of columns of a table.
+#    get_number_lines():         Returns the number of lines of a table.
+#    get_column():               Returns the column header of a column of a table.
+#    get_cell():                 Returns the content of a cell of a table.
+#    get_all_content():          Returns all cells of a table as a list.
+
+template_image_generator.py:
+#    get_no_displays():          Number of connected displays.
+#    get_target():               Get current target for template image generation.
+#    set_target():               Set target for template image generation.
+#    get_target_properties():    Get properties of current target.
+#    get_list_of_categories():   Get list of categories of template images.
+#    get_list_of_operations():   Get list of tpes of tamplate images for the given category.
+#    set_operation():            Set a type of template or an option.
+#    get_list_of_param_names():  Get a parameter name list for the given template image type.
+#    get_param_value():          Get a certain parameter value.
+#    set_param_value():          Set a certain parameter value.
+#    hide_dialog():              Make template image dialog invisible.
+#    create_image():             Create template image with the adjusted parameters.
+#    delete_image():             Remove template image from the display.
+#    load_image():               Load template image file to the target.
+
+main.py:
+    max_luminance():
+    characterize():
+    measure_warm_up():
+    get_result_from_folder():
+    vr_hmd():                   Characterize a Virtual Reality Head-Mounted-Display.
+        characterize():
+        __init__():             Initializes LMK for HMD
+        analyze():
+        
