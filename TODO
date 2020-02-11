@@ -1,0 +1,23 @@
+To-do:|
+------
+    * Check all docstrings have correct information
+    * Change print statements depending on what parameters are chosen
+    * Create 6 regions like a grid for Characterize.VR_HMD()
+    * Update Structure
+    * ColorHighDyn: Simple... Define multiple filter exposure times?
+    * Fix messy code in some places
+    * Call .self within classes instead of global if not needed elsewhere.
+    * Change names to more logical names
+    * Update __main__ example code so it works
+    * Change doctstrings to inlude 'Raises:' for err_codes (https://docs.scipy.org/doc/numpy/reference/generated/numpy.interp.html)
+    * Change docstring layout similar to Numpy (https://github.com/numpy/numpy/blob/v1.16.1/numpy/lib/function_base.py#L1282-L1412)
+    * Space text with \n better
+    * Create instructions/example code with Jupyter Notebook.
+    * Move lens and focus factor functions for Camera() class to Select() class, and get the working
+    * Error check STATISTIC_TYPES{} for compatible images and regions
+    * Test functions in table class
+    * Sort out absolute mess
+    * Give warning if focus factor needed, but no chosen
+    * Delete old functions that are no longer needed
+    * Add spectral responsitivities (in LMK book in box) for each lens
+    * Maybe add iGetProgramInfo if needed?

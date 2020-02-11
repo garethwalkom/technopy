@@ -1,5 +1,5 @@
-# TechnoPy
-TechnoPy allows you to control your TechnoTeam LMK.
+# technopy
+technopy allows you to control your TechnoTeam LMK.
 
 (-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)
 
@@ -11,7 +11,7 @@ TechnoPy allows you to control your TechnoTeam LMK.
 
 (-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)
 
-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(TechnoPy)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)
+(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(technopy)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)
 
 (-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)
 
@@ -23,7 +23,7 @@ TechnoPy allows you to control your TechnoTeam LMK.
 
 (-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)
 
-Good afternoon and welcome to TechnoPy.
+Good afternoon and welcome to technopy.
  
 Initially created in Matlab by TechnoTeam and Jan Audenaert, it has now been
 created for use in Python by Gareth V. Walkom. Once connected to the ActiveX
@@ -31,5 +31,5 @@ server, you can then open the LMK LabSoft4 Standard Color ActiveX (ActiveX
 version of the software is needed to run this script), access the Calibration
 data, and control the camera to make measurements.
 
-Please listen to the TechnoPy playlist while making measurements for inspo:
+Please listen to the technopy playlist while making measurements for inspo:
 https://www.youtube.com/playlist?list=PLu3mtT1o6gSieYEqJEBHm5NX9lWljoED
