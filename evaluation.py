@@ -15,6 +15,7 @@ proj_rect_col():            Projective Rectifaction of Color Image.
 coord_trans_lum():          Coordinate Transformation of Luminance Image.
 coord_trans_col():          Coordinate Transformation of Color Image.
 get_xyz():
+get_max_lum():
 get_image_mean_xyz():       Create region size of image and get mean XYZ.
 get_circle_mean_xyz():      Get size of image, create eclipse in center,
                                 get mean XYZ from circle.
@@ -29,14 +30,14 @@ show_u_v_():                Plot u', v' color coordinates using Luxpy.
 
 """
 import numpy as np
-## COMMENTED OUT BECAUSE OF LUXPY ERROR
-# from matplotlib import pyplot as plt
-# import luxpy as lx
+from matplotlib import pyplot as plt
+import luxpy as lx
 
 import activex as ax
 import dicts as dic
 import image as im
 import region as reg
+import table as tab
 
 def statistic_exists(image = dic.IMAGE_TYPES['Color'], region = 0):
     """
@@ -58,7 +59,7 @@ def statistic_exists(image = dic.IMAGE_TYPES['Color'], region = 0):
         :statistic_index: int
             | Index in statistic list?
     """
-    err_code, exists, statistic_type, statistic_index = ax.LMK.iHaveStatistic(image, region)
+    _, exists, statistic_type, statistic_index = ax.LMK.iHaveStatistic(image, region)
 
     return exists, statistic_type, statistic_index
 
@@ -118,7 +119,7 @@ def get_standard_statistic(statistic_type = dic.STATISTIC_TYPES['standardColor']
 
     stats = {'Area': [], 'Min': [], 'Max': [], 'Mean': [], 'Variance': []}
 
-    err_code, area, stat_min, stat_max, stat_mean, variance = ax.LMK.iGetStandardStatistic2(statistic_type, region, color_class)
+    err_code, _, _, _, _, _ = ax.LMK.iGetStandardStatistic2(statistic_type, region, color_class)
     ax.error_code(err_code) # Check for error
 
     stats['Area'].append(ax.LMK.iGetStandardStatistic2(statistic_type, region, color_class)[1])
@@ -213,6 +214,21 @@ def get_xyz(index_out):
 
     return output_color
 
+def get_max_lum():
+    """
+    [ADD THIS]
+
+    Returns
+    -------
+    output : TYPE
+        DESCRIPTION.
+
+    """
+
+    max_lum = tab.get_cell(table_id=2, table_line_id=0, table_column_id=6)
+    output = np.float64(max_lum)
+
+    return output
 
 def get_image_mean_xyz():
     """
@@ -221,9 +237,9 @@ def get_image_mean_xyz():
     """
 
     # Create a region the size of the whole image
-    region_x_points, region_y_points = reg.create_rect_image_size()
+    reg.create_rect_image_size()
     # Get ID of region
-    err_code, index_out = reg.get_id(dic.IMAGE_TYPES['Color'], name = '1')
+    _, index_out = reg.get_id(dic.IMAGE_TYPES['Color'], name = '1')
     # Select region from index of region
     reg.select(index = index_out)
 
@@ -251,7 +267,7 @@ def get_circle_mean_xyz():
     """
 
     # Get size of image
-    image_first_lin, image_last_line, image_first_col, image_last_col, image_dimensions = im.get_size()
+    _, image_last_line, _, image_last_col, _ = im.get_size()
 
     # If region already exists, delete it
     err_code, index_out = reg.get_id()
@@ -259,12 +275,12 @@ def get_circle_mean_xyz():
         reg.delete()
 
     # If statistic already exists, delete it
-    exists, statistic_type, statistic_index = statistic_exists()
+    exists, _, _ = statistic_exists()
     if exists == 1:
         delete_statistic()
 
     # Create a region the size of the whole image
-    region_x_points, region_y_points = reg.create(x_coords = [image_last_col/2, 1700, 1700],
+    reg.create(x_coords = [image_last_col/2, 1700, 1700],
                                                   y_coords = [image_last_line/2, 1700, 1700])
     # Get ID of region
     err_code, index_out = reg.get_id(dic.IMAGE_TYPES['Color'], name = '1')
@@ -287,7 +303,6 @@ def get_circle_mean_xyz():
     output_color = convert_cie_rgb(cie_r = r_mean, cie_g = g_mean, cie_b = b_mean)
 
     return output_color
-
 
 # def get_grid_mean_xyz():
 #     """
@@ -531,130 +546,130 @@ def convert_cie_rgb(cie_r = 255.0, cie_g = 0.0, cie_b = 0.0, r_ref = 0.0,
 
     return output_color
 
-# def xyz_to_xy(xyz):
-#     """
-#     Convert XYZ to x, y.|
-#     ---------------
-#     Parameters:
-#         :xyz: array (shape: (1, 3))
-#     Returns:
-#         :xy_mean: array (shape: (1, 2))
-#     """
-#     y_xy = lx.xyz_to_Yxy(xyz)
-#     y_xy_mean = np.array([[y_xy[:,0].mean(), y_xy[:,1].mean(), y_xy[:,2].mean()]])
+def xyz_to_xy(xyz):
+    """
+    Convert XYZ to x, y.|
+    ---------------
+    Parameters:
+        :xyz: array (shape: (1, 3))
+    Returns:
+        :xy_mean: array (shape: (1, 2))
+    """
+    y_xy = lx.xyz_to_Yxy(xyz)
+    y_xy_mean = np.array([[y_xy[:,0].mean(), y_xy[:,1].mean(), y_xy[:,2].mean()]])
 
-#     y_xy_mean = np.around(y_xy_mean, decimals=3)
+    y_xy_mean = np.around(y_xy_mean, decimals=3)
 
-#     x_mean = y_xy_mean[:,1]
-#     x_mean = str(x_mean)[1:-1]
-#     y_mean = y_xy_mean[:,2]
-#     y_mean = str(y_mean)[1:-1]
+    x_mean = y_xy_mean[:,1]
+    x_mean = str(x_mean)[1:-1]
+    y_mean = y_xy_mean[:,2]
+    y_mean = str(y_mean)[1:-1]
 
-#     xy_mean = np.array([[x_mean], [y_mean]])
-#     xy_mean = xy_mean.T
+    xy_mean = np.array([[x_mean], [y_mean]])
+    xy_mean = xy_mean.T
 
-#     return xy_mean
+    return xy_mean
 
-# def xyz_to_u_v_(xyz):
-#     """
-#     Conver XYZ to u', v'.|
-#     ---------------
-#     Parameters:
-#         :xyz: array (shape: (1, 3))
-#     Returns:
-#         :u_v_mean: array (shape: (1, 2))
-#     """
-#     y_uv = lx.xyz_to_Yuv(xyz)
-#     y_uv_mean = np.array([[y_uv[:,0].mean(), y_uv[:,1].mean(), y_uv[:,2].mean()]])
+def xyz_to_u_v_(xyz):
+    """
+    Conver XYZ to u', v'.|
+    ---------------
+    Parameters:
+        :xyz: array (shape: (1, 3))
+    Returns:
+        :u_v_mean: array (shape: (1, 2))
+    """
+    y_uv = lx.xyz_to_Yuv(xyz)
+    y_uv_mean = np.array([[y_uv[:,0].mean(), y_uv[:,1].mean(), y_uv[:,2].mean()]])
 
-#     y_uv_mean = np.around(y_uv_mean, decimals=3)
+    y_uv_mean = np.around(y_uv_mean, decimals=3)
 
-#     u_mean = y_uv_mean[:,1]
-#     u_mean = str(u_mean)[1:-1]
-#     v_mean = y_uv_mean[:,2]
-#     v_mean = str(v_mean)[1:-1]
+    u_mean = y_uv_mean[:,1]
+    u_mean = str(u_mean)[1:-1]
+    v_mean = y_uv_mean[:,2]
+    v_mean = str(v_mean)[1:-1]
 
-#     u_v_mean = np.array([[u_mean], [v_mean]])
-#     u_v_mean = u_v_mean.T
+    u_v_mean = np.array([[u_mean], [v_mean]])
+    u_v_mean = u_v_mean.T
 
-#     return u_v_mean
+    return u_v_mean
 
-# def Show_xy(x_val, y_val, label='x, y', facecolors='none', color='k',
-#             linestyle='--', title='x, y', grid=True, **kwargs):
-#     """
-#     Plot x, y color coordinates using Luxpy.
+def Show_xy(x_val, y_val, label='x, y', facecolors='none', color='k',
+            title='x, y', grid=True):
+    """
+    Plot x, y color coordinates using Luxpy.
 
-#     Parameters:
-#         :x_val: float, int, or array
-#             | x coordinate(s)
-#         :y_val: float, int, or array
-#             | y coordinate(s)
-#         :label: string (default: 'x, y')
-#             | Change to adjust label within diagram of the input.
-#         :facecolors: string (default: 'none')
-#             | Change to adjust face color of value within diagram. Only if
-#                 gamut=None
-#         :color: string (default: 'k')
-#             | Change to adjust color of either edge color or line color,
-#                 depending on if 'gamut' is chosen.
-#         :linestyle: string (default: '--')
-#             | Change to adjust style of line if gamut is not None.
-#         :title: string (default: 'x, y')
-#             | Change to adjust title of figure.
-#         :grid: True of None (default: True)
-#             | Change to 'None' for no grid in diagram.
-#         :kwargs:
-#             | Additional keyword arguments for use with matplotlib.pyplot
+    Parameters:
+        :x_val: float, int, or array
+            | x coordinate(s)
+        :y_val: float, int, or array
+            | y coordinate(s)
+        :label: string (default: 'x, y')
+            | Change to adjust label within diagram of the input.
+        :facecolors: string (default: 'none')
+            | Change to adjust face color of value within diagram. Only if
+                gamut=None
+        :color: string (default: 'k')
+            | Change to adjust color of either edge color or line color,
+                depending on if 'gamut' is chosen.
+        :linestyle: string (default: '--')
+            | Change to adjust style of line if gamut is not None.
+        :title: string (default: 'x, y')
+            | Change to adjust title of figure.
+        :grid: True of None (default: True)
+            | Change to 'None' for no grid in diagram.
+        :kwargs:
+            | Additional keyword arguments for use with matplotlib.pyplot
 
-#     Returns:
+    Returns:
 
-#     """
-#     plt.figure()
-#     ax_xy = plt.axes()
-#     lx.plot_chromaticity_diagram_colors(256,0.3,1,lx._CIEOBS,'Yxy',{},True,ax_xy,
-#                                         grid,'Times New Roman',12)
-#     plt.scatter(float(x_val), float(y_val), label = label, facecolors = facecolors, edgecolors = color)
-#     ax_xy.set_title(title)
-#     ax_xy.set_xlim([-0.1, 0.8])
-#     ax_xy.set_ylim([-0.1, 0.9])
-#     ax_xy.legend()
+    """
+    plt.figure()
+    ax_xy = plt.axes()
+    lx.plot_chromaticity_diagram_colors(256,0.3,1,lx._CIEOBS,'Yxy',{},True,ax_xy,
+                                        grid,'Times New Roman',12)
+    plt.scatter(float(x_val), float(y_val), label = label, facecolors = facecolors, edgecolors = color)
+    ax_xy.set_title(title)
+    ax_xy.set_xlim([-0.1, 0.8])
+    ax_xy.set_ylim([-0.1, 0.9])
+    ax_xy.legend()
 
-# def Show_u_v_(u_val, v_val, label='u_, v_', facecolors='none', color='k',
-#        linestyle='--', title='u_, v_', grid=True, **kwargs):
-#     """
-#     Plot u', v' color coordinates using Luxpy.
+def Show_u_v_(u_val, v_val, label='u_, v_', facecolors='none', color='k',
+              title='u_, v_', grid=True):
+    """
+    Plot u', v' color coordinates using Luxpy.
 
-#     Parameters:
-#         :u_val: float, int, or array
-#             | u' coordinate(s)
-#         :v_val: float, int, or array
-#             | v' coordinate(s)
-#         :label: string (default: 'u_, v_')
-#             | Change to adjust label within diagram of the input.
-#         :facecolors: string (default: 'none')
-#             | Change to adjust face color of value within diagram. Only if
-#                 gamut=None
-#         :color: string (default: 'k')
-#             | Change to adjust color of either edge color or line color,
-#                 depending on if 'gamut' is chosen.
-#         :linestyle: string (default: '--')
-#             | Change to adjust style of line if gamut is not None.
-#         :title: string (default: 'u_, v_')
-#             | Change to adjust title of figure.
-#         :grid: True of None (default: True)
-#             | Change to 'None' for no grid in diagram.
-#         :kwargs:
-#             | Additional keyword arguments for use with matplotlib.pyplot
+    Parameters:
+        :u_val: float, int, or array
+            | u' coordinate(s)
+        :v_val: float, int, or array
+            | v' coordinate(s)
+        :label: string (default: 'u_, v_')
+            | Change to adjust label within diagram of the input.
+        :facecolors: string (default: 'none')
+            | Change to adjust face color of value within diagram. Only if
+                gamut=None
+        :color: string (default: 'k')
+            | Change to adjust color of either edge color or line color,
+                depending on if 'gamut' is chosen.
+        :linestyle: string (default: '--')
+            | Change to adjust style of line if gamut is not None.
+        :title: string (default: 'u_, v_')
+            | Change to adjust title of figure.
+        :grid: True of None (default: True)
+            | Change to 'None' for no grid in diagram.
+        :kwargs:
+            | Additional keyword arguments for use with matplotlib.pyplot
 
-#     Returns:
+    Returns:
 
-#     """
-#     plt.figure()
-#     ax_uv = plt.axes()
-#     lx.plot_chromaticity_diagram_colors(256,0.3,1,lx._CIEOBS,'Yuv',{},True,ax_uv,
-#                                         grid,'Times New Roman',12)
-#     plt.scatter(float(u_val), float(v_val), label = label, facecolors = facecolors, edgecolors = color)
-#     ax_uv.set_title(title)
-#     ax_uv.set_xlim([-0.1, 0.7])
-#     ax_uv.set_ylim([-0.1, 0.7])
-#     ax_uv.legend()
+    """
+    plt.figure()
+    ax_uv = plt.axes()
+    lx.plot_chromaticity_diagram_colors(256,0.3,1,lx._CIEOBS,'Yuv',{},True,ax_uv,
+                                        grid,'Times New Roman',12)
+    plt.scatter(float(u_val), float(v_val), label = label, facecolors = facecolors, edgecolors = color)
+    ax_uv.set_title(title)
+    ax_uv.set_xlim([-0.1, 0.7])
+    ax_uv.set_ylim([-0.1, 0.7])
+    ax_uv.legend()

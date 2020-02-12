@@ -46,16 +46,12 @@ import os
 import glob
 import configparser
 
+import roots as root
 import activex as ax
 import dicts as dic
 
-# Define the root to the calibration data
-CALIB_DATA_ROOT = 'F:/LMK/Calibration Data'
-
 # Name of the TechnoTeam LMK Camera
-CAMERA_NAME = str(os.listdir(CALIB_DATA_ROOT))[2:-2]
-
-SCALE = 'infinite'
+CAMERA_NAME = str(os.listdir(root.DATA))[2:-2]
 
 def get_cameras():
     """
@@ -179,7 +175,7 @@ def lenses():
 
     LENSES = []
 
-    for lens in glob(CALIB_DATA_ROOT + '/' + CAMERA_NAME + '/*/'):
+    for lens in glob(root.DATA + '/' + CAMERA_NAME + '/*/'):
         LENSES.append(lens.split('\\')[1])
 
     return LENSES
@@ -208,16 +204,16 @@ def get_focus_factors():
     -----------------------------------------------
     """
 
-    lenses = lenses()
+    all_lenses = lenses()
 
-    lens_id = lens(lenses)
-    lens = lenses[lens_id]
+    current_lens_id = lens(all_lenses)
+    current_lens = all_lenses[current_lens_id]
 
     focus_factors = []
 
     config = configparser.ConfigParser()
-    config.read(CALIB_DATA_ROOT + '/' + CAMERA_NAME + '/' +
-                lens + '/' + 'FocusFactor' + dic.FILE_TYPES['ini'])
+    config.read(root.DATA + '/' + CAMERA_NAME + '/' +
+                current_lens + '/' + 'FocusFactor' + dic.FILE_TYPES['ini'])
     focus_factors_size = config.get('GreyFactor', 'Size')
     focus_factors_size = int(focus_factors)
     for focus_factor in range(focus_factors_size):
@@ -244,7 +240,7 @@ def get_focus_factors_old():
 
     return focus_factors, focus_factor
 
-def get_focus_factor_id(focus_factors):
+def get_focus_factor_id(focus_factors, scale = 'infinite'):
     """
     Gets ID of selected focus factor.|
     ---------------------------------
@@ -255,8 +251,8 @@ def get_focus_factor_id(focus_factors):
     for focus in range(len(focus_factors)):
         focus_factor.append(focus_factors[focus].split(' ')[2])
 
-    if SCALE in focus_factor:
-        focus_factor_id = (focus_factor.index(SCALE))
+    if scale in focus_factor:
+        focus_factor_id = (focus_factor.index(scale))
 
     return focus_factor_id
 
@@ -284,14 +280,14 @@ def open_camera(camera_no, lens_no):
     Parameters:
         :LMK:
             | Dispatch('lmk4.LMKAxServer')
-        :CALIB_DATA_ROOT: QString (default: CALIB_DATA_ROOT)
+        :root.DATA: QString (default: root.DATA)
             | Path to the camera calibration data. More exactly spoken path
                 to the lens sub directory. After calling this function the
                 camera is completely reinitialized.
             | If the string is empty a currently existing camera connection
                 is finished.
     """
-    err_code = ax.LMK.iSetNewCamera(CALIB_DATA_ROOT + '/' + camera_no + '/' + lens_no)
+    err_code = ax.LMK.iSetNewCamera(root.DATA + '/' + camera_no + '/' + lens_no)
     ax.error_code(err_code) # Check for error
 
 def get_converting_units():
@@ -626,7 +622,7 @@ def color_autoscan_time():
         print('Error code:', err_code)
     else:
         color_filters['All'].append(ax.LMK.iColorAutoScanTime()[1])
-        color_filters['All'] = str(All['All'])[2:-2]
+        color_filters['All'] = str(color_filters['All'])[2:-2]
         temp = color_filters['All'].split(" ", 6)
 
         exposure_times['G'].append(temp[0])
@@ -768,7 +764,7 @@ def set_automatic(automatic=1):
 
 #         cameras = []
 
-#         for camera in os.listdir(CALIB_DATA_ROOT):
+#         for camera in os.listdir(root.DATA):
 
 #             cameras.append(camera)
 
@@ -784,7 +780,7 @@ def set_automatic(automatic=1):
 
 #         lenses = []
 
-#         for lens in glob(CALIB_DATA_ROOT + '/' + CAMERA_NAME + '/*/'):
+#         for lens in glob(root.DATA + '/' + CAMERA_NAME + '/*/'):
 #             lenses.append(lens.split('\\')[1])
 
 #         return lenses
@@ -821,7 +817,7 @@ def set_automatic(automatic=1):
 #         FocusFactors = []
 
 #         config = configparser.ConfigParser()
-#         config.read(CALIB_DATA_ROOT + '/' + CAMERA_NAME + '/' +
+#         config.read(root.DATA + '/' + CAMERA_NAME + '/' +
 #                     lens + '/' + 'FocusFactor' + FILE_TYPES['ini'])
 #         FocusFactors_Size = config.get('GreyFactor', 'Size')
 #         FocusFactors_Size = int(FocusFactors_Size)

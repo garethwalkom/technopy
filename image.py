@@ -20,10 +20,9 @@ import datetime
 import os
 from skimage import io
 
-import activex as ax
+import roots as root
 import dicts as dic
-
-MEAS_ROOT = 'E:/Measurements/' + str(datetime.date.today()) + '/'
+import activex as ax
 
 def create(image=0, name='Evaluation[1]'):
     """
@@ -70,7 +69,7 @@ def delete(image=dic.IMAGE_TYPES['Color']):
     """
     ax.LMK.iImageDelete(image)
 
-def save(image=dic.IMAGE_TYPES['Color'], file_name=MEAS_ROOT + \
+def save(image=dic.IMAGE_TYPES['Color'], file_name=root.SAVE + \
          datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S') + \
              dic.FILE_TYPES['png']):
     """
@@ -87,12 +86,12 @@ def save(image=dic.IMAGE_TYPES['Color'], file_name=MEAS_ROOT + \
             | Destination file name
             | Datetime is the exact datetime of the measurement, not datetime when saved.
     """
-    if not os.path.exists(MEAS_ROOT):
-        os.makedirs(MEAS_ROOT)
+    if not os.path.exists(root.SAVE):
+        os.makedirs(root.SAVE)
     err_code = ax.LMK.iSaveImage(image, file_name)
     ax.error_code(err_code) # Check for error
 
-def load(image=dic.IMAGE_TYPES['Color'], file_name=MEAS_ROOT + 'Image' + dic.FILE_TYPES['pcf']):
+def load(image=dic.IMAGE_TYPES['Color'], file_name=root.LOAD + 'Image' + dic.FILE_TYPES['pcf']):
     """
     Load image from .pcf.|
     ---------------------
@@ -196,7 +195,7 @@ def rotate(code=dic.OPERATION_TYPES['Rotate'],
     err_code = ax.LMK.imageArithmeticIP1(code, src_image, param, dst_image)
     ax.error_code(err_code) # Check for error
 
-def show(file_name=MEAS_ROOT + 'Image' + dic.FILE_TYPES['png']):
+def show(file_name=root.LOAD + 'Image' + dic.FILE_TYPES['png']):
     """
     Show image.|
     -----------

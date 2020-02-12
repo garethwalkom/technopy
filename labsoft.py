@@ -18,10 +18,9 @@ from win32com.client import Dispatch
 import os
 import datetime
 
-import activex as ax
+import roots as root
 import dicts as dic
-
-MEAS_ROOT = 'E:/Measurements/' + str(datetime.date.today()) + '/'
+import activex as ax
 
 def open_labsoft():
     """
@@ -53,7 +52,7 @@ def close_labsoft(question=0):
     err_code = ax.LMK.iClose(question)
     ax.error_code(err_code) # Check for error
 
-def save(file_name=MEAS_ROOT + \
+def save(file_name=root.SAVE + \
          datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S') + \
          dic.FILE_TYPES['ttcs']):
     """
@@ -62,16 +61,16 @@ def save(file_name=MEAS_ROOT + \
     Parameters:
         :LMK:
             | Dispatch('lmk4.LMKAxServer')
-        :file_name: QString, optional (default: MEAS_ROOT + datetime + .ttcs')
+        :file_name: QString, optional (default: root.SAVE + datetime + .ttcs')
             | Change to adjust root to save measurement
             | Datetime is the exact datetime of the measurement, not datetime when saved.
     """
-    if not os.path.exists(MEAS_ROOT):
-        os.makedirs(MEAS_ROOT)
+    if not os.path.exists(root.SAVE):
+        os.makedirs(root.SAVE)
     err_code = ax.LMK.iSaveProtokoll(file_name)
     ax.error_code(err_code) # Check for error
 
-def load(file_name='Meas.ttcs'):
+def load(file_name=root.LOAD +'Meas.ttcs'):
     """
     Load a measurement from a .ttcs file.|
     -------------------------------------

@@ -19,33 +19,65 @@ import activex as ax
 import image as im
 import dicts as dic
 
-def create(image=dic.IMAGE_TYPES['Color'],
-           region_id=dic.REGION_TYPES['Ellipse']['identifier'],
-           region_points=dic.REGION_TYPES['Ellipse']['points'],
+def create(image=dic.IMAGE_TYPES['Color'], region='Ellipse',
            x_coords=[1226, 500, 500], y_coords=[1026, 500, 500]):
     """
     Create a region.|
     ----------------
-    Parameters:
-        :LMK:
-            | Dispatch('lmk4.LMKAxServer')
-        :image: int (default: IMAGE_TYPES['Color'])
-            | Index of region list (same as image index)
-        :region_id: int (default: REGION_TYPES['Ellipse']['identifier'])
-            | Type of region from REGION_TYPES{}
-        :region_points: int (default: REGION_TYPES['Ellipse']['points'])
-            | Number of points from REGION_TYPES{}
-    Returns:
-        :x_coords: QStringList
-            | List of x-points
-        :y_coords: QStringList
-            | List of y-points
+
+    Parameters
+    ----------
+    image : TYPE, optional
+        DESCRIPTION. The default is dic.IMAGE_TYPES['Color'].
+    region : TYPE, optional
+        DESCRIPTION. The default is 'Ellipse'.
+    x_coords : TYPE, optional
+        DESCRIPTION. The default is [1226, 500, 500].
+    y_coords : TYPE, optional
+        DESCRIPTION. The default is [1026, 500, 500].
+
+    Returns
+    -------
+    region_x_points : TYPE
+        DESCRIPTION.
+    region_y_points : TYPE
+        DESCRIPTION.
+
     """
     [err_code, region_x_points, region_y_points] \
-        = ax.LMK.iCreateRegion(image, region_id, region_points, x_coords, y_coords)
+        = ax.LMK.iCreateRegion(image, dic.REGION_TYPES[region]['identifier'],
+                               dic.REGION_TYPES[region]['points'], x_coords,
+                               y_coords)
     ax.error_code(err_code) # Check for error
 
     return region_x_points, region_y_points
+
+def create_rect(image, first_col=567, last_col=1969,
+                first_line=391, last_line=2045):
+    """
+    [ADD THIS]
+
+    Parameters
+    ----------
+    image : TYPE
+        DESCRIPTION.
+    first_col : TYPE, optional
+        DESCRIPTION. The default is 567.
+    last_col : TYPE, optional
+        DESCRIPTION. The default is 1969.
+    first_line : TYPE, optional
+        DESCRIPTION. The default is 391.
+    last_line : TYPE, optional
+        DESCRIPTION. The default is 2045.
+
+    Returns
+    -------
+    None.
+
+    """
+
+    create(image, 'Rectangle', x_coords=[first_col, last_col],
+           y_coords=[first_line, last_line])
 
 def create_rect_image_size(image=dic.IMAGE_TYPES['Color'],
                            region_id=dic.REGION_TYPES['Rectangle']['identifier'],
@@ -70,7 +102,7 @@ def create_rect_image_size(image=dic.IMAGE_TYPES['Color'],
             | List of y-points
     """
     [image_first_line, image_last_line, image_first_col,
-     image_last_col, _] = im.GetSize()
+     image_last_col, _] = im.get_size()
     x_coords = [image_first_col, image_last_col]
     y_coords = [image_first_line, image_last_line]
     [err_code, region_x_points, region_y_points] \
@@ -106,7 +138,7 @@ def create_grid(image=dic.IMAGE_TYPES['Color'],
         :Y: QStringList
             | List of y-points
     """
-    [image_first_line, image_last_line, image_first_col, image_last_col, _] = im.GetSize()
+    [image_first_line, image_last_line, image_first_col, image_last_col, _] = im.get_size()
     image_second_col = int(image_last_col/x_squares)
     image_third_col = int((image_last_col/x_squares)*2)
     image_second_line = int(image_last_line/y_squares)
@@ -157,7 +189,8 @@ def create_grid(image=dic.IMAGE_TYPES['Color'],
 
 #        X = [Image_FirstColumn, Image_LastColumn]
 #        Y = [Image_FirstLine, Image_LastLine]
-#        [err_code, Region_X_Points, Region_Y_Points] = ax.LMK.iCreateRegion(Im, Type, NumPoints, X, Y)
+#        [err_code, Region_X_Points, Region_Y_Points] = ax.LMK.iCreateRegion(Im,
+# Type, NumPoints, X, Y)
 
 def get_id(image=dic.IMAGE_TYPES['Color'], name='1'):
     """
