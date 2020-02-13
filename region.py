@@ -196,6 +196,10 @@ def get_id(image=dic.IMAGE_TYPES['Color'], name='1'):
     """
     Get index of region given region name.|
     --------------------------------------
+
+    %timeit:
+        133 µs ± 3 µs per loop (mean ± std. dev. of 7 runs, 10000 loops each)
+
     Parameters:
         :LMK:
             | Dispatch('lmk4.LMKAxServer')
@@ -215,6 +219,10 @@ def select(image=dic.IMAGE_TYPES['Color'], index=0, check=1):
     """
     Selects or deselects a region.|
     ------------------------------
+
+    %timeit:
+        124 µs ± 376 ns per loop (mean ± std. dev. of 7 runs, 10000 loops each)
+
     Parameters:
         :LMK:
             | Dispatch('lmk4.LMKAxServer')

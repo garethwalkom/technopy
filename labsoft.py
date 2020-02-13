@@ -28,9 +28,14 @@ def open_labsoft():
     ---------------------------
     After opening, the main window is visible.
     -----------------------------------------------------------------------
-    Parameters:
-        :LMK:
-            | Dispatch('lmk4.LMKAxServer')
+
+    %timeit:
+        2.41 s ± 75.5 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)
+
+    Returns
+    -------
+    None.
+
     """
     ax.LMK = Dispatch('lmk4.LMKAxServer')
     err_code = ax.LMK.iOpen()
@@ -40,6 +45,10 @@ def close_labsoft(question=0):
     """
     Closes the LMK4 application.|
     ----------------------------
+
+    %timeit:
+        23.7 ms ± 3.02 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)
+
     Parameters:
         :LMK:
             | Dispatch('lmk4.LMKAxServer')
@@ -74,6 +83,10 @@ def load(file_name=root.LOAD +'Meas.ttcs'):
     """
     Load a measurement from a .ttcs file.|
     -------------------------------------
+
+    %timeit:
+        4.19 s ± 441 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)
+
     Parameters:
         :LMK:
             | Dispatch('lmk4.LMKAxServer')
@@ -88,6 +101,9 @@ def get_program_info():
 
     Get some information about program version and camera current used.|
     -------------------------------------------------------------------
+
+    %timeit:
+        144 µs ± 5.82 µs per loop (mean ± std. dev. of 7 runs, 10000 loops each)
 
     Parameters
     ----------

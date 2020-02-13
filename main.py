@@ -18,10 +18,12 @@ import os
 import datetime
 import time
 import numpy as np
+import luxpy as lx
+from matplotlib import pyplot as plt
 
 import roots as root
 import dicts as dic
-import activex as ax
+# import activex as ax
 import labsoft as ls
 import camera as cam
 import capture as cap
@@ -29,6 +31,8 @@ import image as im
 import region as reg
 import evaluation as eva
 import table as tab
+
+from luxpy.toolboxes import spectro as sp
 
 def max_luminance(min_time=0.0, time_ratio=3.0, pic_count=1):
     """
@@ -157,6 +161,199 @@ def get_result_from_folder(target='XYZ', region='Center Circle'):
 
     return results
 
+def y_diff(max_ys, xyzs):
+
+    diff = []
+
+    for index, _ in enumerate(xyzs):
+        diff.append(100 - (100 * float(xyzs[index, 1]) / float(max_ys[index
+                                                                      , 0])))
+    diff = np.vstack(diff)
+    mean = diff.mean()
+
+    return diff, mean
+
+def xyz_to_u_v_(xyzs):
+
+    u_v_ = []
+    for xyz in xyzs:
+        u_v_.append(eva.xyz_to_u_v_(xyz))
+    u_v_ = np.vstack(u_v_)
+
+    return u_v_
+
+def xyz_to_space(input_type='RGB', R=None, G=None, B=None, W=None,
+                 file='GW_2019-09-13.txt', space='uv'):
+
+    if input_type == 'RGB':
+        R_Yuv = lx.xyz_to_Yuv(R)
+        G_Yuv = lx.xyz_to_Yuv(G)
+        B_Yuv = lx.xyz_to_Yuv(B)
+        return R_Yuv, G_Yuv, B_Yuv
+
+    elif input_type == 'RGBW':
+        R_Yuv = lx.xyz_to_Yuv(R)
+        G_Yuv = lx.xyz_to_Yuv(G)
+        B_Yuv = lx.xyz_to_Yuv(B)
+        W_Yuv = lx.xyz_to_Yuv(W)
+        return R_Yuv, G_Yuv, B_Yuv, W_Yuv
+
+    elif input_type == 'file':
+        XYZs = np.loadtxt(file, delimiter='\t')
+        if space == 'uv':
+            output = lx.xyz_to_Yuv(XYZs)
+        else:
+            output = lx.xyz_to_Yxy(XYZs)
+        for count, _ in enumerate(output):
+            count = count + 1
+        return XYZs, output, count
+
+def input_to_gamut(input_type='RGB', count=None, output=None, R=None,
+                   G=None, B=None, C=None, M=None, Y=None):
+
+    if input_type == 'RGB':
+        u_out, v_out = np.array([[R[:, 1], G[:, 1],
+                                  B[:, 1], R[:, 1]],
+                                 [R[:, 2], G[:, 2],
+                                  B[:, 2], R[:, 2]]])
+        return u_out, v_out
+
+    elif input_type == 'RGBCMY':
+        u_out, v_out = np.array([[R[:, 1], Y[:, 1],
+                                  G[:, 1], C[:, 1],
+                                  B[:, 1], M[:, 1],
+                                  R[:, 1]],
+                                 [R[:, 2], Y[:, 2],
+                                  G[:, 2], C[:, 2],
+                                  B[:, 2], M[:, 2],
+                                  R[:, 2]]])
+        return u_out, v_out
+
+    elif input_type == 'file':
+        if count == 4:
+            u_out, v_out = np.array([[output[0, 1], output[1, 1],
+                                      output[2, 1], output[0, 1]],
+                                     [output[0, 2], output[1, 2],
+                                      output[2, 2], output[0, 2]]])
+            return u_out, v_out
+
+        elif count == 7 or count == 8:
+            u_out, v_out = np.array([[output[0, 0], output[6, 0], output[1, 0],
+                                      output[4, 0], output[2, 0], output[5, 0],
+                                      output[0, 0]],
+                                     [output[0, 1], output[6, 1], output[1, 1],
+                                      output[4, 1], output[2, 1], output[5, 1],
+                                      output[0, 1]]])
+            return u_out, v_out
+
+        elif count == 13 or count == 14:
+            u_out, v_out = np.array([[output[0, 1], output[1, 1], output[2, 1],
+                                      output[3, 1], output[4, 1], output[5, 1],
+                                      output[6, 1], output[7, 1], output[8, 1],
+                                      output[9, 1], output[10, 1], output[11, 1],
+                                      output[0, 1]],
+                                     [output[0, 2], output[1, 2], output[2, 2],
+                                      output[3, 2], output[4, 2], output[5, 2],
+                                      output[6, 2], output[7, 2], output[8, 2],
+                                      output[9, 2], output[10, 2], output[11, 2],
+                                      output[0, 2]]])
+            return u_out, v_out
+
+        elif count == 84:
+            u_out, v_out = np.array([[output[26, 1], output[83, 1], output[39, 1],
+                                      output[75, 1], output[52, 1], output[67, 1],
+                                      output[26, 1]],
+                                     [output[26, 2], output[83, 2], output[39, 2],
+                                      output[75, 2], output[52, 2], output[67, 2],
+                                      output[26, 2]]])
+
+            return u_out, v_out
+
+def show(input_type='file', space='uv', count=None, output=None,
+         new=True, color='k', label=None):
+
+    x, y = input_to_gamut(input_type=input_type, count=count, output=output)
+
+    if space == 'uv':
+        uv(x, y, gamut=True, label=label, title=None, color=color, new=new)
+
+def uv(u_, v_, gamut=None, label='u_, v_', facecolors='none', color='k',
+       linestyle='--', title='u_, v_', grid=True, new=False):
+    """
+    Plot u', v' color coordinates using Luxpy.|
+    ------------------------------------------
+
+    Args:
+        :u_:
+            u' coordinate(s) - must be float, int, or array
+        :v_:
+            v' coordinate(s) - must be float, int, or array
+        :gamut:
+            None
+            Anything bar 'None' will assume a gamut is going to be created.
+            This expects a plot in the order of a line in the diagram e.g.
+            R, G, B, R or R, Y, G, C, B, M, R. Must go back to starting
+            value to complete gamut line.
+        :label:
+            'u_, v_'
+            Change to adjust label within diagram of the input.
+        :facecolors:
+            'none'
+            Change to adjust face color of value within diagram. Only if
+            gamut=None
+        :color:
+            'k'
+            Change to adjust color of either edge color or line color,
+            depending on if 'gamut' is chosen.
+        :linestyle:
+            '--'
+            Change to adjust style of line if gamut is not None.
+        :title:
+            'u_, v_'
+            Change to adjust title of figure.
+        :grid:
+            True
+            Change to 'None' for no grid in diagram.
+        :kwargs:
+            Additional keyword arguments for use with matplotlib.pyplot
+
+    Returns:
+
+    """
+    if new is True:
+        plt.figure()
+        ax_uv = plt.axes()
+        lx.plot_chromaticity_diagram_colors(256, 0.3, 1, lx._CIEOBS, 'Yuv',
+                                            {}, True, ax_uv, grid,
+                                            'Times New Roman', 12)
+    else:
+        ax_uv = plt.axes()
+
+    if gamut is None:
+        plt.scatter(float(u_), float(v_), label=label, facecolors=facecolors,
+                    edgecolors=color)
+    else:
+        ax_uv.plot(u_, v_, label=label, color=color, linestyle=linestyle)
+    ax_uv.set_title(title)
+    ax_uv.set_xlim([-0.1, 0.7])
+    ax_uv.set_ylim([-0.1, 0.7])
+    ax_uv.legend()
+
+def SPD(device = 'jeti', Tint = 0, wait = 0.1):
+    # Initializes spectrometer 'jeti' or 'oceanoptics'
+    sp.init(device)
+
+    spds = []
+
+    time.sleep(wait)
+    spd = sp.get_spd(manufacturer = device, Tint = Tint)
+    spds.append(spd)
+
+    if spds != []:
+        spds = np.vstack((spds[0][0,:],[x[1,:] for x in spds]))
+
+    return spds
+
 class VirtualRealityHmd():
     """
     [ADD THIS]
@@ -167,6 +364,8 @@ class VirtualRealityHmd():
         """
         Initializes LMK for VR-HMD.|
         ---------------------------
+        %timeit:
+            2.28 s ± 56.5 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)
 
         Parameters
         ----------
@@ -242,6 +441,12 @@ class VirtualRealityHmd():
     def analyze(self, target='XYZ'):
         """
         [ADD THIS]
+
+        %timeit:
+            target='Y':
+            36.2 s ± 1.55 s per loop (mean ± std. dev. of 7 runs, 1 loop each)
+            target='XYZ':
+            36.8 s ± 2.06 s per loop (mean ± std. dev. of 7 runs, 1 loop each)
 
         Parameters
         ----------
@@ -322,7 +527,22 @@ class VirtualRealityHmd():
         if results != []:
             results = np.vstack((results))
 
-        ls.close_labsoft()
-        del ax.LMK
+        # ls.close_labsoft()
+        # del ax.LMK
 
         return results
+
+if __name__ == '__main__':
+
+    test = 1
+
+    # VR = VirtualRealityHmd(connect_camera=False)
+
+    # UE_Off_MAX_Ys = VR.analyze('Y')
+    # UE_Off_XYZs = VR.analyze('XYZ')
+
+    # UE_Off_diff, UE_Off_mean = y_diff(UE_Off_MAX_Ys, UE_Off_XYZs)
+    # UE_Off_u_v_ = xyz_to_u_v_(UE_Off_XYZs)
+    # UE_Off_u_v_ = UE_Off_u_v_.astype(float)
+    # show(space='uv', new=False, color='r', input_type='file', count=7, output=UE_Off_u_v_, label='UE4 - Blue Correction: Off')
+    # uv(UE_Off_u_v_[3,0], UE_Off_u_v_[3,1], label='UE4 Blue Correction: Off White', color='r', new=False)

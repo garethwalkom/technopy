@@ -17,6 +17,10 @@ def error_code(err_code):
     """
     Prints error code if error occurs.|
     ----------------------------------
+
+    %timeit:
+        563 µs ± 15.6 µs per loop (mean ± std. dev. of 7 runs, 1000 loops each)
+
     Parameters:
         :err_code: int
             | Error code from ActiveX server.

@@ -43,6 +43,10 @@ def statistic_exists(image = dic.IMAGE_TYPES['Color'], region = 0):
     """
     Proof, if a statistic exists for a image / region / statistic type.|
     -------------------------------------------------------------------
+
+    %timeit:
+        138 µs ± 7.29 µs per loop (mean ± std. dev. of 7 runs, 10000 loops each)
+
     Parameters:
         :lmk:
             | Dispatch('lmk4.LMKAxServer')

@@ -32,6 +32,9 @@ def create(image=0, name='Evaluation[1]'):
     evalutation image.)
     ---------------------------------------------------------------------------
 
+    %timeit:
+        41.4 ms ± 41.5 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)
+
     Parameters
     ----------
     LMK :
@@ -56,6 +59,9 @@ def create(image=0, name='Evaluation[1]'):
 def delete(image=dic.IMAGE_TYPES['Color']):
     """
     [ADD THIS]
+
+    %timeit:
+        27.2 ms ± 373 µs per loop (mean ± std. dev. of 7 runs, 10 loops each)
 
     Parameters
     ----------
@@ -116,6 +122,9 @@ def get_amount():
     """
     [ADD THIS]
 
+    %timeit:
+        127 µs ± 2.64 µs per loop (mean ± std. dev. of 7 runs, 10000 loops each)
+
     Returns
     -------
     images_no : TYPE
@@ -135,6 +144,10 @@ def get_size(image=dic.IMAGE_TYPES['Color']):
     These informations are needed for the other access functions.
     See also Image.SetSize()
     -----------------------------------------------------------------------
+
+    %timeit:
+        142 µs ± 6.26 µs per loop (mean ± std. dev. of 7 runs, 10000 loops each)
+
     Parameters:
         :LMK:
             | Dispatch('lmk4.LMKAxServer')
@@ -173,6 +186,9 @@ def rotate(code=dic.OPERATION_TYPES['Rotate'],
     Uses image arithmetic with one source image, one parameter, and one
     desination image.
     ---------------------------------------------------------------------------
+
+    %timeit:
+        149 ms ± 10.4 ms per loop (mean ± std. dev. of 7 runs, 10 loops each)
 
     Parameters
     ----------
