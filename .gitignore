@@ -1,0 +1,6 @@
+# Build-related
+__pycache__
+.spyproject
+.pylint.d
+*.pyc
+*.stats
