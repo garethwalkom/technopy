@@ -22,7 +22,11 @@ Structure:|
 # load_image():               Load template image file to the target.
 
 """
-import activex as ax
+import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(__file__), os.path.pardir))
+
+from technoteam import activex as ax
 
 def get_no_displays():
     """

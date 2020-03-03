@@ -42,13 +42,15 @@ get_automatic():            Get the state of Automatic-Flag for exposure times.
 set_automatic():            Set Automatic-Flag for all exposure times.
 
 """
+import sys
 import os
+sys.path.append(os.path.join(os.path.dirname(__file__), os.path.pardir))
 import glob
 import configparser
 
-import roots as root
-import activex as ax
-import dicts as dic
+from change_this import roots as root
+from technoteam import activex as ax
+from variables import dicts as dic
 
 # Name of the TechnoTeam LMK Camera
 CAMERA_NAME = str(os.listdir(root.DATA))[2:-2]

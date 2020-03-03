@@ -16,13 +16,16 @@ rotate():                   Rotates image to desired image.
 show():                     Show image.
 
 """
-import datetime
+import sys
 import os
+sys.path.append(os.path.join(os.path.dirname(__file__), os.path.pardir))
+
+import datetime
 from skimage import io
 
-import roots as root
-import dicts as dic
-import activex as ax
+from change_this import roots as root
+from variables import dicts as dic
+from technoteam import activex as ax
 
 def create(image=0, name='Evaluation[1]'):
     """

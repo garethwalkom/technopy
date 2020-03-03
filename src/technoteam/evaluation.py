@@ -29,15 +29,19 @@ show_xy():                  Plot x, y color coordinates using Luxpy.
 show_u_v_():                Plot u', v' color coordinates using Luxpy.
 
 """
+import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(__file__), os.path.pardir))
+
 import numpy as np
 from matplotlib import pyplot as plt
 import luxpy as lx
 
-import activex as ax
-import dicts as dic
-import image as im
-import region as reg
-import table as tab
+from technoteam import activex as ax
+from variables import dicts as dic
+from technoteam import image as im
+from technoteam import region as reg
+from technoteam import table as tab
 
 def statistic_exists(image = dic.IMAGE_TYPES['Color'], region = 0):
     """

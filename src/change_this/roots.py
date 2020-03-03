@@ -15,4 +15,4 @@ DATA = 'F:/LMK/Calibration Data'
 SAVE = 'E:/Measurements/' + str(datetime.date.today()) + '/'
 
 # Define Load Root
-LOAD = 'E:/Measurements/2020-02-08/Unreal Engine/Blue Correction - Off/'
+LOAD = 'E:/Measurements/2019-10-01/'

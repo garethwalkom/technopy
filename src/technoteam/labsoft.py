@@ -15,12 +15,15 @@ get_program_info():         Get some information about program version and
 
 """
 from win32com.client import Dispatch
+import sys
 import os
+sys.path.append(os.path.join(os.path.dirname(__file__), os.path.pardir))
+
 import datetime
 
-import roots as root
-import dicts as dic
-import activex as ax
+from change_this import roots as root
+from variables import dicts as dic
+from technoteam import activex as ax
 
 def open_labsoft():
     """

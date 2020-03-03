@@ -15,9 +15,13 @@ select():                   Selects or deselects a region.
 delete():                   Delete a region.
 
 """
-import activex as ax
-import image as im
-import dicts as dic
+import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(__file__), os.path.pardir))
+
+from technoteam import activex as ax
+from technoteam import image as im
+from variables import dicts as dic
 
 def create(image=dic.IMAGE_TYPES['Color'], region='Ellipse',
            x_coords=[1226, 500, 500], y_coords=[1026, 500, 500]):

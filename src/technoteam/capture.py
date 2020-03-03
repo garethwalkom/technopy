@@ -14,11 +14,15 @@ get_last_info():            Determine information about the preceeding capture.
 
 
 """
+import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(__file__), os.path.pardir))
+
 import operator
 import datetime
 
-import activex as ax
-import camera as cam
+from technoteam import activex as ax
+from technoteam import camera as cam
 
 def single_pic(autoscan=True, exposure_time=0.1):
     """

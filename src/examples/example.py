@@ -14,23 +14,25 @@ VirtualRealityHmd():        Characterize a Virtual Reality Head-Mounted-Display.
         create_region():
 
 """
+import sys
 import os
+sys.path.append(os.path.join(os.path.dirname(__file__), os.path.pardir))
+
 import datetime
 import time
 import numpy as np
 import luxpy as lx
 from matplotlib import pyplot as plt
 
-import roots as root
-import dicts as dic
-# import activex as ax
-import labsoft as ls
-import camera as cam
-import capture as cap
-import image as im
-import region as reg
-import evaluation as eva
-import table as tab
+from change_this import roots as root
+from variables import dicts as dic
+from technoteam import labsoft as ls
+from technoteam import camera as cam
+from technoteam import capture as cap
+from technoteam import image as im
+from technoteam import region as reg
+from technoteam import evaluation as eva
+from technoteam import table as tab
 
 from luxpy.toolboxes import spectro as sp
 
@@ -536,13 +538,16 @@ if __name__ == '__main__':
 
     test = 1
 
+    # label = 'Oculus Rift CV1: Warm-Up Time'
+
     # VR = VirtualRealityHmd(connect_camera=False)
 
-    # UE_Off_MAX_Ys = VR.analyze('Y')
-    # UE_Off_XYZs = VR.analyze('XYZ')
+    # MAX_Ys = VR.analyze('Y')
+    # XYZs = VR.analyze('XYZ')
 
-    # UE_Off_diff, UE_Off_mean = y_diff(UE_Off_MAX_Ys, UE_Off_XYZs)
-    # UE_Off_u_v_ = xyz_to_u_v_(UE_Off_XYZs)
-    # UE_Off_u_v_ = UE_Off_u_v_.astype(float)
-    # show(space='uv', new=False, color='r', input_type='file', count=7, output=UE_Off_u_v_, label='UE4 - Blue Correction: Off')
-    # uv(UE_Off_u_v_[3,0], UE_Off_u_v_[3,1], label='UE4 Blue Correction: Off White', color='r', new=False)
+    # diff, mean = y_diff(MAX_Ys, XYZs)
+    # u_v_ = xyz_to_u_v_(XYZs)
+    # u_v_ = u_v_.astype(float)
+    # show(space='uv', new=False, color='r', input_type='file',
+    #      count=7, output=u_v_, label=label)
+    # uv(u_v_[3,0], u_v_[3,1], label=label, color='r', new=False)
