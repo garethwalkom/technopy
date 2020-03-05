@@ -26,7 +26,7 @@ import sys
 import os
 sys.path.append(os.path.join(os.path.dirname(__file__), os.path.pardir))
 
-from technoteam import activex as ax
+import technoteam.activex as ax
 
 def get_no_displays():
     """
