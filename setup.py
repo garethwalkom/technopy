@@ -10,7 +10,7 @@ setuptools.setup(
     version='0.0.1',
     author='Gareth V. Walkom',
     author_email='walkga04@googlemail.com',
-    description='technopy allows you to control your TechnoTeam LMK.',
+    description='technopy allows you to control your TechnoTeam Luminance Camera or Hyperspectral Camera.',
     long_description=long_description,
     long_description_content_type='COMING SOON',
     url='https://github.com/garethwalkom/technopy',
