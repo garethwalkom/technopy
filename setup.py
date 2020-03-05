@@ -12,7 +12,7 @@ setuptools.setup(
     author_email='walkga04@googlemail.com',
     description='technopy allows you to control your TechnoTeam Luminance Camera or Hyperspectral Camera.',
     long_description=long_description,
-    long_description_content_type='COMING SOON',
+    long_description_content_type='text/markdown',
     url='https://github.com/garethwalkom/technopy',
     packages=setuptools.find_packages(),
     classifiers=[
