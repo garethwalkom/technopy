@@ -1,5 +1,5 @@
 # technopy
-technopy allows you to control your TechnoTeam LMK.
+technopy allows you to control your TechnoTeam Luminance Camera or Hyperspectral Camera.
 
 (-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)
 
