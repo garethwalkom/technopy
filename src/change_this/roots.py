@@ -13,6 +13,8 @@ DATA = 'F:/LMK/Calibration Data'
 
 # Define Save Root
 SAVE = 'E:/Measurements/' + str(datetime.date.today()) + '/'
+SAVE_TEST = 'E:/Measurements/TEST/'
 
 # Define Load Root
-LOAD = 'E:/Measurements/2019-10-01/'
+LOAD = 'E:/Measurements/2020-03-05/'
+LOAD_HYP = 'F:/Program Files/Hyperspectral Camera/GUIHSK23052016/Data_Cube/20200305_081505/'

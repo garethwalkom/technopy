@@ -18,14 +18,13 @@ show():                     Show image.
 """
 import sys
 import os
-sys.path.append(os.path.join(os.path.dirname(__file__), os.path.pardir))
-
 import datetime
 from skimage import io
+sys.path.append(os.path.join(os.path.dirname(__file__), os.path.pardir))
 
-from change_this import roots as root
-from variables import dicts as dic
-from technoteam import activex as ax
+import change_this.roots as root
+import variables.dicts as dic
+import technoteam.activex as ax
 
 def create(image=0, name='Evaluation[1]'):
     """

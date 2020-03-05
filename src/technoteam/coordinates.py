@@ -14,8 +14,8 @@ import sys
 import os
 sys.path.append(os.path.join(os.path.dirname(__file__), os.path.pardir))
 
-from technoteam import activex as ax
-from variables import dicts as dic
+import technoteam.activex as ax
+import variables.dicts as dic
 
 def get_value_unit(image=dic.IMAGE_TYPES['Color']):
     """

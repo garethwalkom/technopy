@@ -14,16 +14,15 @@ get_program_info():         Get some information about program version and
                                 camera current used.
 
 """
-from win32com.client import Dispatch
 import sys
 import os
+import datetime
+from win32com.client import Dispatch
 sys.path.append(os.path.join(os.path.dirname(__file__), os.path.pardir))
 
-import datetime
-
-from change_this import roots as root
-from variables import dicts as dic
-from technoteam import activex as ax
+import change_this.roots as root
+import variables.dicts as dic
+import technoteam.activex as ax
 
 def open_labsoft():
     """
@@ -128,7 +127,8 @@ def get_program_info():
 
     """
 
-    err_code, program_type, program_version, camera_type, camera_no, lens_no = ax.LMK.iGetProgramInfo()
+    err_code, program_type, program_version, camera_type, camera_no, lens_no = \
+        ax.LMK.iGetProgramInfo()
     ax.error_code(err_code) # Check for error
 
     return program_type, program_version, camera_type, camera_no, lens_no

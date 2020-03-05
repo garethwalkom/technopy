@@ -31,19 +31,18 @@ show_u_v_():                Plot u', v' color coordinates using Luxpy.
 """
 import sys
 import os
-sys.path.append(os.path.join(os.path.dirname(__file__), os.path.pardir))
-
 import numpy as np
 from matplotlib import pyplot as plt
 import luxpy as lx
+sys.path.append(os.path.join(os.path.dirname(__file__), os.path.pardir))
 
-from technoteam import activex as ax
-from variables import dicts as dic
-from technoteam import image as im
-from technoteam import region as reg
-from technoteam import table as tab
+import variables.dicts as dic
+import technoteam.activex as ax
+import technoteam.image as im
+import technoteam.region as reg
+import technoteam.table as tab
 
-def statistic_exists(image = dic.IMAGE_TYPES['Color'], region = 0):
+def statistic_exists(image=dic.IMAGE_TYPES['Color'], region=0):
     """
     Proof, if a statistic exists for a image / region / statistic type.|
     -------------------------------------------------------------------
@@ -71,9 +70,9 @@ def statistic_exists(image = dic.IMAGE_TYPES['Color'], region = 0):
 
     return exists, statistic_type, statistic_index
 
-def create_statistic(statistic_type = dic.STATISTIC_TYPES['standardColor'],
-                    image = dic.IMAGE_TYPES['Color'], region = 0,
-                    num_param = 1, param_list = [1]):
+def create_statistic(statistic_type=dic.STATISTIC_TYPES['standardColor'],
+                     image=dic.IMAGE_TYPES['Color'], region=0,
+                     num_param=1, param_list=[1]):
     """
     Create a new statistic.|
     -----------------------
@@ -90,13 +89,14 @@ def create_statistic(statistic_type = dic.STATISTIC_TYPES['standardColor'],
             | Number of parameters for this statistic
         :param_list: QStringList
     """
-    [err_code, statistic] = ax.LMK.iCreateStatistic(statistic_type, image, region, num_param, param_list)
+    [err_code, statistic] = ax.LMK.iCreateStatistic(statistic_type, image, region,
+                                                    num_param, param_list)
     ax.error_code(err_code) # Check for error
 
     return statistic
 
-def get_standard_statistic(statistic_type = dic.STATISTIC_TYPES['standardColor'],
-                         region = 0, color_class = 0):
+def get_standard_statistic(statistic_type=dic.STATISTIC_TYPES['standardColor'],
+                           region=0, color_class=0):
     """
     Determine parameter of the standard statistic.|
     ----------------------------------------------
@@ -138,7 +138,7 @@ def get_standard_statistic(statistic_type = dic.STATISTIC_TYPES['standardColor']
 
     return stats
 
-def delete_statistic(statistic_type = dic.STATISTIC_TYPES['standardColor'], stat_no = 0):
+def delete_statistic(statistic_type=dic.STATISTIC_TYPES['standardColor'], stat_no=0):
     """
     Delete an existing statistic.|
     -----------------------------
@@ -208,17 +208,17 @@ def get_xyz(index_out):
 
     """
 
-    blue_stats = get_standard_statistic(region = index_out, color_class = 0)
+    blue_stats = get_standard_statistic(region=index_out, color_class=0)
     b_mean = str(blue_stats['Mean'])[1:-1]
     b_mean = float(b_mean)
-    green_stats = get_standard_statistic(region = index_out, color_class = 1)
+    green_stats = get_standard_statistic(region=index_out, color_class=1)
     g_mean = str(green_stats['Mean'])[1:-1]
     g_mean = float(g_mean)
-    red_stats = get_standard_statistic(region = index_out, color_class = 2)
+    red_stats = get_standard_statistic(region=index_out, color_class=2)
     r_mean = str(red_stats['Mean'])[1:-1]
     r_mean = float(r_mean)
 
-    output_color = convert_cie_rgb(cie_r = r_mean, cie_g = g_mean, cie_b = b_mean)
+    output_color = convert_cie_rgb(cie_r=r_mean, cie_g=g_mean, cie_b=b_mean)
 
     return output_color
 
@@ -247,24 +247,25 @@ def get_image_mean_xyz():
     # Create a region the size of the whole image
     reg.create_rect_image_size()
     # Get ID of region
-    _, index_out = reg.get_id(dic.IMAGE_TYPES['Color'], name = '1')
+    _, index_out = reg.get_id(dic.IMAGE_TYPES['Color'], name='1')
     # Select region from index of region
-    reg.select(index = index_out)
+    reg.select(index=index_out)
 
     ### Evaluate Region
-    create_statistic(dic.STATISTIC_TYPES['standardColor'], dic.IMAGE_TYPES['Color'], index_out, param_list = [1])
+    create_statistic(dic.STATISTIC_TYPES['standardColor'], dic.IMAGE_TYPES['Color'],
+                     index_out, param_lis=[1])
 
-    blue_stats = get_standard_statistic(color_class = 0)
+    blue_stats = get_standard_statistic(color_class=0)
     b_mean = str(blue_stats['Mean'])[1:-1]
     b_mean = float(b_mean)
-    green_stats = get_standard_statistic(color_class = 1)
+    green_stats = get_standard_statistic(color_class=1)
     g_mean = str(green_stats['Mean'])[1:-1]
     g_mean = float(g_mean)
-    red_stats = get_standard_statistic(color_class = 2)
+    red_stats = get_standard_statistic(color_class=2)
     r_mean = str(red_stats['Mean'])[1:-1]
     r_mean = float(r_mean)
 
-    output_color = convert_cie_rgb(cie_r = r_mean, cie_g = g_mean, cie_b = b_mean)
+    output_color = convert_cie_rgb(cie_r=r_mean, cie_g=g_mean, cie_b=b_mean)
 
     return output_color
 
@@ -288,27 +289,28 @@ def get_circle_mean_xyz():
         delete_statistic()
 
     # Create a region the size of the whole image
-    reg.create(x_coords = [image_last_col/2, 1700, 1700],
-                                                  y_coords = [image_last_line/2, 1700, 1700])
+    reg.create(x_coords=[image_last_col/2, 1700, 1700],
+               y_coords=[image_last_line/2, 1700, 1700])
     # Get ID of region
-    err_code, index_out = reg.get_id(dic.IMAGE_TYPES['Color'], name = '1')
+    err_code, index_out = reg.get_id(dic.IMAGE_TYPES['Color'], name='1')
     # Select region from index of region
-    reg.select(index = index_out)
+    reg.select(index=index_out)
 
     ### Evaluate Region
-    create_statistic(dic.STATISTIC_TYPES['standardColor'], dic.IMAGE_TYPES['Color'], index_out, param_list = [1])
+    create_statistic(dic.STATISTIC_TYPES['standardColor'], dic.IMAGE_TYPES['Color'],
+                     index_out, param_list=[1])
 
-    blue_stats = get_standard_statistic(color_class = 0)
+    blue_stats = get_standard_statistic(color_class=0)
     b_mean = str(blue_stats['Mean'])[1:-1]
     b_mean = float(b_mean)
-    green_stats = get_standard_statistic(color_class = 1)
+    green_stats = get_standard_statistic(color_class=1)
     g_mean = str(green_stats['Mean'])[1:-1]
     g_mean = float(g_mean)
-    red_stats = get_standard_statistic(color_class = 2)
+    red_stats = get_standard_statistic(color_class=2)
     r_mean = str(red_stats['Mean'])[1:-1]
     r_mean = float(r_mean)
 
-    output_color = convert_cie_rgb(cie_r = r_mean, cie_g = g_mean, cie_b = b_mean)
+    output_color = convert_cie_rgb(cie_r=r_mean, cie_g=g_mean, cie_b=b_mean)
 
     return output_color
 
@@ -341,16 +343,25 @@ def get_circle_mean_xyz():
 #     reg.Select(LMK, Index = Index_Seven)
 #     reg.Select(LMK, Index = Index_Eight)
 
-#     ### Evaluate Region
-#     CreateStatistic(LMK, dic.STATISTIC_TYPES['standardColor'], dic.IMAGE_TYPES['Color'], Index_Zero, ParamList = [1])
-#     CreateStatistic(LMK, dic.STATISTIC_TYPES['standardColor'], dic.IMAGE_TYPES['Color'], Index_One, ParamList = [1])
-#     CreateStatistic(LMK, dic.STATISTIC_TYPES['standardColor'], dic.IMAGE_TYPES['Color'], Index_Two, ParamList = [1])
-#     CreateStatistic(LMK, dic.STATISTIC_TYPES['standardColor'], dic.IMAGE_TYPES['Color'], Index_Three, ParamList = [1])
-#     CreateStatistic(LMK, dic.STATISTIC_TYPES['standardColor'], dic.IMAGE_TYPES['Color'], Index_Four, ParamList = [1])
-#     CreateStatistic(LMK, dic.STATISTIC_TYPES['standardColor'], dic.IMAGE_TYPES['Color'], Index_Five, ParamList = [1])
-#     CreateStatistic(LMK, dic.STATISTIC_TYPES['standardColor'], dic.IMAGE_TYPES['Color'], Index_Six, ParamList = [1])
-#     CreateStatistic(LMK, dic.STATISTIC_TYPES['standardColor'], dic.IMAGE_TYPES['Color'], Index_Seven, ParamList = [1])
-#     CreateStatistic(LMK, dic.STATISTIC_TYPES['standardColor'], dic.IMAGE_TYPES['Color'], Index_Eight, ParamList = [1])
+    ## Evaluate Region
+    # CreateStatistic(LMK, dic.STATISTIC_TYPES['standardColor'],
+    #                 dic.IMAGE_TYPES['Color'], Index_Zero, ParamList = [1])
+    # CreateStatistic(LMK, dic.STATISTIC_TYPES['standardColor'],
+    #                 dic.IMAGE_TYPES['Color'], Index_One, ParamList = [1])
+    # CreateStatistic(LMK, dic.STATISTIC_TYPES['standardColor'],
+    #                 dic.IMAGE_TYPES['Color'], Index_Two, ParamList = [1])
+    # CreateStatistic(LMK, dic.STATISTIC_TYPES['standardColor'],
+    #                 dic.IMAGE_TYPES['Color'], Index_Three, ParamList = [1])
+    # CreateStatistic(LMK, dic.STATISTIC_TYPES['standardColor'],
+    #                 dic.IMAGE_TYPES['Color'], Index_Four, ParamList = [1])
+    # CreateStatistic(LMK, dic.STATISTIC_TYPES['standardColor'],
+    #                 dic.IMAGE_TYPES['Color'], Index_Five, ParamList = [1])
+    # CreateStatistic(LMK, dic.STATISTIC_TYPES['standardColor'],
+    #                 dic.IMAGE_TYPES['Color'], Index_Six, ParamList = [1])
+    # CreateStatistic(LMK, dic.STATISTIC_TYPES['standardColor'],
+    #                 dic.IMAGE_TYPES['Color'], Index_Seven, ParamList = [1])
+    # CreateStatistic(LMK, dic.STATISTIC_TYPES['standardColor'],
+    #                 dic.IMAGE_TYPES['Color'], Index_Eight, ParamList = [1])
 
 #     Blue_Stats_Zero = GetStandardStatistic(LMK, Region = 0, Class = 0)
 #     B_Mean_Zero = str(Blue_Stats_Zero['Mean'])[1:-1]
@@ -442,20 +453,31 @@ def get_circle_mean_xyz():
 #     R_Mean_Eight = str(Red_Stats_Eight['Mean'])[1:-1]
 #     R_Mean_Eight = float(R_Mean_Eight)
 
-#     Output_Color_Zero = Convert_CIE_RGB(LMK, CIE_R = R_Mean_Zero, CIE_G = G_Mean_Zero, CIE_B = B_Mean_Zero)
-#     Output_Color_One = Convert_CIE_RGB(LMK, CIE_R = R_Mean_One, CIE_G = G_Mean_One, CIE_B = B_Mean_One)
-#     Output_Color_Two = Convert_CIE_RGB(LMK, CIE_R = R_Mean_Two, CIE_G = G_Mean_Two, CIE_B = B_Mean_Two)
-#     Output_Color_Three = Convert_CIE_RGB(LMK, CIE_R = R_Mean_Three, CIE_G = G_Mean_Three, CIE_B = B_Mean_Three)
-#     Output_Color_Four = Convert_CIE_RGB(LMK, CIE_R = R_Mean_Four, CIE_G = G_Mean_Four, CIE_B = B_Mean_Four)
-#     Output_Color_Five = Convert_CIE_RGB(LMK, CIE_R = R_Mean_Five, CIE_G = G_Mean_Five, CIE_B = B_Mean_Five)
-#     Output_Color_Six = Convert_CIE_RGB(LMK, CIE_R = R_Mean_Six, CIE_G = G_Mean_Six, CIE_B = B_Mean_Six)
-#     Output_Color_Seven = Convert_CIE_RGB(LMK, CIE_R = R_Mean_Seven, CIE_G = G_Mean_Seven, CIE_B = B_Mean_Seven)
-#     Output_Color_Eight = Convert_CIE_RGB(LMK, CIE_R = R_Mean_Eight, CIE_G = G_Mean_Eight, CIE_B = B_Mean_Eight)
+    # Output_Color_Zero = Convert_CIE_RGB(LMK, CIE_R = R_Mean_Zero,
+    #                                     CIE_G = G_Mean_Zero, CIE_B = B_Mean_Zero)
+    # Output_Color_One = Convert_CIE_RGB(LMK, CIE_R = R_Mean_One,
+    #                                    CIE_G = G_Mean_One, CIE_B = B_Mean_One)
+    # Output_Color_Two = Convert_CIE_RGB(LMK, CIE_R = R_Mean_Two,
+    #                                    CIE_G = G_Mean_Two, CIE_B = B_Mean_Two)
+    # Output_Color_Three = Convert_CIE_RGB(LMK, CIE_R = R_Mean_Three,
+    #                                      CIE_G = G_Mean_Three, CIE_B = B_Mean_Three)
+    # Output_Color_Four = Convert_CIE_RGB(LMK, CIE_R = R_Mean_Four,
+    #                                     CIE_G = G_Mean_Four, CIE_B = B_Mean_Four)
+    # Output_Color_Five = Convert_CIE_RGB(LMK, CIE_R = R_Mean_Five,
+    #                                     CIE_G = G_Mean_Five, CIE_B = B_Mean_Five)
+    # Output_Color_Six = Convert_CIE_RGB(LMK, CIE_R = R_Mean_Six,
+    #                                    CIE_G = G_Mean_Six, CIE_B = B_Mean_Six)
+    # Output_Color_Seven = Convert_CIE_RGB(LMK, CIE_R = R_Mean_Seven,
+    #                                      CIE_G = G_Mean_Seven, CIE_B = B_Mean_Seven)
+    # Output_Color_Eight = Convert_CIE_RGB(LMK, CIE_R = R_Mean_Eight,
+    #                                      CIE_G = G_Mean_Eight, CIE_B = B_Mean_Eight)
 
-#     return Output_Color_Zero, Output_Color_One, Output_Color_Two, Output_Color_Three, Output_Color_Four, Output_Color_Five, Output_Color_Six, Output_Color_Seven, Output_Color_Eight
+    # return Output_Color_Zero, Output_Color_One, Output_Color_Two, \
+    #     Output_Color_Three, Output_Color_Four, Output_Color_Five, \
+    #         Output_Color_Six, Output_Color_Seven, Output_Color_Eight
 
-def get_color_hist_vals(image = dic.IMAGE_TYPES['Color'],
-                            color_space = dic.COLOR_SPACES['XYZ']):
+def get_color_hist_vals(image=dic.IMAGE_TYPES['Color'],
+                        color_space=dic.COLOR_SPACES['XYZ']):
     """
     Get the values of the histogram in a color image.|
     -------------------------------------------------
@@ -476,12 +498,13 @@ def get_color_hist_vals(image = dic.IMAGE_TYPES['Color'],
         :hist_values: QStringList
             | Histogram values
     """
-    err_code, num_param, x_coords, hist_values = ax.LMK.iGetColorHistogramValues(image, color_space)
+    err_code, num_param, x_coords, hist_values \
+        = ax.LMK.iGetColorHistogramValues(image, color_space)
     ax.error_code(err_code) # Check for error
 
     return num_param, x_coords, hist_values
 
-def get_pixel_color(image = dic.IMAGE_TYPES['Color'], line = 500, column = 500):
+def get_pixel_color(image=dic.IMAGE_TYPES['Color'], line=500, column=500):
     """
     Get a pixel value of a color image.|
     -----------------------------------
@@ -509,8 +532,8 @@ def get_pixel_color(image = dic.IMAGE_TYPES['Color'], line = 500, column = 500):
 
     return cie_r, cie_g, cie_b
 
-def convert_cie_rgb(cie_r = 255.0, cie_g = 0.0, cie_b = 0.0, r_ref = 0.0,
-                 g_ref = 0.0, b_ref = 0.0, color_space = dic.COLOR_SPACES['XYZ']):
+def convert_cie_rgb(cie_r=255.0, cie_g=0.0, cie_b=0.0, r_ref=0.0,
+                    g_ref=0.0, b_ref=0.0, color_space=dic.COLOR_SPACES['XYZ']):
     """
     Conversion of a color value from CIE-RGB to another color space.|
     ----------------------------------------------------------------
@@ -564,13 +587,13 @@ def xyz_to_xy(xyz):
         :xy_mean: array (shape: (1, 2))
     """
     y_xy = lx.xyz_to_Yxy(xyz)
-    y_xy_mean = np.array([[y_xy[:,0].mean(), y_xy[:,1].mean(), y_xy[:,2].mean()]])
+    y_xy_mean = np.array([[y_xy[:, 0].mean(), y_xy[:, 1].mean(), y_xy[:, 2].mean()]])
 
     y_xy_mean = np.around(y_xy_mean, decimals=3)
 
-    x_mean = y_xy_mean[:,1]
+    x_mean = y_xy_mean[:, 1]
     x_mean = str(x_mean)[1:-1]
-    y_mean = y_xy_mean[:,2]
+    y_mean = y_xy_mean[:, 2]
     y_mean = str(y_mean)[1:-1]
 
     xy_mean = np.array([[x_mean], [y_mean]])
@@ -588,13 +611,13 @@ def xyz_to_u_v_(xyz):
         :u_v_mean: array (shape: (1, 2))
     """
     y_uv = lx.xyz_to_Yuv(xyz)
-    y_uv_mean = np.array([[y_uv[:,0].mean(), y_uv[:,1].mean(), y_uv[:,2].mean()]])
+    y_uv_mean = np.array([[y_uv[:, 0].mean(), y_uv[:, 1].mean(), y_uv[:, 2].mean()]])
 
     y_uv_mean = np.around(y_uv_mean, decimals=3)
 
-    u_mean = y_uv_mean[:,1]
+    u_mean = y_uv_mean[:, 1]
     u_mean = str(u_mean)[1:-1]
-    v_mean = y_uv_mean[:,2]
+    v_mean = y_uv_mean[:, 2]
     v_mean = str(v_mean)[1:-1]
 
     u_v_mean = np.array([[u_mean], [v_mean]])
@@ -602,7 +625,7 @@ def xyz_to_u_v_(xyz):
 
     return u_v_mean
 
-def Show_xy(x_val, y_val, label='x, y', facecolors='none', color='k',
+def show_xy(x_val, y_val, label='x, y', facecolors='none', color='k',
             title='x, y', grid=True):
     """
     Plot x, y color coordinates using Luxpy.
@@ -634,15 +657,16 @@ def Show_xy(x_val, y_val, label='x, y', facecolors='none', color='k',
     """
     plt.figure()
     ax_xy = plt.axes()
-    lx.plot_chromaticity_diagram_colors(256,0.3,1,lx._CIEOBS,'Yxy',{},True,ax_xy,
-                                        grid,'Times New Roman',12)
-    plt.scatter(float(x_val), float(y_val), label = label, facecolors = facecolors, edgecolors = color)
+    lx.plot_chromaticity_diagram_colors(256, 0.3, 1, lx._CIEOBS, 'Yxy', {},
+                                        True, ax_xy, grid, 'Times New Roman', 12)
+    plt.scatter(float(x_val), float(y_val), label=label, facecolors=facecolors,
+                edgecolors=color)
     ax_xy.set_title(title)
     ax_xy.set_xlim([-0.1, 0.8])
     ax_xy.set_ylim([-0.1, 0.9])
     ax_xy.legend()
 
-def Show_u_v_(u_val, v_val, label='u_, v_', facecolors='none', color='k',
+def show_u_v_(u_val, v_val, label='u_, v_', facecolors='none', color='k',
               title='u_, v_', grid=True):
     """
     Plot u', v' color coordinates using Luxpy.
@@ -674,9 +698,10 @@ def Show_u_v_(u_val, v_val, label='u_, v_', facecolors='none', color='k',
     """
     plt.figure()
     ax_uv = plt.axes()
-    lx.plot_chromaticity_diagram_colors(256,0.3,1,lx._CIEOBS,'Yuv',{},True,ax_uv,
-                                        grid,'Times New Roman',12)
-    plt.scatter(float(u_val), float(v_val), label = label, facecolors = facecolors, edgecolors = color)
+    lx.plot_chromaticity_diagram_colors(256, 0.3, 1, lx._CIEOBS, 'Yuv', {},
+                                        True, ax_uv, grid, 'Times New Roman', 12)
+    plt.scatter(float(u_val), float(v_val), label=label, facecolors=facecolors,
+                edgecolors=color)
     ax_uv.set_title(title)
     ax_uv.set_xlim([-0.1, 0.7])
     ax_uv.set_ylim([-0.1, 0.7])

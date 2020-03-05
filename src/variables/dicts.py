@@ -4,7 +4,8 @@ Created on Sun Feb  9 21:50:00 2020
 @author: Gareth V. Walkom (walkga04 at googlemail.com)
 """
 CAMERA_NAMES = {'Old':'ttf8847',
-                'VR': 'tts20035'}
+                'VR': 'tts20035',
+                'Hyperspectral': 'tte4202ir_52127ir'}
 
 OLD_LENSES = {'6.5': 'o13196f6_5',
               '12': 'o95653f12',
@@ -15,6 +16,8 @@ VR_LENSES = {'50mm': 'oM00442f50',
              'Conoscopic': 'oTTC-163_D0224',
              'NED_2mm': 'oTTNED-12_50_2mmEP',
              'NED_4mm': 'oTTNED-12_50_4mmEP'}
+
+HYPERSPECTRAL_LENSES = {'8mm':'oDietzschf8'}
 
 ## Access Color Spaces
 # Dictionary containing all available color spaces.

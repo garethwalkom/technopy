@@ -19,9 +19,9 @@ import sys
 import os
 sys.path.append(os.path.join(os.path.dirname(__file__), os.path.pardir))
 
-from technoteam import activex as ax
-from technoteam import image as im
-from variables import dicts as dic
+import technoteam.activex as ax
+import technoteam.image as im
+import variables.dicts as dic
 
 def create(image=dic.IMAGE_TYPES['Color'], region='Ellipse',
            x_coords=[1226, 500, 500], y_coords=[1026, 500, 500]):

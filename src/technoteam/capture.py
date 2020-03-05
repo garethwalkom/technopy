@@ -21,8 +21,8 @@ sys.path.append(os.path.join(os.path.dirname(__file__), os.path.pardir))
 import operator
 import datetime
 
-from technoteam import activex as ax
-from technoteam import camera as cam
+import technoteam.activex as ax
+import technoteam.camera as cam
 
 def single_pic(autoscan=True, exposure_time=0.1):
     """
@@ -37,7 +37,8 @@ def single_pic(autoscan=True, exposure_time=0.1):
 
     if autoscan is True:
         exposure_times = cam.color_autoscan_time() # [REQUIRED if wanting best exposure times]
-        err_code = ax.LMK.iSinglePic2(max(exposure_times.items(), key=operator.itemgetter(1))[1])
+        err_code = ax.LMK.iSinglePic2(max(exposure_times.items(),
+                                          key=operator.itemgetter(1))[1])
     else:
         err_code = ax.LMK.iSinglePic2(exposure_time)
     ax.error_code(err_code) # Check for error
@@ -85,8 +86,8 @@ def high_dyn_pic(autoscan=True, exposure_time=0.1, start_ratio=10.0, time_ratio=
     if autoscan is True:
         exposure_times = cam.color_autoscan_time() # [REQUIRED if wanting best exposure times]
         err_code = ax.LMK.iHighDynPic3(max(exposure_times.items(),
-                                        key=operator.itemgetter(1))[1],
-                                    start_ratio, time_ratio, pic_count)
+                                           key=operator.itemgetter(1))[1],
+                                       start_ratio, time_ratio, pic_count)
     else:
         err_code = ax.LMK.iHighDynPic3(exposure_time, start_ratio, time_ratio, pic_count)
     ax.error_code(err_code) # Check for error
@@ -111,8 +112,8 @@ def color_high_dyn(autoscan=True, max_time=15.0, min_time=0.0, time_ratio=3.0, p
     if autoscan is True:
         exposure_times = cam.color_autoscan_time() # [REQUIRED if wanting best exposure times]
         err_code = ax.LMK.iColorHighDynPic2(max(exposure_times.items(),
-                                             key=operator.itemgetter(1))[1],
-                                         min_time, time_ratio, pic_count)
+                                                key=operator.itemgetter(1))[1],
+                                            min_time, time_ratio, pic_count)
     else:
         err_code = ax.LMK.iColorHighDynPic2(max_time, min_time, time_ratio, pic_count)
     ax.error_code(err_code) # Check for error

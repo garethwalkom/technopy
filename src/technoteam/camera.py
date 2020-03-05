@@ -44,13 +44,14 @@ set_automatic():            Set Automatic-Flag for all exposure times.
 """
 import sys
 import os
-sys.path.append(os.path.join(os.path.dirname(__file__), os.path.pardir))
 import glob
 import configparser
+import numpy as np
+sys.path.append(os.path.join(os.path.dirname(__file__), os.path.pardir))
 
-from change_this import roots as root
-from technoteam import activex as ax
-from variables import dicts as dic
+import change_this.roots as root
+import technoteam.activex as ax
+import variables.dicts as dic
 
 # Name of the TechnoTeam LMK Camera
 CAMERA_NAME = str(os.listdir(root.DATA))[2:-2]
@@ -125,6 +126,9 @@ def get_lenses(camera):
     elif camera == 'VR':
         for lenses in dic.VR_LENSES.keys():
             print(lenses)
+    elif camera == 'Hyperspectral':
+        for lenses in dic.HYPERSPECTRAL_LENSES.keys():
+            print(lenses)
 
     return lenses
 
@@ -156,6 +160,9 @@ def set_lens(camera, lens=None):
         elif camera == 'VR':
             for lenses in dic.VR_LENSES.keys():
                 print(lenses)
+        elif camera == 'Hyperspectral':
+            for lenses in dic.HYPERSPECTRAL_LENSES.keys():
+                print(lenses)
 
         lens = input('Input chosen lens: ')
 
@@ -163,6 +170,8 @@ def set_lens(camera, lens=None):
         lens_no = dic.OLD_LENSES[lens]
     elif camera == 'VR':
         lens_no = dic.VR_LENSES[lens]
+    elif camera == 'Hyperspectral':
+        lens_no = dic.HYPERSPECTRAL_LENSES[lens]
 
 
     return lens, lens_no
@@ -242,7 +251,7 @@ def get_focus_factors_old():
 
     return focus_factors, focus_factor
 
-def get_focus_factor_id(focus_factors, scale = 'infinite'):
+def get_focus_factor_id(focus_factors, scale='infinite'):
     """
     Gets ID of selected focus factor.|
     ---------------------------------
@@ -270,10 +279,33 @@ def set_focus_factor():
         :focus_factor: int
             | Index of focus factor
     """
-    focus_factors, focus_factors_size = get_focus_factors()
+    focus_factors, _ = get_focus_factors()
     focus_factor_id = get_focus_factor_id(focus_factors)
     err_code = ax.LMK.iSetFocusFactor(focus_factor_id)
     ax.error_code(err_code) # Check for error
+
+def get_filter_wheels():
+    """
+    [ADD THIS]
+
+    Returns
+    -------
+    filter_wheel_max : TYPE
+        DESCRIPTION.
+    filter_wheel_names : TYPE
+        DESCRIPTION.
+
+    """
+
+    config = configparser.ConfigParser()
+    config.read(root.DATA + '/' + dic.CAMERA_NAMES['Hyperspectral'] + '/' + \
+                'camera' + dic.FILE_TYPES['ini'])
+    filter_wheel_max = config.get('PropertyList', 'FILTER_WHEEL_MAX')
+    filter_wheel_names = config.get('PropertyList', 'FILTER_WHEEL_NAMES')
+    filter_wheel_names = filter_wheel_names.split(' ')
+    filter_wheel_names = np.vstack(filter_wheel_names).astype(int)
+
+    return filter_wheel_max, filter_wheel_names
 
 def open_camera(camera_no, lens_no):
     """
@@ -420,7 +452,8 @@ def get_integration_time():
         :max_time: float
             | Maximal possible time
     """
-    err_code, current_time, previous_time, next_time, min_time, max_time = ax.LMK.iGetIntegrationTime()
+    err_code, current_time, previous_time, next_time, min_time, max_time = \
+        ax.LMK.iGetIntegrationTime()
     ax.error_code(err_code) # Check for error
 
     return current_time, previous_time, next_time, min_time, max_time
@@ -530,6 +563,24 @@ def get_filter_wheel():
     ax.error_code(err_code) # Check for error
 
     return current_filter_pos, current_filter_name
+
+def set_filter_wheel(filter_pos):
+    """
+    [ADD THIS]
+
+    Parameters
+    ----------
+    filter_pos : TYPE
+        DESCRIPTION.
+
+    Returns
+    -------
+    None.
+
+    """
+
+    err_code = ax.LMK.iSetFilterWheel(filter_pos)
+    ax.error_code(err_code) # Check for error
 
 def get_grey_filter_list():
     """
@@ -721,7 +772,7 @@ def set_smear(smear=0):
             | !0 = smear correction with at least 10 dark images captures
             | > 10 number of dark images
     """
-    err_code = ax.LMK.iGetSmear()
+    err_code = ax.LMK.iSetSmear(smear)
     ax.error_code(err_code) # Check for error
 
 def get_automatic():
