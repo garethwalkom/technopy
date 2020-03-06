@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-import setuptools
+from setuptools import find_packages, setup
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
@@ -15,12 +15,7 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type='text/markdown',
     url='https://github.com/garethwalkom/technopy',
-    packages=setuptools.find_packages(),
-    package_data={
-        # If any package contains *.py or *.txt files, include them:
-        "": ["*.py", "*.txt"],
-    },
-    include_package_data=True,
+    packages=find_packages(),
     classifiers=[
         'Programming Language :: Python :: 3',
         'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
