@@ -7,7 +7,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name='technopy',
-    version='0.0.6',
+    version='0.0.7',
     author='Gareth V. Walkom',
     author_email='walkga04@googlemail.com',
     license='GPLv3',
