@@ -7,7 +7,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name='technopy',
-    version='0.0.3',
+    version='0.0.4',
     author='Gareth V. Walkom',
     author_email='walkga04@googlemail.com',
     license='GPLv3',
