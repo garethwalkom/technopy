@@ -3,19 +3,16 @@
 Created on Wed Mar  4 18:24:22 2020
 @author: Gareth V. Walkom (walkga04 at googlemail.com)
 """
-import sys
 import os
 import numpy as np
 import matplotlib.pyplot as plt
 
-sys.path.append(os.path.join(os.path.dirname(__file__), os.path.pardir))
-
-import change_this.roots as root
-import variables.dicts as dic
-import technoteam.labsoft as ls
-import technoteam.camera as cam
-import technoteam.capture as cap
-import technoteam.image as im
+from technopy.change_this import roots as root
+from technopy.variables import dicts as dic
+from technopy.technoteam import labsoft as ls
+from technopy.technoteam import camera as cam
+from technopy.technoteam import capture as cap
+from technopy.technoteam import image as im
 
 class Hyperspectral:
     """
