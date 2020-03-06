@@ -7,7 +7,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name='technopy',
-    version='0.0.1',
+    version='0.0.2',
     author='Gareth V. Walkom',
     author_email='walkga04@googlemail.com',
     license='GPLv3',
@@ -16,6 +16,10 @@ setuptools.setup(
     long_description_content_type='text/markdown',
     url='https://github.com/garethwalkom/technopy',
     packages=setuptools.find_packages(),
+    package_data={
+        # If any package contains *.py or *.txt files, include them:
+        "": ["*.py", "*.txt"],
+    },
     classifiers=[
         'Programming Language :: Python :: 3',
         'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
