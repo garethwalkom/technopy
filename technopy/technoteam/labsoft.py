@@ -17,7 +17,6 @@ get_program_info():         Get some information about program version and
 import sys
 import os
 import datetime
-from win32com.client import Dispatch
 sys.path.append(os.path.join(os.path.dirname(__file__), os.path.pardir))
 
 import change_this.roots as root
@@ -39,7 +38,6 @@ def open_labsoft():
     None.
 
     """
-    ax.LMK = Dispatch('lmk4.LMKAxServer')
     err_code = ax.LMK.iOpen()
     ax.error_code(err_code) # Check for error
 

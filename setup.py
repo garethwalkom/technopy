@@ -5,9 +5,12 @@ from setuptools import find_packages, setup
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
+with open('requirements.txt') as f:
+    requirements = f.read().splitlines()
+
 setup(
     name='technopy',
-    version='0.0.7',
+    version='0.0.8',
     author='Gareth V. Walkom',
     author_email='walkga04@googlemail.com',
     license='GPLv3',
@@ -16,6 +19,8 @@ setup(
     long_description_content_type='text/markdown',
     url='https://github.com/garethwalkom/technopy',
     packages=find_packages(),
+    include_package_data=True,
+    install_requires=requirements,
     classifiers=[
         'Programming Language :: Python :: 3',
         'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',

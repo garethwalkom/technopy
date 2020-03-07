@@ -7,9 +7,9 @@ Structure:|
 
 VirtualRealityHmd():        Measure a Virtual Reality Head-Mounted-Display.
     __init__():             Initializes LMK for HMD
-    warm_up():
-    measure():
-    analyze():
+    warm_up():              Warm-Up VR-HMD
+    measure():              Measure VR-HMD
+    analyze():              Analyze Data from Measurement
 
 """
 import os
