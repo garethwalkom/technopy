@@ -5,12 +5,12 @@ from setuptools import find_packages, setup
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
-with open('requirements.txt') as f:
+with open('technopy/requirements.txt') as f:
     requirements = f.read().splitlines()
 
 setup(
     name='technopy',
-    version='0.0.8',
+    version='0.0.9',
     author='Gareth V. Walkom',
     author_email='walkga04@googlemail.com',
     license='GPLv3',
