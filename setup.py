@@ -5,6 +5,9 @@ from setuptools import find_packages, setup
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
+with open('technopy/requirements.txt') as f:
+    requirements = f.read().splitlines()
+
 setup(
     name='technopy',
     version='0.0.11',
@@ -17,13 +20,7 @@ setup(
     url='https://github.com/garethwalkom/technopy',
     packages=find_packages(),
     include_package_data=True,
-    install_requires=[
-        numpy==1.18.1
-        pandas==1.0.1,
-        matplotlib==3.1.3,
-        scikit-image==0.16.2,
-        tornado==5.1,
-        luxpy==1.4.17],
+    install_requires=requirements,
     classifiers=[
         'Programming Language :: Python :: 3',
         'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
