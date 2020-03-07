@@ -20,7 +20,13 @@ setup(
     url='https://github.com/garethwalkom/technopy',
     packages=find_packages(),
     include_package_data=True,
-    install_requires=requirements,
+    install_requires=[
+		'luxpy',
+		'matplotlib',
+		'numpy',
+		'pandas',
+		'scikit-image',
+		'tornado'],
     classifiers=[
         'Programming Language :: Python :: 3',
         'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
