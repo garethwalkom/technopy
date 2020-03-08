@@ -10,7 +10,7 @@ with open('requirements.txt') as f:
 
 setup(
     name='technopy',
-    version='0.0.11',
+    version='0.0.17',
     author='Gareth V. Walkom',
     author_email='walkga04@googlemail.com',
     license='GPLv3',
@@ -19,14 +19,8 @@ setup(
     long_description_content_type='text/markdown',
     url='https://github.com/garethwalkom/technopy',
     packages=find_packages(),
-    include_package_data=True,
-    install_requires=[
-		'luxpy',
-		'matplotlib',
-		'numpy',
-		'pandas',
-		'scikit-image',
-		'tornado'],
+    include_package_data = True,
+    install_requires=requirements,
     classifiers=[
         'Programming Language :: Python :: 3',
         'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
