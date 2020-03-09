@@ -10,7 +10,7 @@ with open('requirements.txt') as f:
 
 setup(
 	name='technopy',
-	version='0.0.18',
+	version='0.0.24',
 	author='Gareth V. Walkom',
 	author_email='walkga04@googlemail.com',
 	license='GPLv3',
@@ -19,7 +19,7 @@ setup(
 	long_description_content_type='text/markdown',
 	url='https://github.com/garethwalkom/technopy',
 	keywords = ['TECHNOTEAM', 'METROLOGY', 'COLOR-SCIENCE', 'LIGHT', 'COLOR', 'LUMINANCE', 'HYSPERSPECTRAL', 'CAMERA','LIGHTING','HYPERSPECTRAL-IMAGING', 'IMAGE-PROCESSING'],
-	packages=find_packages(),
+	packages=find_packages(exclude=['**/__pycache__']),
 	include_package_data = True,
 	install_requires=requirements,
 	classifiers=[
