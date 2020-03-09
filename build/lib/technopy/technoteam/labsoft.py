@@ -14,6 +14,8 @@ get_program_info():         Get some information about program version and
                                 camera current used.
 
 """
+from win32com.client import Dispatch
+
 import sys
 import os
 sys.path.append(os.path.join(os.path.dirname(__file__), os.path.pardir))
@@ -36,6 +38,8 @@ def open_labsoft():
     None.
 
     """
+    ax.LMK = Dispatch('lmk4.LMKAxServer')
+
     err_code = ax.LMK.iOpen()
     ax.error_code(err_code) # Check for error
 
@@ -104,7 +108,8 @@ def load(load_root, file_name):
 
     """
 
-    err_code = ax.LMK.iLoadProtokoll(load_root + file_name)
+    err_code = ax.LMK.iLoadProtokoll(load_root + file_name + \
+                                     dic.FILE_TYPES['ttcs'])
     ax.error_code(err_code) # Check for error
 
 def get_program_info():

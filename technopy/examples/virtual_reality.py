@@ -118,7 +118,8 @@ class VirtualRealityHmd:
 
 
     def measure(self, color_image=True, autoscan=False, min_time=0.0,
-                time_ratio=3.0, pic_count=1, start_ratio=10, time_it=False):
+                max_time=15, time_ratio=3.0, pic_count=1, start_ratio=10,
+                time_it=False, analyze=None):
         """
         Capture VR-HMD.|
         ----------------
@@ -134,15 +135,18 @@ class VirtualRealityHmd:
 
         ## Capture Image
         if color_image is True:
-            cap.color_high_dyn(autoscan, min_time, time_ratio, pic_count)
+            cap.color_high_dyn(autoscan, max_time, min_time,
+                               time_ratio, pic_count)
         else:
             cap.high_dyn_pic(autoscan, min_time, start_ratio, time_ratio,
                              pic_count)
 
+        # Optional Analyze
+        if analyze is not None:
+            results = self.analyze(analyze)
+
         ## Save Measurement
-        ls.save(self.save_root,
-                datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S') + \
-                    dic.FILE_TYPES['ttcs'])
+        ls.save(self.save_root, datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S'))
 
         if time_it is True:
             meas_fin = datetime.datetime.now()
@@ -175,7 +179,7 @@ class VirtualRealityHmd:
         for measurement in os.listdir(self.load_root):
             if measurement.endswith('.ttcs'):
 
-                ls.load(self.load_root + measurement)
+                ls.load(self.load_root, measurement[:-5])
 
                 if target == 'Y':
                     color = 0
