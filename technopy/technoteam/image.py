@@ -18,11 +18,9 @@ show():                     Show image.
 """
 import sys
 import os
-import datetime
 from skimage import io
 sys.path.append(os.path.join(os.path.dirname(__file__), os.path.pardir))
 
-import change_this.roots as root
 import variables.dicts as dic
 import technoteam.activex as ax
 
@@ -77,47 +75,67 @@ def delete(image=dic.IMAGE_TYPES['Color']):
     """
     ax.LMK.iImageDelete(image)
 
-def save(image=dic.IMAGE_TYPES['Color'], file_name=root.SAVE + \
-         datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S') + \
-             dic.FILE_TYPES['png']):
+def save(file_root, file_name, file_type=dic.FILE_TYPES['png'],
+         image=dic.IMAGE_TYPES['Color']):
     """
     Save image.|
     -----------
     The function overwrites an existing file.
     -----------------------------------------------------------------------
-    Parameters:
-        :LMK:
-            | Dispatch('lmk4.LMKAxServer')
-        :image: int (default -1)
-            | Index of image to save
-        :file_name: QString (default: 'C:/Desktop/Image.png')
-            | Destination file name
-            | Datetime is the exact datetime of the measurement, not datetime when saved.
+
+    Parameters
+    ----------
+    file_root : QString
+        Destination file root.
+    file_name : QString
+        Destination file name.
+    file_type : QString, optional
+        Destination file type. The default is dic.FILE_TYPES['png'].
+    image : int, optional
+        Index of image to save. The default is dic.IMAGE_TYPES['Color'].
+
+    Returns
+    -------
+    None.
+
     """
-    if not os.path.exists(root.SAVE):
-        os.makedirs(root.SAVE)
-    err_code = ax.LMK.iSaveImage(image, file_name)
+
+    if not os.path.exists(file_root):
+        os.makedirs(file_root)
+    err_code = ax.LMK.iSaveImage(image, file_root + file_name + file_type)
     ax.error_code(err_code) # Check for error
 
-def load(image=dic.IMAGE_TYPES['Color'], file_name=root.LOAD + 'Image' + dic.FILE_TYPES['pcf']):
+def load(file_root, file_name, file_type=dic.FILE_TYPES['pcf'],
+         image=dic.IMAGE_TYPES['Color']):
     """
     Load image from .pcf.|
     ---------------------
     Loads a saved image from .pcf. Of course, the image needs to be saved
     first.
     -----------------------------------------------------------------------
-    Parameters:
-        :LMK:
-            | Dispatch('lmk4.LMKAxServer')
-        :image: int (default -1)
-            | Index of image to Load to
-        :file_name: QString (default: MEAS_ROOT + 'Image.pcf')
-            | Source file name
-            | .pus = Camera Image
-            | .pf = Luminance Image
-            | .pcf = Color Image
+
+    Parameters
+    ----------
+    file_root : QString
+        Source file root.
+    file_name : QString
+        Source file name.
+    file_type : QString, optional
+        Source file type.
+        .pus = Camera Image
+        .pf = Luminance Image
+        .pcf = Color Image
+        The default is dic.FILE_TYPES['pcf'].
+    image : int, optional
+        Index of image to Load to. The default is dic.IMAGE_TYPES['Color'].
+
+    Returns
+    -------
+    None.
+
     """
-    err_code = ax.LMK.iLoadImage(image, file_name)
+
+    err_code = ax.LMK.iLoadImage(image, file_root + file_name + file_type)
     ax.error_code(err_code) # Check for error
 
 def get_amount():
@@ -213,20 +231,31 @@ def rotate(code=dic.OPERATION_TYPES['Rotate'],
     err_code = ax.LMK.imageArithmeticIP1(code, src_image, param, dst_image)
     ax.error_code(err_code) # Check for error
 
-def show(file_name=root.LOAD + 'Image' + dic.FILE_TYPES['png']):
+def show(file_root, file_name, file_type=dic.FILE_TYPES['png']):
     """
     Show image.|
     -----------
     Shows a saved image. Of course, the image needs to be saved first.
     -----------------------------------------------------------------------
-    Parameters:
-        :file_name: QString (default: MEAS_ROOT + 'Image.png')
-            | Source file name
-    Returns:
-        :image: uint8
-            | Stores image into a numpy array and show it
+
+    Parameters
+    ----------
+    file_root : QString
+        Source file root.
+    file_name : QString
+        Source file name.
+    file_type : QString, optional
+        Source file type.
+        The default is dic.FILE_TYPES['png'].
+
+    Returns
+    -------
+    image : uint8
+        Stores image into a numpy array and show it.
+
     """
-    image = io.imread(file_name)
+
+    image = io.imread(file_root + file_name + file_type)
     io.imshow(image)
 
     return image

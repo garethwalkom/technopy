@@ -44,230 +44,15 @@ set_automatic():            Set Automatic-Flag for all exposure times.
 """
 import sys
 import os
-import glob
+from glob import glob
 import configparser
 import numpy as np
 sys.path.append(os.path.join(os.path.dirname(__file__), os.path.pardir))
 
-import change_this.roots as root
 import technoteam.activex as ax
 import variables.dicts as dic
 
-# Name of the TechnoTeam LMK Camera
-CAMERA_NAME = str(os.listdir(root.DATA))[2:-2]
-
-def get_cameras():
-    """
-    [ADD THIS]
-
-    Returns
-    -------
-    cameras : TYPE
-        DESCRIPTION.
-
-    """
-
-    print('Cameras:')
-    for cameras in dic.CAMERA_NAMES.keys():
-        print(cameras)
-
-    return cameras
-
-def set_camera(camera=None):
-    """
-    [ADD THIS]
-
-    Parameters
-    ----------
-    camera : TYPE, optional
-        DESCRIPTION. The default is None.
-
-    Returns
-    -------
-    camera : TYPE
-        DESCRIPTION.
-    camera_no : TYPE
-        DESCRIPTION.
-
-    """
-
-    if camera is None:
-        print('Cameras:')
-        for cameras in dic.CAMERA_NAMES.keys():
-            print(cameras)
-
-        camera = input('Input chosen camera: ')
-
-    camera_no = dic.CAMERA_NAMES[camera]
-
-    return camera, camera_no
-
-def get_lenses(camera):
-    """
-    [ADD THIS]
-
-    Parameters
-    ----------
-    camera : TYPE
-        DESCRIPTION.
-
-    Returns
-    -------
-    lenses : TYPE
-        DESCRIPTION.
-
-    """
-
-    print('Lenses:')
-
-    if camera == 'Old':
-        for lenses in dic.OLD_LENSES.keys():
-            print(lenses)
-    elif camera == 'VR':
-        for lenses in dic.VR_LENSES.keys():
-            print(lenses)
-    elif camera == 'Hyperspectral':
-        for lenses in dic.HYPERSPECTRAL_LENSES.keys():
-            print(lenses)
-
-    return lenses
-
-def set_lens(camera, lens=None):
-    """
-    [ADD THIS]
-
-    Parameters
-    ----------
-    camera : TYPE
-        DESCRIPTION.
-    lens : TYPE, optional
-        DESCRIPTION. The default is None.
-
-    Returns
-    -------
-    lens : TYPE
-        DESCRIPTION.
-    lens_no : TYPE
-        DESCRIPTION.
-
-    """
-
-    if lens is None:
-        print('Lenses:')
-        if camera == 'Old':
-            for lenses in dic.OLD_LENSES.keys():
-                print(lenses)
-        elif camera == 'VR':
-            for lenses in dic.VR_LENSES.keys():
-                print(lenses)
-        elif camera == 'Hyperspectral':
-            for lenses in dic.HYPERSPECTRAL_LENSES.keys():
-                print(lenses)
-
-        lens = input('Input chosen lens: ')
-
-    if camera == 'Old':
-        lens_no = dic.OLD_LENSES[lens]
-    elif camera == 'VR':
-        lens_no = dic.VR_LENSES[lens]
-    elif camera == 'Hyperspectral':
-        lens_no = dic.HYPERSPECTRAL_LENSES[lens]
-
-
-    return lens, lens_no
-
-def lenses():
-    """
-    Gets list of all lenses of selected camera.|
-    -------------------------------------------
-    """
-
-    global LENSES
-
-    LENSES = []
-
-    for lens in glob(root.DATA + '/' + CAMERA_NAME + '/*/'):
-        LENSES.append(lens.split('\\')[1])
-
-    return LENSES
-
-def lens(current_lens='12'):
-    """
-    Gets ID of selected lens.|
-    -------------------------
-    """
-
-    global LENS_ID
-
-    lens = []
-
-    for lenses in range(len(LENSES)):
-        lens.append(LENSES[lenses].split('f')[1])
-
-    if current_lens in lens:
-        LENS_ID = (lens.index(current_lens))
-
-    return LENS_ID
-
-def get_focus_factors():
-    """
-    Gets list of all focus factors of current lens.|
-    -----------------------------------------------
-    """
-
-    all_lenses = lenses()
-
-    current_lens_id = lens(all_lenses)
-    current_lens = all_lenses[current_lens_id]
-
-    focus_factors = []
-
-    config = configparser.ConfigParser()
-    config.read(root.DATA + '/' + CAMERA_NAME + '/' +
-                current_lens + '/' + 'FocusFactor' + dic.FILE_TYPES['ini'])
-    focus_factors_size = config.get('GreyFactor', 'Size')
-    focus_factors_size = int(focus_factors)
-    for focus_factor in range(focus_factors_size):
-        focus_factor = str(focus_factor + 1)
-        focus_factors.append(config.get('GreyFactor/' + focus_factor, 'Name'))
-
-    return focus_factors, focus_factors_size
-
-def get_focus_factors_old():
-    """
-    List of available focus factors.|
-    --------------------------------
-    Parameters:
-        :LMK:
-            | Dispatch('lmk4.LMKAxServer')
-    Returns:
-        :focus_factors: QStringList
-            | List of focus factors
-        :focus_factor: int
-            | Index of current focus factor
-    """
-    err_code, focus_factors, focus_factor = ax.LMK.iGetFocusFactorList()
-    ax.error_code(err_code) # Check for error
-
-    return focus_factors, focus_factor
-
-def get_focus_factor_id(focus_factors, scale='infinite'):
-    """
-    Gets ID of selected focus factor.|
-    ---------------------------------
-    """
-
-    focus_factor = []
-
-    for focus in range(len(focus_factors)):
-        focus_factor.append(focus_factors[focus].split(' ')[2])
-
-    if scale in focus_factor:
-        focus_factor_id = (focus_factor.index(scale))
-
-    return focus_factor_id
-
-def set_focus_factor():
+def set_focus_factor(focus_factor_no):
     """
     Set a focus factor.|
     -------------------
@@ -279,12 +64,10 @@ def set_focus_factor():
         :focus_factor: int
             | Index of focus factor
     """
-    focus_factors, _ = get_focus_factors()
-    focus_factor_id = get_focus_factor_id(focus_factors)
-    err_code = ax.LMK.iSetFocusFactor(focus_factor_id)
+    err_code = ax.LMK.iSetFocusFactor(focus_factor_no)
     ax.error_code(err_code) # Check for error
 
-def get_filter_wheels():
+def get_filter_wheels(calibration_data_root, camera_no):
     """
     [ADD THIS]
 
@@ -298,7 +81,7 @@ def get_filter_wheels():
     """
 
     config = configparser.ConfigParser()
-    config.read(root.DATA + '/' + dic.CAMERA_NAMES['Hyperspectral'] + '/' + \
+    config.read(calibration_data_root + '/' + camera_no + '/' + \
                 'camera' + dic.FILE_TYPES['ini'])
     filter_wheel_max = config.get('PropertyList', 'FILTER_WHEEL_MAX')
     filter_wheel_names = config.get('PropertyList', 'FILTER_WHEEL_NAMES')
@@ -307,21 +90,31 @@ def get_filter_wheels():
 
     return filter_wheel_max, filter_wheel_names
 
-def open_camera(camera_no, lens_no):
+def open_camera(calibration_data_root, camera_no, lens_no):
     """
     Set new camera calibration data.|
     --------------------------------
-    Parameters:
-        :LMK:
-            | Dispatch('lmk4.LMKAxServer')
-        :root.DATA: QString (default: root.DATA)
-            | Path to the camera calibration data. More exactly spoken path
-                to the lens sub directory. After calling this function the
-                camera is completely reinitialized.
-            | If the string is empty a currently existing camera connection
-                is finished.
+
+    Parameters
+    ----------
+    calibration_data_root : TYPE
+        Path to the camera calibration data. More exactly spoken path
+            to the lens sub directory. After calling this function the
+            camera is completely reinitialized.
+        If the string is empty a currently existing camera connection
+            is finished..
+    camera_no : TYPE
+        DESCRIPTION.
+    lens_no : TYPE
+        DESCRIPTION.
+
+    Returns
+    -------
+    None.
+
     """
-    err_code = ax.LMK.iSetNewCamera(root.DATA + '/' + camera_no + '/' + lens_no)
+
+    err_code = ax.LMK.iSetNewCamera(calibration_data_root + '/' + camera_no + '/' + lens_no)
     ax.error_code(err_code) # Check for error
 
 def get_converting_units():
@@ -811,87 +604,190 @@ def set_automatic(automatic=1):
     err_code = ax.LMK.iSetAutomatic(automatic)
     ax.error_code(err_code) # Check for error
 
-# class Select():
+class Setup:
+    """
+    [ADD THIS]
 
-#     def Camera():
+    """
 
-#         cameras = []
+    def __init__(self, calibration_data_root, camera_no=None, lens_no=None,
+                 focus_factor_no=None):
+        """
+        [ADD THIS]
 
-#         for camera in os.listdir(root.DATA):
+        Parameters
+        ----------
+        calibration_data_root : TYPE
+            DESCRIPTION.
+        camera : TYPE, optional
+            DESCRIPTION. The default is None.
+        lens : TYPE, optional
+            DESCRIPTION. The default is None.
 
-#             cameras.append(camera)
+        Returns
+        -------
+        None.
 
-#         return cameras
+        """
 
-#     def Lenses():
-#         """
-#         Gets list of all lenses of selected camera.|
-#         -------------------------------------------
-#         """
+        self.data_root = calibration_data_root
+        self.camera_no = camera_no
+        self.lens_no = lens_no
+        self.focus_factor_no = focus_factor_no
 
-#         global lenses
+        self.camera_no, self.lens_no, self.focus_factor_no = self.numbers()
+        open_camera(self.data_root, self.camera_no, self.lens_no)
+        if self.focus_factor_no is not None:
+            set_focus_factor(self.focus_factor_no)
 
-#         lenses = []
+    def camera(self):
+        """
+        [ADD THIS]
 
-#         for lens in glob(root.DATA + '/' + CAMERA_NAME + '/*/'):
-#             lenses.append(lens.split('\\')[1])
+        Raises
+        ------
+        ValueError
+            DESCRIPTION.
 
-#         return lenses
+        Returns
+        -------
+        camera_no : TYPE
+            DESCRIPTION.
 
-#     def Lens(lenses, current_lens='12'):
-#         """
-#         Gets ID of selected lens.|
-#         -------------------------
-#         """
+        """
 
-#         global lens_ID
+        cameras = []
+        for camera in glob(self.data_root + '/' + '/*/'):
+            cameras.append(camera.split('\\')[1])
 
-#         lens = []
+        if len(cameras) > 1:
+            print('\nCameras:')
+            for camera in cameras:
+                print(camera)
+            camera_no = input('Chosen Camera: ')
 
-#         for l in range(len(lenses)):
-#             lens.append(lenses[l].split('f')[1])
+            if camera_no not in cameras:
+                raise ValueError("'" + camera_no + "'" + ' is not a valid camera number')
 
-#         if current_lens in lens:
-#             lens_ID = (lens.index(current_lens))
+        else:
+            camera_no = cameras[0]
 
-#         return lens_ID
+        return camera_no
 
-#     def FocusFactors():
-#         """
-#         Gets list of all focus factors of current lens.|
-#         -----------------------------------------------
-#         """
+    def lens(self):
+        """
+        [ADD THIS]
 
-#         lenses = Camera.Lenses()
+        Raises
+        ------
+        ValueError
+            DESCRIPTION.
 
-#         lens_ID = Camera.Lens(lenses)
-#         lens = lenses[lens_ID]
+        Returns
+        -------
+        lens_no : TYPE
+            DESCRIPTION.
 
-#         FocusFactors = []
+        """
 
-#         config = configparser.ConfigParser()
-#         config.read(root.DATA + '/' + CAMERA_NAME + '/' +
-#                     lens + '/' + 'FocusFactor' + FILE_TYPES['ini'])
-#         FocusFactors_Size = config.get('GreyFactor', 'Size')
-#         FocusFactors_Size = int(FocusFactors_Size)
-#         for FocusFactor in range(FocusFactors_Size):
-#             FocusFactor = str(FocusFactor + 1)
-#             FocusFactors.append(config.get('GreyFactor/' + FocusFactor, 'Name'))
+        lenses = []
+        for lens in glob(self.data_root + '/' + self.camera_no + '/*/'):
+            lenses.append(lens.split('\\')[1])
 
-#         return FocusFactors, FocusFactors_Size
+        if len(lenses) > 1:
+            print('\nLenses:')
+            for lens in lenses:
+                print(lens)
+            lens_no = input('Chosen Lens: ')
 
-#     def FocusFactor(FocusFactors):
-#         """
-#         Gets ID of selected focus factor.|
-#         ---------------------------------
-#         """
+            if lens_no not in lenses:
+                raise ValueError("'" + lens_no + "'" + ' is not a valid lens number')
+        else:
+            lens_no = lenses[0]
 
-#         FocusFactor = []
+        return lens_no
 
-#         for f in range(len(FocusFactors)):
-#             FocusFactor.append(FocusFactors[f].split(' ')[2])
+    def focus_factor(self, camera_no, lens_no):
+        """
+        [ADD THIS]
 
-#         if SCALE in FocusFactor:
-#             FocusFactor_ID = (FocusFactor.index(SCALE))
+        Parameters
+        ----------
+        camera_no : TYPE
+            DESCRIPTION.
+        lens_no : TYPE
+            DESCRIPTION.
 
-#         return FocusFactor_ID
+        Raises
+        ------
+        ValueError
+            DESCRIPTION.
+
+        Returns
+        -------
+        focus_factor : TYPE
+            DESCRIPTION.
+
+        """
+
+        focus_factors = []
+
+        config = configparser.ConfigParser()
+        config.optionxform = str
+        try:
+            config.read(self.data_root + '/' + camera_no + '/' +
+                        lens_no + '/' + 'FocusFactor' + dic.FILE_TYPES['ini'],
+                        encoding='utf-8')
+        except UnicodeDecodeError:
+            config.read(self.data_root + '/' + camera_no + '/' +
+                        lens_no + '/' + 'FocusFactor' + dic.FILE_TYPES['ini'],
+                        encoding='utf-16')
+        focus_factors_size = config.get('GreyFactor', 'Size')
+        focus_factors_size = int(focus_factors_size)
+        if focus_factors_size != 0:
+            print('\nFocus Factors:')
+            for focus_factor in range(focus_factors_size):
+                focus_factor = str(focus_factor + 1)
+                focus_factors.append(config.get('GreyFactor/' + focus_factor,
+                                                'Name'))
+                print(config.get('GreyFactor/' + focus_factor, 'Name'))
+
+            focus_factor = input('Chosen Focus Factor: ')
+
+            if focus_factor not in focus_factors:
+                raise ValueError("'" + focus_factor + "'" + ' is not a valid focus factor')
+
+            return focus_factor
+
+    def numbers(self):
+        """
+        [ADD THIS]
+
+        Returns
+        -------
+        TYPE
+            DESCRIPTION.
+        TYPE
+            DESCRIPTION.
+        TYPE
+            DESCRIPTION.
+
+        """
+
+        if self.camera_no is None:
+            self.camera_no = self.camera()
+        else:
+            self.camera_no = self.camera_no
+
+        if self.lens_no is None:
+            self.lens_no = self.lens()
+        else:
+            self.lens_no = self.lens_no
+
+        if self.focus_factor_no is None:
+            self.focus_factor_no = self.focus_factor(self.camera_no,
+                                                     self.lens_no)
+        else:
+            self.focus_factor_no = self.focus_factor_no
+
+        return self.camera_no, self.lens_no, self.focus_factor_no

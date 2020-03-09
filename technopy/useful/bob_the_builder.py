@@ -9,7 +9,6 @@ import datetime
 import numpy as np
 sys.path.append(os.path.join(os.path.dirname(__file__), os.path.pardir))
 
-import change_this.roots as root
 import variables.dicts as dic
 import technoteam.labsoft as ls
 import technoteam.capture as cap
@@ -17,7 +16,8 @@ import technoteam.region as reg
 import technoteam.evaluation as eva
 import technoteam.table as tab
 
-def max_luminance(min_time=0.0, time_ratio=3.0, pic_count=1):
+def max_luminance(save_root, file_name=None, min_time=0.0, time_ratio=3.0,
+                  pic_count=1):
     """
     [ADD THIS]
 
@@ -36,6 +36,8 @@ def max_luminance(min_time=0.0, time_ratio=3.0, pic_count=1):
         DESCRIPTION.
 
     """
+    if file_name is None:
+        file_name = datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
 
     ### Capture Image
     # Capture a ColorHighDyn Image with Max Exposure Time of all Filters
@@ -61,18 +63,21 @@ def max_luminance(min_time=0.0, time_ratio=3.0, pic_count=1):
     max_lum = np.float64(max_lum)
 
     ### Save Measurement
-    ls.save(file_name=root.SAVE + \
-            datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S') + \
-                dic.FILE_TYPES['ttcs'])
+    ls.save(save_root, file_name)
 
     return max_lum
 
-def get_result_from_folder(target='XYZ', region='Center Circle'):
+def get_result_from_folder(load_root, save_root, target='XYZ',
+                           region='Center Circle'):
     """
-    [ADD THIS]
+
 
     Parameters
     ----------
+    load_root : TYPE
+        DESCRIPTION.
+    save_root : TYPE
+        DESCRIPTION.
     target : TYPE, optional
         DESCRIPTION. The default is 'XYZ'.
     region : TYPE, optional
@@ -89,9 +94,9 @@ def get_result_from_folder(target='XYZ', region='Center Circle'):
 
     results = []
 
-    for measurement in os.listdir(root.LOAD):
+    for measurement in os.listdir(load_root):
         if measurement.endswith('.ttcs'):
-            ls.load(root.LOAD + '/' + measurement)
+            ls.load(load_root + '/' + measurement)
             if target == 'XYZ':
                 if region == 'Whole Image':
                     output = eva.get_image_mean_xyz()
@@ -99,7 +104,7 @@ def get_result_from_folder(target='XYZ', region='Center Circle'):
                     output = eva.get_circle_mean_xyz()
             elif target == 'Y':
                 if region == 'Whole Image':
-                    output = max_luminance()
+                    output = max_luminance(save_root)
             results.append(output)
 
     if results != []:

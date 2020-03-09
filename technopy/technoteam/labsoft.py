@@ -16,10 +16,8 @@ get_program_info():         Get some information about program version and
 """
 import sys
 import os
-import datetime
 sys.path.append(os.path.join(os.path.dirname(__file__), os.path.pardir))
 
-import change_this.roots as root
 import variables.dicts as dic
 import technoteam.activex as ax
 
@@ -46,54 +44,67 @@ def close_labsoft(question=0):
     Closes the LMK4 application.|
     ----------------------------
 
-    %timeit:
-        23.7 ms ± 3.02 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)
-
-    Parameters:
-        :LMK:
-            | Dispatch('lmk4.LMKAxServer')
-        :question: int, optional
-            | !0 = Opens a dialogue window in the application. The user can
+    Parameters
+    ----------
+    question : int, optional
+        The default is 0.
+        !0 = Opens a dialogue window in the application. The user can
                     choose whether they wish to save the current state or not
                     or cancel the closing of the program.
-            | 0 = No dialogue window
+        0 = No dialogue window.
+
+    Returns
+    -------
+    None.
+
     """
+
     err_code = ax.LMK.iClose(question)
     ax.error_code(err_code) # Check for error
 
-def save(file_name=root.SAVE + \
-         datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S') + \
-         dic.FILE_TYPES['ttcs']):
+def save(save_root, file_name):
     """
     Save the measurement as a .ttcs file.|
     -------------------------------------
-    Parameters:
-        :LMK:
-            | Dispatch('lmk4.LMKAxServer')
-        :file_name: QString, optional (default: root.SAVE + datetime + .ttcs')
-            | Change to adjust root to save measurement
-            | Datetime is the exact datetime of the measurement, not datetime when saved.
+
+    Parameters
+    ----------
+    save_root : QString
+        Change to adjust root to save measurement.
+    file_name : QString
+        Change to adjust name of measurement.
+
+    Returns
+    -------
+    None.
+
     """
-    if not os.path.exists(root.SAVE):
-        os.makedirs(root.SAVE)
-    err_code = ax.LMK.iSaveProtokoll(file_name)
+
+    if not os.path.exists(save_root):
+        os.makedirs(save_root)
+    err_code = ax.LMK.iSaveProtokoll(save_root + file_name + \
+                                     dic.FILE_TYPES['ttcs'])
     ax.error_code(err_code) # Check for error
 
-def load(file_name=root.LOAD +'Meas.ttcs'):
+def load(load_root, file_name):
     """
     Load a measurement from a .ttcs file.|
     -------------------------------------
 
-    %timeit:
-        4.19 s ± 441 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)
+    Parameters
+    ----------
+    load_root : TYPE
+        Change to adjust root to load measurement.
+    file_name : TYPE
+        Change to adjust name of measurement.
 
-    Parameters:
-        :LMK:
-            | Dispatch('lmk4.LMKAxServer')
-        :file_name: QString, optional (default: 'Meas.ttcs')
-            | Change to adjust root to load measurement
+    Returns
+    -------
+    None.
+
     """
-    err_code = ax.LMK.iLoadProtokoll(file_name)
+
+    err_code = ax.LMK.iLoadProtokoll(load_root + file_name)
     ax.error_code(err_code) # Check for error
 
 def get_program_info():

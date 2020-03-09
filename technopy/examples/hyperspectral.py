@@ -4,10 +4,10 @@ Created on Wed Mar  4 18:24:22 2020
 @author: Gareth V. Walkom (walkga04 at googlemail.com)
 """
 import os
+import datetime
 import numpy as np
 import matplotlib.pyplot as plt
 
-from technopy.change_this import roots as root
 from technopy.variables import dicts as dic
 from technopy.technoteam import labsoft as ls
 from technopy.technoteam import camera as cam
@@ -16,19 +16,32 @@ from technopy.technoteam import image as im
 
 class Hyperspectral:
     """
-    [ADD THIS]
+    Initialize, capture, and analyze hyperspectral images.|
+    ------------------------------------------------------
     """
 
-    def __init__(self, connect_camera=False):
+    def __init__(self, calibration_data_root, camera_no, lens_no, load_root,
+                 save_root, data_cube, connect_camera=False):
         """
-        Initializes LMK for Hyperspectral Camera.|
-        -----------------------------------------
-        %timeit:
-
+        Initialize LabSoft for hyperspectral camera.|
+        --------------------------------------------
 
         Parameters
         ----------
-        None.
+        calibration_data_root : TYPE
+            DESCRIPTION.
+        camera_no : TYPE
+            DESCRIPTION.
+        lens_no : TYPE
+            DESCRIPTION.
+        load_root : TYPE
+            DESCRIPTION.
+        save_root : TYPE
+            DESCRIPTION.
+        data_cube : TYPE
+            DESCRIPTION.
+        connect_camera : TYPE, optional
+            DESCRIPTION. The default is False.
 
         Returns
         -------
@@ -36,24 +49,26 @@ class Hyperspectral:
 
         """
 
-        self.camera = 'Hyperspectral'
-        self.lens = '8mm'
-        self.load_hyp = root.LOAD_HYP
-        self.save_root = root.SAVE_TEST
-        self.load_root = root.LOAD
+        self.data_root = calibration_data_root
+        self.load_root = load_root
+        self.save_root = save_root
+        self.data_cube = data_cube
+        self.camera_no = camera_no
         self.image = dic.IMAGE_TYPES['Luminance']
         self.file_type = dic.FILE_TYPES['pf']
+
+        self.wavelengths = []
+        self.results = []
 
         ls.open_labsoft()
 
         if connect_camera is True:
-            _, self.camera_no = cam.set_camera(self.camera)
-            _, self.lens_no = cam.set_lens(self.camera, self.lens)
-            cam.open_camera(self.camera_no, self.lens_no)
+            cam.open_camera(self.data_root, self.camera_no, lens_no)
 
     def capture(self):
         """
-        [ADD THIS]
+        Capture hyperspectral image.|
+        ----------------------------
 
         Returns
         -------
@@ -61,7 +76,8 @@ class Hyperspectral:
 
         """
 
-        _, filter_wheel_names = cam.get_filter_wheels()
+        _, filter_wheel_names = cam.get_filter_wheels(self.data_root,
+                                                      self.camera_no)
         for number, filter_name in enumerate(filter_wheel_names[1:]):
             cam.set_filter_wheel(number+1)
             cam.set_autoscan(1)
@@ -73,24 +89,24 @@ class Hyperspectral:
 
     def save_all(self):
         """
-        [ADD THIS]
+        Save all wavelengths as .txt.|
+        -----------------------------
 
         """
-        ## Initialize
-        # Open LMK LabSoft4 Standard Color ActiveX
-        ls.open_labsoft()
 
-        for wavelength in os.listdir(self.load_hyp):
+        for wavelength in os.listdir(self.data_cube):
             if wavelength.endswith(self.file_type):
-                self.variable = wavelength[:-3]
-                im.load(self.image, self.load_hyp + wavelength)
-                im.rotate(src_image=self.image, param='270', dst_image=self.image)
-                im.save(self.image, self.save_root + self.variable + \
+                variable = wavelength[:-3]
+                im.load(self.image, self.data_cube + wavelength)
+                im.rotate(src_image=self.image, param='270',
+                          dst_image=self.image)
+                im.save(self.image, self.save_root + variable + \
                         dic.FILE_TYPES['txt'])
 
     def read_all(self):
         """
-        [ADD THIS]
+        Read all .txts and get wavelengths and results.|
+        -----------------------------------------------
 
         Returns
         -------
@@ -101,15 +117,12 @@ class Hyperspectral:
 
         """
 
-        self.file_type = dic.FILE_TYPES['txt']
-
-        self.wavelengths = []
-        self.results = []
+        file_type = dic.FILE_TYPES['txt']
 
         for wavelength in os.listdir(self.load_root):
-            if wavelength.endswith(self.file_type):
+            if wavelength.endswith(file_type):
                 variable = wavelength[:-4]
-                output = np.loadtxt(self.load_root + variable + self.file_type,
+                output = np.loadtxt(self.load_root + variable + file_type,
                                     skiprows=2, delimiter='\t')
                 self.wavelengths.append(variable)
                 self.results.append(output)
@@ -118,7 +131,8 @@ class Hyperspectral:
 
     def get_pixel(self, row, col, data=None, nms=None, plot=False):
         """
-        [ADD THIS]
+        Get the spectral radiance of a given pixel.|
+        -------------------------------------------
 
         Parameters
         ----------
@@ -141,22 +155,40 @@ class Hyperspectral:
         """
 
         if data and nms is not None:
-            self.results = data
-            self.wavelengths = nms
+            results = data
+            wavelengths = nms
+        else:
+            results = self.results
+            wavelengths = self.wavelengths
 
-        self.pixel = []
-        for result in self.results:
-            self.max_rows = result.shape[0]
-            self.max_cols = result.shape[1]
-            self.pixel.append(result[row, col])
+        pixel = []
+        for result in results:
+            pixel.append(result[row, col])
 
         if plot is True:
-            plt.plot(self.wavelengths, self.pixel)
+            plt.plot(wavelengths, pixel)
             plt.title('Pixel at: Row: ' + str(row) + ' Col: ' + str(col))
             plt.xlabel('Wavelength [nm]')
 
-        return self.pixel
+        return pixel
 
 if __name__ == '__main__':
 
-    HYPER = Hyperspectral(connect_camera=True)
+    # Define Calibration Data Root
+    DATA_ROOT = 'F:/LMK/Calibration Data'
+
+    # Define Save/Load Roots
+    SAVE_ROOT = 'E:/Measurements/' + str(datetime.date.today()) + '/'
+    LOAD_ROOT = 'E:/Measurements/TEST/'
+
+    # Define Hyperspectral Data Cube Root
+    DATA_CUBE = 'F:/Program Files/Hyperspectral Camera/GUIHSK23052016/Data_Cube/20200305_081505/'
+
+    # Define Camera and Lens Numbers
+    SET = cam.Setup(DATA_ROOT, camera_no=None, lens_no=None)
+    CAMERA_NO, LENS_NO, _ = SET.numbers()
+
+    # Initializes hypspectral class and connects to hyperspectral camera
+    HYPER = Hyperspectral(DATA_ROOT, CAMERA_NO, LENS_NO,
+                          load_root=LOAD_ROOT, save_root=SAVE_ROOT,
+                          data_cube=DATA_CUBE, connect_camera=True)

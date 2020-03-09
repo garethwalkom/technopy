@@ -17,7 +17,6 @@ import datetime
 import time
 import numpy as np
 
-from technopy.change_this import roots as root
 from technopy.variables import dicts as dic
 from technopy.useful import bob_the_builder as bob
 from technopy.technoteam import labsoft as ls
@@ -34,30 +33,26 @@ class VirtualRealityHmd:
     [ADD THIS]
     """
 
-    def __init__(self, camera='VR', lens='Conoscopic', mod_freq=90.0,
-                 connect_camera=True):
+    def __init__(self, calibration_data_root, camera_no, lens_no, mod_freq,
+                 load_root, save_root, connect_camera=True):
         """
         Initializes LMK for VR-HMD.|
         ---------------------------
-        %timeit:
-            2.28 s ± 56.5 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)
 
         Parameters
         ----------
-        camera : TYPE, optional
-            DESCRIPTION. The default is 'VR'.
-        lens : TYPE, optional
-            DESCRIPTION. The default is 'Conoscopic'.
-        mod_freq : TYPE, optional
-            DESCRIPTION. The default is 90.0.
-        autoscan : TYPE, optional
-            DESCRIPTION. The default is False.
-        min_time : TYPE, optional
-            DESCRIPTION. The default is 0.0.
-        time_ratio : TYPE, optional
-            DESCRIPTION. The default is 3.0.
-        pic_count : TYPE, optional
-            DESCRIPTION. The default is 1.
+        calibration_data_root : TYPE
+            DESCRIPTION.
+        camera_no : TYPE
+            DESCRIPTION.
+        lens_no : TYPE
+            DESCRIPTION.
+        mod_freq : TYPE
+            DESCRIPTION.
+        load_root : TYPE
+            DESCRIPTION.
+        save_root : TYPE
+            DESCRIPTION.
         connect_camera : TYPE, optional
             DESCRIPTION. The default is True.
 
@@ -67,29 +62,26 @@ class VirtualRealityHmd:
 
         """
 
-        self.save_root = root.SAVE
-        self.load_root = root.LOAD
-        self.camera = camera
-        self.lens = lens
-        self.mod_freq = mod_freq
+        self.data_root = calibration_data_root
+        self.save_root = save_root
+        self.load_root = load_root
 
         ## Initialize
         # Open LMK LabSoft4 Standard Color ActiveX
         ls.open_labsoft()
         if connect_camera is True:
-            _, self.camera_no = cam.set_camera(self.camera)
-            _, self.lens_no = cam.set_lens(self.camera, self.lens)
-            cam.open_camera(self.camera_no, self.lens_no)
+            cam.open_camera(self.data_root, camera_no, lens_no)
 
             ## Adjust Camera
             # Set Modulation Frequency
-            cam.set_modulation_frequency(self.mod_freq)
+            cam.set_modulation_frequency(mod_freq)
             # Change converting units so it doesn't multiply by two
             cam.set_converting_units()
 
     def warm_up(self, time_total=120):
         """
-        [ADD THIS]
+        Warm-Up VR-HMD.|
+        ---------------
 
         Parameters
         ----------
@@ -109,7 +101,7 @@ class VirtualRealityHmd:
         while time_warm < time_total:
             start = time.time()
             if datetime.datetime.now().minute % 1 == 0:
-                max_lum = bob.max_luminance()
+                max_lum = bob.max_luminance(self.save_root)
                 ls.close_labsoft()
                 print(time_warm + 1, '(of', time_total, 'minutes)', '|',
                       datetime.datetime.now().time(),
@@ -125,11 +117,11 @@ class VirtualRealityHmd:
         return output
 
 
-    def measure(self, autoscan=False, min_time=0.0, time_ratio=3.0,
-                pic_count=1):
+    def measure(self, color_image=True, autoscan=False, min_time=0.0,
+                time_ratio=3.0, pic_count=1, start_ratio=10, time_it=False):
         """
-        Measure a Virtual Reality Head-Mounted-Display.|
-        -----------------------------------------------
+        Capture VR-HMD.|
+        ----------------
 
         Returns
         -------
@@ -137,18 +129,24 @@ class VirtualRealityHmd:
             DESCRIPTION.
 
         """
-        meas_start = datetime.datetime.now()
+        if time_it is True:
+            meas_start = datetime.datetime.now()
 
         ## Capture Image
-        cap.color_high_dyn(autoscan, min_time, time_ratio, pic_count)
+        if color_image is True:
+            cap.color_high_dyn(autoscan, min_time, time_ratio, pic_count)
+        else:
+            cap.high_dyn_pic(autoscan, min_time, start_ratio, time_ratio,
+                             pic_count)
 
         ## Save Measurement
         ls.save(file_name=self.save_root + \
                 datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S') + \
                     dic.FILE_TYPES['ttcs'])
 
-        meas_fin = datetime.datetime.now()
-        print('Measured Image in: {}\n'.format(meas_fin - meas_start))
+        if time_it is True:
+            meas_fin = datetime.datetime.now()
+            print('Measured Image in: {}\n'.format(meas_fin - meas_start))
 
     def analyze(self, target='XYZ'):
         """
@@ -243,7 +241,17 @@ class VirtualRealityHmd:
 
 if __name__ == '__main__':
 
-    VR = VirtualRealityHmd(connect_camera=False)
+    # Define Calibration Data Root
+    DATA_ROOT = 'F:/LMK/Calibration Data'
+
+    # Define Save/Load Roots
+    SAVE_ROOT = 'E:/Measurements/' + str(datetime.date.today()) + '/'
+    LOAD_ROOT = 'E:/Measurements/TEST/'
+
+    VR = VirtualRealityHmd(DATA_ROOT, camera_no='tts20035',
+                           lens_no='oTTC-163_D0224',
+                           mod_freq=90, save_root=SAVE_ROOT,
+                           load_root=LOAD_ROOT, connect_camera=False)
 
     # label = 'Oculus Rift CV1'
 
