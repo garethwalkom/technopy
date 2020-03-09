@@ -140,7 +140,7 @@ class VirtualRealityHmd:
                              pic_count)
 
         ## Save Measurement
-        ls.save(file_name=self.save_root + \
+        ls.save(self.save_root,
                 datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S') + \
                     dic.FILE_TYPES['ttcs'])
 
