@@ -86,7 +86,11 @@ def get_filter_wheels(calibration_data_root, camera_no):
     filter_wheel_max = config.get('PropertyList', 'FILTER_WHEEL_MAX')
     filter_wheel_names = config.get('PropertyList', 'FILTER_WHEEL_NAMES')
     filter_wheel_names = filter_wheel_names.split(' ')
-    filter_wheel_names = np.vstack(filter_wheel_names).astype(int)
+
+    if type(filter_wheel_names) == int:
+        filter_wheel_names = np.vstack(filter_wheel_names).astype(int)
+    else:
+        filter_wheel_names = np.vstack(filter_wheel_names)
 
     return filter_wheel_max, filter_wheel_names
 
@@ -434,7 +438,7 @@ def set_grey_filter(grey_filter_index=0, grey_filter_selected=0):
     err_code = ax.LMK.iSetGreyFilter(grey_filter_index, grey_filter_selected)
     ax.error_code(err_code) # Check for error
 
-def color_autoscan_time():
+def color_autoscan_time(filter_wheel_names):
     """
     Determine good exposure times for every color filter.|
     -----------------------------------------------------
@@ -458,9 +462,10 @@ def color_autoscan_time():
                 You can use the returned list of exposure times in the
                 function ColorHighDyn()
     """
-
     color_filters = {'All': []}
-    exposure_times = {'G': [], 'X1': [], 'X2': [], 'Z': [], 'VL': [], 'IR': []}
+    exposure_times = {}
+    for filter_wheel in filter_wheel_names:
+        exposure_times[str(filter_wheel)[2:-2]] = []
 
     err_code = ax.LMK.iColorAutoScanTime()[0]
 
@@ -471,30 +476,10 @@ def color_autoscan_time():
         color_filters['All'] = str(color_filters['All'])[2:-2]
         temp = color_filters['All'].split(" ", 6)
 
-        exposure_times['G'].append(temp[0])
-        exposure_times['G'] = str(exposure_times['G'])[3:-4]
-        exposure_times['G'] = float(exposure_times['G'])
-
-        exposure_times['X1'].append(temp[1])
-        exposure_times['X1'] = str(exposure_times['X1'])[3:-4]
-        exposure_times['X1'] = float(exposure_times['X1'])
-
-        exposure_times['X2'].append(temp[2])
-        exposure_times['X2'] = str(exposure_times['X2'])[3:-4]
-        exposure_times['X2'] = float(exposure_times['X2'])
-
-        exposure_times['Z'].append(temp[3])
-        exposure_times['Z'] = str(exposure_times['Z'])[3:-4]
-        exposure_times['Z'] = float(exposure_times['Z'])
-
-        exposure_times['VL'].append(temp[4])
-        exposure_times['VL'] = str(exposure_times['VL'])[3:-4]
-        exposure_times['VL'] = float(exposure_times['VL'])
-
-        exposure_times['IR'].append(temp[5])
-        exposure_times['IR'] = str(exposure_times['IR'])[3:-3]
-        exposure_times['IR'] = float(exposure_times['IR'])
-
+        for filter_position, filter_name in enumerate(exposure_times):
+            exposure_times[filter_name].append(temp[filter_position])
+            exposure_times[filter_name] = str(exposure_times[filter_name])[3:-4]
+            exposure_times[filter_name] = float(exposure_times[filter_name])
 
     return exposure_times
 

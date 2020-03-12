@@ -65,12 +65,14 @@ class VirtualRealityHmd:
         self.data_root = calibration_data_root
         self.save_root = save_root
         self.load_root = load_root
+        self.camera_no = camera_no
+        self.autoscan = False
 
         ## Initialize
         # Open LMK LabSoft4 Standard Color ActiveX
         ls.open_labsoft()
         if connect_camera is True:
-            cam.open_camera(self.data_root, camera_no, lens_no)
+            cam.open_camera(self.data_root, self.camera_no, lens_no)
 
             ## Adjust Camera
             # Set Modulation Frequency
@@ -116,10 +118,25 @@ class VirtualRealityHmd:
 
         return output
 
+    def exposure_times(self, filter_wheel_names):
+        """
+        [ADD THIS]
 
-    def measure(self, color_image=True, autoscan=False, min_time=0.0,
-                max_time=15, time_ratio=3.0, pic_count=1, start_ratio=10,
-                time_it=False, analyze=None):
+        Returns
+        -------
+        exposure_times : TYPE
+            DESCRIPTION.
+
+        """
+
+        exposure_times = cam.color_autoscan_time(filter_wheel_names)
+
+        return exposure_times
+
+
+    def measure(self, color_image=True, autoscan=None, exposure_times=None,
+                min_time=0.0, max_time=15, time_ratio=3.0, pic_count=1,
+                start_ratio=10, time_it=False, analyze=None):
         """
         Capture VR-HMD.|
         ----------------
@@ -130,16 +147,21 @@ class VirtualRealityHmd:
             DESCRIPTION.
 
         """
+        if autoscan is None:
+            autoscan = self.autoscan
+
         if time_it is True:
             meas_start = datetime.datetime.now()
 
         ## Capture Image
         if color_image is True:
-            cap.color_high_dyn(autoscan, max_time, min_time,
+            cap.color_high_dyn(self.data_root, self.camera_no, autoscan,
+                               exposure_times, max_time, min_time,
                                time_ratio, pic_count)
         else:
-            cap.high_dyn_pic(autoscan, min_time, start_ratio, time_ratio,
-                             pic_count)
+            cap.high_dyn_pic(self.data_root, self.camera_no, autoscan,
+                             exposure_times, min_time, start_ratio,
+                             time_ratio, pic_count)
 
         # Optional Analyze
         if analyze is not None:
@@ -151,6 +173,9 @@ class VirtualRealityHmd:
         if time_it is True:
             meas_fin = datetime.datetime.now()
             print('Measured Image in: {}\n'.format(meas_fin - meas_start))
+
+        if analyze is not None:
+            return results
 
     def analyze(self, target='XYZ'):
         """
@@ -250,7 +275,7 @@ if __name__ == '__main__':
 
     # Define Save/Load Roots
     SAVE_ROOT = 'E:/Measurements/' + str(datetime.date.today()) + '/'
-    LOAD_ROOT = 'E:/Measurements/TEST/'
+    LOAD_ROOT = 'E:/Measurements/2020-03-12-PERM/'
 
     VR = VirtualRealityHmd(DATA_ROOT, camera_no='tts20035',
                            lens_no='oTTC-163_D0224',
