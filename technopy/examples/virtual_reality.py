@@ -16,6 +16,7 @@ import os
 import datetime
 import time
 import numpy as np
+import pandas as pd
 
 from technopy.variables import dicts as dic
 from technopy.useful import bob_the_builder as bob
@@ -255,8 +256,8 @@ class VirtualRealityHmd:
 
                     # Evaluate Region
                     eva.create_statistic(statistic,
-                                          image,
-                                          index_out)
+                                         image,
+                                         index_out)
 
                 if target == 'Y':
                     output = eva.get_max_lum()
@@ -282,7 +283,7 @@ if __name__ == '__main__':
     MEASURE = False
     ANALYZE = False
     ANALYZE_MAX_YS = False
-    ANALYZE_XYZs = False
+    ANALYZE_XYZS = False
     SHOW_YUVS = False
 
     # Define Calibration Data Root
@@ -301,8 +302,8 @@ if __name__ == '__main__':
     if MEASURE is True:
 
         FILTER_WHEEL = []
-        _, FILTER_WHEEL_NAMES = cam.get_filter_wheels(self.data_root,
-                                                      self.camera_no)
+        _, FILTER_WHEEL_NAMES = cam.get_filter_wheels(DATA_ROOT,
+                                                      camera_no='tts20035')
         for FILTER_WHEEL_NAME in FILTER_WHEEL_NAMES:
             FILTER_WHEEL.append(str(FILTER_WHEEL_NAME)[2:-2])
         ALL_EXPOSURE_TIMES = pd.DataFrame(columns=FILTER_WHEEL)
@@ -320,17 +321,17 @@ if __name__ == '__main__':
         LAST_LINE = 2045
 
         if ANALYZE_MAX_YS is True:
-            MAX_Ys = VR.analyze('Y', cols=[FIRST_COL, LAST_COL],
+            MAX_YS = VR.analyze('Y', cols=[FIRST_COL, LAST_COL],
                                 lines=[FIRST_LINE, LAST_LINE])
-        if ANALYZE_XYZs is True:
-            XYZs = VR.analyze('TEXT', cols=[FIRST_COL, LAST_COL],
+        if ANALYZE_XYZS is True:
+            XYZS = VR.analyze('TEXT', cols=[FIRST_COL, LAST_COL],
                               lines=[FIRST_LINE, LAST_LINE])
 
     if SHOW_YUVS is True:
-        label = 'Oculus Rift CV1'
+        LABEL = 'Oculus Rift CV1'
 
-        diff, mean = fanta.y_diff(MAX_Ys, XYZs)
-        YUVs = fanta.xyz_to_yuv(XYZs)
+        DIFF, MEAN = fanta.y_diff(MAX_YS, XYZS)
+        YUVS = fanta.xyz_to_yuv(XYZS)
         fanta.show(space='uv', new=False, color='r', input_type='file',
-                    count=len(YUVs), output=YUVs, label=label)
-        fanta.uv(YUVs[3,0], YUVs[3,1], label=label, color='r', new=False)
+                   count=len(YUVS), output=YUVS, label=LABEL)
+        fanta.uv(YUVS[3, 0], YUVS[3, 1], label=LABEL, color='r', new=False)
