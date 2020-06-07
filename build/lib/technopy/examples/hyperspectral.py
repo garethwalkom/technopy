@@ -81,7 +81,7 @@ class Hyperspectral:
         for number, filter_name in enumerate(filter_wheel_names[1:]):
             cam.set_filter_wheel(number+1)
             cam.set_autoscan(1)
-            cap.single_pic(False)
+            cap.single_pic(self.data_root, self.camera_no, False)
             im.rotate(src_image=self.image, param='270', dst_image=self.image)
             im.save(self.image, self.save_root + str(filter_name)[1:-1] + \
                     dic.FILE_TYPES['txt'])

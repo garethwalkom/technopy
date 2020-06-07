@@ -24,7 +24,7 @@ import datetime
 import technoteam.activex as ax
 import technoteam.camera as cam
 
-def single_pic(autoscan=True, exposure_time=0.1):
+def single_pic(calibration_data_root, camera_no, autoscan=True, exposure_time=0.1):
     """
     SinglePic capture algorithm.|
     ----------------------------
@@ -36,14 +36,17 @@ def single_pic(autoscan=True, exposure_time=0.1):
     """
 
     if autoscan is True:
-        exposure_times = cam.color_autoscan_time() # [REQUIRED if wanting best exposure times]
+        _, filter_wheel_names = cam.get_filter_wheels(calibration_data_root,
+                                                      camera_no)
+        exposure_times = cam.color_autoscan_time(filter_wheel_names) # [REQUIRED if wanting best exposure times]
         err_code = ax.LMK.iSinglePic2(max(exposure_times.items(),
                                           key=operator.itemgetter(1))[1])
     else:
         err_code = ax.LMK.iSinglePic2(exposure_time)
     ax.error_code(err_code) # Check for error
 
-def multi_pic(autoscan=True, exposure_time=0.1, pic_count=1):
+def multi_pic(calibration_data_root, camera_no, autoscan=True,
+              exposure_time=0.1, pic_count=1):
     """
     MultiPic capture algorithm.|
     ---------------------------
@@ -57,14 +60,17 @@ def multi_pic(autoscan=True, exposure_time=0.1, pic_count=1):
     """
 
     if autoscan is True:
-        exposure_times = cam.color_autoscan_time() # [REQUIRED if wanting best exposure times]
+        _, filter_wheel_names = cam.get_filter_wheels(calibration_data_root,
+                                                      camera_no)
+        exposure_times = cam.color_autoscan_time(filter_wheel_names) # [REQUIRED if wanting best exposure times]
         err_code = ax.LMK.iMultiPic2(max(exposure_times.items(), \
                                       key=operator.itemgetter(1))[1], pic_count)
     else:
         err_code = ax.LMK.iMultiPic2(exposure_time, pic_count)
     ax.error_code(err_code) # Check for error
 
-def high_dyn_pic(autoscan=True, exposure_time=0.1, start_ratio=10.0, time_ratio=3.0, pic_count=1):
+def high_dyn_pic(calibration_data_root, camera_no, autoscan=True,
+                 exposure_time=0.1, start_ratio=10.0, time_ratio=3.0, pic_count=1):
     """
     HighDyn capturing for luminance image.|
     --------------------------------------
@@ -84,7 +90,9 @@ def high_dyn_pic(autoscan=True, exposure_time=0.1, start_ratio=10.0, time_ratio=
     """
 
     if autoscan is True:
-        exposure_times = cam.color_autoscan_time() # [REQUIRED if wanting best exposure times]
+        _, filter_wheel_names = cam.get_filter_wheels(calibration_data_root,
+                                                      camera_no)
+        exposure_times = cam.color_autoscan_time(filter_wheel_names) # [REQUIRED if wanting best exposure times]
         err_code = ax.LMK.iHighDynPic3(max(exposure_times.items(),
                                            key=operator.itemgetter(1))[1],
                                        start_ratio, time_ratio, pic_count)
@@ -92,7 +100,9 @@ def high_dyn_pic(autoscan=True, exposure_time=0.1, start_ratio=10.0, time_ratio=
         err_code = ax.LMK.iHighDynPic3(exposure_time, start_ratio, time_ratio, pic_count)
     ax.error_code(err_code) # Check for error
 
-def color_high_dyn(autoscan=True, max_time=15.0, min_time=0.0, time_ratio=3.0, pic_count=1):
+def color_high_dyn(calibration_data_root, camera_no, autoscan=True,
+                   exposure_times=None, max_time=15.0, min_time=0.0,
+                   time_ratio=3.0, pic_count=1):
     """
     HighDyn capturing for color image.|
     ----------------------------------
@@ -110,12 +120,23 @@ def color_high_dyn(autoscan=True, max_time=15.0, min_time=0.0, time_ratio=3.0, p
     """
 
     if autoscan is True:
-        exposure_times = cam.color_autoscan_time() # [REQUIRED if wanting best exposure times]
-        err_code = ax.LMK.iColorHighDynPic2(max(exposure_times.items(),
-                                                key=operator.itemgetter(1))[1],
-                                            min_time, time_ratio, pic_count)
+        _, filter_wheel_names = cam.get_filter_wheels(calibration_data_root,
+                                                      camera_no)
+        if exposure_times is None:
+            exposure_times = cam.color_autoscan_time(filter_wheel_names)
+            cam.set_autoscan(1)
+            err_code, _ = ax.LMK.iColorCaptureHighDyn(exposure_times,
+                                                      min(exposure_times),
+                                                      time_ratio, pic_count)
     else:
-        err_code = ax.LMK.iColorHighDynPic2(max_time, min_time, time_ratio, pic_count)
+        if exposure_times is None:
+            err_code = ax.LMK.iColorHighDynPic2(max_time, min_time, time_ratio, pic_count)
+        else:
+            cam.set_autoscan(1)
+            err_code, _ = ax.LMK.iColorCaptureHighDyn(exposure_times,
+                                                      min(exposure_times),
+                                                      time_ratio, pic_count)
+
     ax.error_code(err_code) # Check for error
 
 def get_last_info():

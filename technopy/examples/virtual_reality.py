@@ -177,7 +177,7 @@ class VirtualRealityHmd:
         if analyze is not None:
             return results
 
-    def analyze(self, target='XYZ'):
+    def analyze(self, target, cols, lines):
         """
         [ADD THIS]
 
@@ -211,7 +211,7 @@ class VirtualRealityHmd:
                     image_name = 'Evaluation[1]'
                     statistic = dic.STATISTIC_TYPES['standardGrey']
 
-                elif target == 'XYZ':
+                elif target != 'Y':
                     color = 1
                     image_name = 'Evaluation[2]'
                     statistic = dic.STATISTIC_TYPES['standardColor']
@@ -221,11 +221,12 @@ class VirtualRealityHmd:
                 if images_no != 0:
                     im.delete()
 
-                image = im.create(color, image_name)
+                if target != 'TEXT':
+                    image = im.create(color, image_name)
 
                 if target == 'Y':
                     eva.coord_trans_lum()
-                elif target == 'XYZ':
+                elif target != 'Y':
                     eva.coord_trans_col()
 
                 # If region already exists, delete it
@@ -242,18 +243,20 @@ class VirtualRealityHmd:
                 if exists == 1:
                     eva.delete_statistic()
 
-                reg.create_rect(image)
+                if target != 'TEXT':
+                    reg.create_rect(image, cols[0], cols[1],
+                                    lines[0], lines[1])
 
-                # Get ID of region
-                _, index_out = reg.get_id(image,
-                                          region_name)
-                # Select region from index of region
-                reg.select(image, index_out)
+                    # Get ID of region
+                    _, index_out = reg.get_id(image,
+                                              region_name)
+                    # Select region from index of region
+                    reg.select(image, index_out)
 
-                ## Evaluate Region
-                eva.create_statistic(statistic,
-                                     image,
-                                     index_out)
+                    # Evaluate Region
+                    eva.create_statistic(statistic,
+                                          image,
+                                          index_out)
 
                 if target == 'Y':
                     output = eva.get_max_lum()
@@ -261,7 +264,12 @@ class VirtualRealityHmd:
                 elif target == 'XYZ':
                     output = eva.get_xyz(index_out)
 
-                results.append(output)
+                elif target == 'TEXT':
+                    im.save(self.save_root, measurement[:-5],
+                            dic.FILE_TYPES['txt'], dic.IMAGE_TYPES['Color'])
+
+                if target != 'TEXT':
+                    results.append(output)
 
         if results != []:
             results = np.vstack((results))
@@ -270,26 +278,59 @@ class VirtualRealityHmd:
 
 if __name__ == '__main__':
 
+    SETUP = True
+    MEASURE = False
+    ANALYZE = False
+    ANALYZE_MAX_YS = False
+    ANALYZE_XYZs = False
+    SHOW_YUVS = False
+
     # Define Calibration Data Root
     DATA_ROOT = 'F:/LMK/Calibration Data'
 
     # Define Save/Load Roots
     SAVE_ROOT = 'E:/Measurements/' + str(datetime.date.today()) + '/'
-    LOAD_ROOT = 'E:/Measurements/2020-03-12-PERM/'
+    LOAD_ROOT = 'E:/Measurements/2020-03-12/'
 
-    VR = VirtualRealityHmd(DATA_ROOT, camera_no='tts20035',
-                           lens_no='oTTC-163_D0224',
-                           mod_freq=90, save_root=SAVE_ROOT,
-                           load_root=LOAD_ROOT, connect_camera=False)
+    if SETUP is True:
+        VR = VirtualRealityHmd(DATA_ROOT, camera_no='tts20035',
+                               lens_no='oTTC-163_D0224',
+                               mod_freq=90, save_root=SAVE_ROOT,
+                               load_root=LOAD_ROOT, connect_camera=True)
 
-    # label = 'Oculus Rift CV1'
+    if MEASURE is True:
 
-    # MAX_Ys = VR.analyze('Y')
-    # XYZs = VR.analyze('XYZ')
+        FILTER_WHEEL = []
+        _, FILTER_WHEEL_NAMES = cam.get_filter_wheels(self.data_root,
+                                                      self.camera_no)
+        for FILTER_WHEEL_NAME in FILTER_WHEEL_NAMES:
+            FILTER_WHEEL.append(str(FILTER_WHEEL_NAME)[2:-2])
+        ALL_EXPOSURE_TIMES = pd.DataFrame(columns=FILTER_WHEEL)
 
-    # diff, mean = fanta.y_diff(MAX_Ys, XYZs)
-    # u_v_ = fanta.xyz_to_u_v_(XYZs)
-    # u_v_ = u_v_.astype(float)
-    # fanta.show(space='uv', new=False, color='r', input_type='file',
-    #       count=7, output=u_v_, label=label)
-    # fanta.uv(u_v_[3,0], u_v_[3,1], label=label, color='r', new=False)
+        EXPOSURE_TIMES = VR.exposure_times(FILTER_WHEEL_NAMES)
+        ALL_EXPOSURE_TIMES = ALL_EXPOSURE_TIMES.append(EXPOSURE_TIMES,
+                                                       ignore_index=True)
+        VR.measure(exposure_times=ALL_EXPOSURE_TIMES.iloc[-1])
+
+    if ANALYZE is True:
+
+        FIRST_COL = 567
+        LAST_COL = 1969
+        FIRST_LINE = 391
+        LAST_LINE = 2045
+
+        if ANALYZE_MAX_YS is True:
+            MAX_Ys = VR.analyze('Y', cols=[FIRST_COL, LAST_COL],
+                                lines=[FIRST_LINE, LAST_LINE])
+        if ANALYZE_XYZs is True:
+            XYZs = VR.analyze('TEXT', cols=[FIRST_COL, LAST_COL],
+                              lines=[FIRST_LINE, LAST_LINE])
+
+    if SHOW_YUVS is True:
+        label = 'Oculus Rift CV1'
+
+        diff, mean = fanta.y_diff(MAX_Ys, XYZs)
+        YUVs = fanta.xyz_to_yuv(XYZs)
+        fanta.show(space='uv', new=False, color='r', input_type='file',
+                    count=len(YUVs), output=YUVs, label=label)
+        fanta.uv(YUVs[3,0], YUVs[3,1], label=label, color='r', new=False)

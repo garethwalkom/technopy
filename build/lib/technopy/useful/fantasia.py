@@ -46,7 +46,7 @@ def y_diff(max_ys, xyzs):
 
     return diff, mean
 
-def xyz_to_u_v_(xyzs):
+def xyz_to_yuv(xyzs):
     """
     [ADD THIS]
 
@@ -62,12 +62,9 @@ def xyz_to_u_v_(xyzs):
 
     """
 
-    u_v_ = []
-    for xyz in xyzs:
-        u_v_.append(eva.xyz_to_u_v_(xyz))
-    u_v_ = np.vstack(u_v_)
+    yuv = lx.xyz_to_Yuv(xyzs)
 
-    return u_v_
+    return yuv
 
 def xyz_to_space(input_type='RGB', R=None, G=None, B=None, W=None,
                  file='GW_2019-09-13.txt', space='uv'):
