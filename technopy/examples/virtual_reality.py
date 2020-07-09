@@ -178,7 +178,7 @@ class VirtualRealityHmd:
         if analyze is not None:
             return results
 
-    def analyze(self, target, cols, lines):
+    def analyze(self, target, grid=None, region=None, count=True, conoscopic=True):
         """
         [ADD THIS]
 
@@ -200,10 +200,20 @@ class VirtualRealityHmd:
 
         """
 
+        if count is True:
+            amount = 0
+            for measurement in os.listdir(self.load_root):
+                if measurement.endswith('.ttcs'):
+                    amount += 1
+            current = 1
+
         results = []
 
         for measurement in os.listdir(self.load_root):
             if measurement.endswith('.ttcs'):
+
+                if count is True:
+                    print('Analyzing', str(current) + '/' + str(amount))
 
                 ls.load(self.load_root, measurement[:-5])
 
@@ -214,7 +224,7 @@ class VirtualRealityHmd:
 
                 elif target != 'Y':
                     color = 1
-                    image_name = 'Evaluation[2]'
+                    image_name = 'Color'
                     statistic = dic.STATISTIC_TYPES['standardColor']
 
                 region_name = '1'
@@ -222,31 +232,66 @@ class VirtualRealityHmd:
                 if images_no != 0:
                     im.delete()
 
-                if target != 'TEXT':
-                    image = im.create(color, image_name)
-
                 if target == 'Y':
-                    eva.coord_trans_lum()
-                elif target != 'Y':
-                    eva.coord_trans_col()
+                    image = im.create(color, image_name)
+                else:
+                    image = dic.IMAGE_TYPES[image_name]
+
+                if conoscopic is True:
+                    if target == 'Y':
+                        eva.coord_trans_lum()
+                    elif target != 'Y':
+                        eva.coord_trans_col()
+
+                if grid is None:
+                    first_line, last_line, first_col, last_col, _ = im.get_size(image)
+                else:
+                    col_width = int((last_col - first_col) / grid[0])
+                    line_width = int((last_line - first_line) / grid[1])
+
+                    # grid = np.zeros([grid[1] * grid[0], 2, 2])
+                    cols = []
+                    lines = []
+                    for (square_x, square_y) in zip(range(grid[0]),
+                                                    range(grid[1])):
+                        if (square_x or square_y) == 0:
+                            cols.append(first_col)
+                            lines.append(first_line)
+                        else:
+                            cols.append((col_width * square_x) + first_col)
+                            lines.append((line_width  * square_y) + first_line)
+                    cols.append(last_col)
+                    lines.append(last_line)
+
+                    grid = np.zeros([2, grid[1] + 1, grid[0] + 1])
+                    grid[0] = cols
+                    grid[1] = lines
+                    # coords = {'cols': {'first': first_col, 'last': last_col},
+                    #           'lines': {'first': first_line, 'last': last_line}}
+
+                if region is not None:
+                    first_col = region['cols']['first']
+                    last_col = region['cols']['last']
+                    first_line = region['lines']['first']
+                    last_line = region['lines']['last']
 
                 # If region already exists, delete it
                 err_code, index_out = \
-                    reg.get_id(dic.IMAGE_TYPES[image_name],
+                    reg.get_id(image,
                                region_name)
                 if err_code == 0:
-                    reg.delete(dic.IMAGE_TYPES[image_name],
+                    reg.delete(image,
                                index_out)
 
                 # If statistic already exists, delete it
-                exists, _, _ = eva.statistic_exists(dic.IMAGE_TYPES[image_name],
+                exists, _, _ = eva.statistic_exists(image,
                                                     index_out)
                 if exists == 1:
                     eva.delete_statistic()
 
                 if target != 'TEXT':
-                    reg.create_rect(image, cols[0], cols[1],
-                                    lines[0], lines[1])
+                    reg.create_rect(image, first_col, last_col,
+                                    first_line, last_line)
 
                     # Get ID of region
                     _, index_out = reg.get_id(image,
@@ -272,6 +317,9 @@ class VirtualRealityHmd:
                 if target != 'TEXT':
                     results.append(output)
 
+                if count is True:
+                    current += 1
+
         if results != []:
             results = np.vstack((results))
 
@@ -280,10 +328,16 @@ class VirtualRealityHmd:
 if __name__ == '__main__':
 
     SETUP = True
+    CONNECT_CAMERA = False
+
     MEASURE = False
-    ANALYZE = False
+
+    CONOSCOPIC = False
+    ANALYZE_REGION = True
+    ANALYZE_GRID = None
     ANALYZE_MAX_YS = False
-    ANALYZE_XYZS = False
+    ANALYZE_XYZS = True
+
     SHOW_YUVS = False
 
     # Define Calibration Data Root
@@ -291,13 +345,28 @@ if __name__ == '__main__':
 
     # Define Save/Load Roots
     SAVE_ROOT = 'E:/Measurements/' + str(datetime.date.today()) + '/'
-    LOAD_ROOT = 'E:/Measurements/2020-03-12/'
+    LOAD_ROOT = 'E:/Measurements/2020-06-24/'
+
+    GRID_SQUARES_X = 3
+    GRID_SQUARES_Y = 3
+
+    if ANALYZE_REGION is True:
+        FIRST_COL = 2257 # 567
+        LAST_COL = 2380 # 1969
+        FIRST_LINE = 1500 # 391
+        LAST_LINE = 1619 # 2045
+
+        REGION = {'cols': {'first': FIRST_COL, 'last': LAST_COL},
+                  'lines': {'first': FIRST_LINE, 'last': LAST_LINE}}
+    else:
+        REGION = None
+
 
     if SETUP is True:
         VR = VirtualRealityHmd(DATA_ROOT, camera_no='tts20035',
                                lens_no='oTTC-163_D0224',
                                mod_freq=90, save_root=SAVE_ROOT,
-                               load_root=LOAD_ROOT, connect_camera=True)
+                               load_root=LOAD_ROOT, connect_camera=CONNECT_CAMERA)
 
     if MEASURE is True:
 
@@ -313,19 +382,14 @@ if __name__ == '__main__':
                                                        ignore_index=True)
         VR.measure(exposure_times=ALL_EXPOSURE_TIMES.iloc[-1])
 
-    if ANALYZE is True:
+    # ls.load(LOAD_ROOT, '2020-06-24-19-19-20')
 
-        FIRST_COL = 567
-        LAST_COL = 1969
-        FIRST_LINE = 391
-        LAST_LINE = 2045
+    if ANALYZE_MAX_YS is True:
+        MAX_YS = VR.analyze('Y', grid=ANALYZE_GRID, region=REGION)
 
-        if ANALYZE_MAX_YS is True:
-            MAX_YS = VR.analyze('Y', cols=[FIRST_COL, LAST_COL],
-                                lines=[FIRST_LINE, LAST_LINE])
-        if ANALYZE_XYZS is True:
-            XYZS = VR.analyze('TEXT', cols=[FIRST_COL, LAST_COL],
-                              lines=[FIRST_LINE, LAST_LINE])
+    if ANALYZE_XYZS is True:
+        XYZS = VR.analyze('XYZ', grid=ANALYZE_GRID, conoscopic=CONOSCOPIC,
+                          region=REGION)
 
     if SHOW_YUVS is True:
         LABEL = 'Oculus Rift CV1'

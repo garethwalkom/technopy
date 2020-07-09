@@ -4,3 +4,5 @@ __pycache__
 .pylint.d
 *.pyc
 *.stats
+report.log
+upload_to_PyPi_instructions.txt
