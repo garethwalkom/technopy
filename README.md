@@ -1,35 +1,12 @@
 # technopy
-technopy allows you to control your TechnoTeam Luminance Camera or Hyperspectral Camera.
-
-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)
-
-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)
-
-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(° ͜ʖ ͡°)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)
-
-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)
-
-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)
-
-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(technopy)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)
-
-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)
-
-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)
-
-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(¯\_(ツ)_/¯)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)
-
-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)
-
-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-(-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)-)
-
 Good afternoon and welcome to technopy.
  
-Initially created in Matlab by TechnoTeam and Jan Audenaert, it has now been
-created for use in Python by Gareth V. Walkom. Once connected to the ActiveX
-server, you can then open the LMK LabSoft4 Standard Color ActiveX (ActiveX 
-version of the software is needed to run this script), access the Calibration
-data, and control the camera to make measurements.
+technopy is a Python package that allows you to control your TechnoTeam
+Luminance Camera or Hyperspectral Camera. Once connected to the ActiveX
+server, technopy will allow you to use most functionality directly from
+within Python. This will open the LMK LabSoft4 Standard Color ActiveX
+(ActiveX version of the software is needed), access the Calibration data,
+control the camera to make measurements, analyze, save, etc.
 
 Please listen to the technopy playlist while making measurements for inspo:
 https://www.youtube.com/playlist?list=PLu3mtT1o6gSieYEqJEBHm5NX9lWljoED
