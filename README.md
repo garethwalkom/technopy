@@ -7,6 +7,3 @@ server, technopy will allow you to use most functionality directly from
 within Python. This will open the LMK LabSoft4 Standard Color ActiveX
 (ActiveX version of the software is needed), access the Calibration data,
 control the camera to make measurements, analyze, save, etc.
-
-Please listen to the technopy playlist while making measurements for inspo:
-https://www.youtube.com/playlist?list=PLu3mtT1o6gSieYEqJEBHm5NX9lWljoED
